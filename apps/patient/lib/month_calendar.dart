@@ -65,14 +65,14 @@ class _MonthCalendarState extends State<MonthCalendar> {
           ],
         ),
         const SizedBox(height: 8),
-        const Row(
+        Row(
           children: [
             for (final label in <String>['M', 'T', 'W', 'T', 'F', 'S', 'S'])
               Expanded(
                 child: Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
           ],
