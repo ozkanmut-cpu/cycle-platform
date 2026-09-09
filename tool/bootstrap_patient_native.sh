@@ -37,6 +37,22 @@ if permission not in text:
     )
 manifest.write_text(text, encoding="utf-8")
 
+settings = app / "android/settings.gradle.kts"
+settings_text = settings.read_text(encoding="utf-8")
+settings_text = settings_text.replace(
+    'id("com.android.application") version "9.1.0" apply false',
+    'id("com.android.application") version "9.1.1" apply false',
+)
+settings.write_text(settings_text, encoding="utf-8")
+
+android_build = app / "android/app/build.gradle.kts"
+build_text = android_build.read_text(encoding="utf-8")
+build_text = build_text.replace(
+    "compileSdk = flutter.compileSdkVersion",
+    "compileSdk = 37",
+)
+android_build.write_text(build_text, encoding="utf-8")
+
 info = app / "ios/Runner/Info.plist"
 with info.open("rb") as handle:
     plist = plistlib.load(handle)
@@ -55,4 +71,4 @@ for name in ("DebugProfile.entitlements", "Release.entitlements"):
         plistlib.dump(entitlements, handle, fmt=plistlib.FMT_XML, sort_keys=False)
 PY
 
-echo "Patient Android/iOS shell configured for local authentication and Keychain storage."
+echo "Patient Android/iOS shell configured for local authentication, API 37, and Keychain storage."
