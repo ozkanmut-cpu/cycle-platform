@@ -1,4 +1,5 @@
-import 'package:cycle_health_ingestion/cycle_health_ingestion.dart' as ingestion;
+import 'package:cycle_health_ingestion/cycle_health_ingestion.dart'
+    as ingestion;
 import 'package:cycle_storage/cycle_storage.dart' as storage;
 
 class PatientHealthSyncCursorStore {
