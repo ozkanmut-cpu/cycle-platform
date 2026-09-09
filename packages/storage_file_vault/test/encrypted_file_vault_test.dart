@@ -48,10 +48,14 @@ void main() {
     expect(restored.originalName, 'report.pdf');
     expect(restored.metadata['kind'], 'ultrasound');
 
-    final files = await directory.list().where((entry) => entry is File).toList();
+    final files =
+        await directory.list().where((entry) => entry is File).toList();
     expect(files, hasLength(1));
     expect(files.single.path, isNot(contains(blob.id)));
-    expect(await (files.single as File).readAsString(), isNot(contains('report.pdf')));
+    expect(
+      await (files.single as File).readAsString(),
+      isNot(contains('report.pdf')),
+    );
   });
 
   test('attachment and raw sensor vault namespaces are isolated', () async {
@@ -76,14 +80,19 @@ void main() {
     await attachmentVault.write(blob);
     await sensorVault.write(blob);
 
-    final attachmentFile =
-        (await attachmentDirectory.list().where((entry) => entry is File).toList())
-            .single;
+    final attachmentFile = (await attachmentDirectory
+            .list()
+            .where((entry) => entry is File)
+            .toList())
+        .single;
     final sensorFile =
         (await sensorDirectory.list().where((entry) => entry is File).toList())
             .single;
 
-    expect(attachmentFile.path.split('/').last, isNot(sensorFile.path.split('/').last));
+    expect(
+      attachmentFile.path.split('/').last,
+      isNot(sensorFile.path.split('/').last),
+    );
   });
 
   test('delete removes encrypted blob', () async {
