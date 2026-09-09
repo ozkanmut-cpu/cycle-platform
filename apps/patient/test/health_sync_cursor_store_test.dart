@@ -1,4 +1,5 @@
-import 'package:cycle_health_ingestion/cycle_health_ingestion.dart' as ingestion;
+import 'package:cycle_health_ingestion/cycle_health_ingestion.dart'
+    as ingestion;
 import 'package:cycle_storage/cycle_storage.dart' as storage;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cycle_patient/health/health_sync_cursor_store.dart';
@@ -77,8 +78,7 @@ class _MemoryCursorRepository implements storage.HealthSyncCursorRepository {
   Future<storage.PersistedHealthSyncCursor?> load({
     required String subjectId,
     required storage.HealthSyncCursorSource source,
-  }) async =>
-      _values[_key(subjectId, source)];
+  }) async => _values[_key(subjectId, source)];
 
   @override
   Future<void> save(storage.PersistedHealthSyncCursor cursor) async {
