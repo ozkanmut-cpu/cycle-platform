@@ -20,6 +20,8 @@ class PermissionScope {
     this.purposes = const <String>{},
     this.validFrom,
     this.validUntil,
+    this.dataFrom,
+    this.dataUntil,
   });
 
   final Set<String> categories;
@@ -27,10 +29,18 @@ class PermissionScope {
   final Set<String> purposes;
   final DateTime? validFrom;
   final DateTime? validUntil;
+  final DateTime? dataFrom;
+  final DateTime? dataUntil;
 
   bool isActiveAt(DateTime at) {
     if (validFrom != null && at.isBefore(validFrom!)) return false;
     if (validUntil != null && !at.isBefore(validUntil!)) return false;
+    return true;
+  }
+
+  bool includesObservedAt(DateTime observedAt) {
+    if (dataFrom != null && observedAt.isBefore(dataFrom!)) return false;
+    if (dataUntil != null && observedAt.isAfter(dataUntil!)) return false;
     return true;
   }
 }
@@ -70,6 +80,7 @@ class PermissionRequest {
     required this.at,
     this.field,
     this.purpose,
+    this.resourceObservedAt,
   });
 
   final String ownerId;
@@ -79,6 +90,7 @@ class PermissionRequest {
   final String? field;
   final String? purpose;
   final DateTime at;
+  final DateTime? resourceObservedAt;
 }
 
 class PermissionDecision {
