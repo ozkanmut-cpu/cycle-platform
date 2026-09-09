@@ -5,10 +5,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'sqlcipher_database.dart';
 
 class SqlCipherVaultLifecycle implements VaultLifecycle {
-  SqlCipherVaultLifecycle({
-    required this.password,
-    this.fileName = 'cycle.db',
-  });
+  SqlCipherVaultLifecycle({required this.password, this.fileName = 'cycle.db'});
 
   final String password;
   final String fileName;
