@@ -1,0 +1,17 @@
+name: cycle_backup
+description: Encrypted .cyclevault backup container and recovery validation for Cycle Platform.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  crypto: ^3.0.7
+  cycle_crypto:
+    path: ../crypto
+  cycle_storage:
+    path: ../storage
+
+dev_dependencies:
+  test: ^1.25.8
