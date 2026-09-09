@@ -1,5 +1,6 @@
 import 'package:cycle_core_domain/cycle_core_domain.dart';
-import 'package:cycle_health_ingestion/cycle_health_ingestion.dart' as ingestion;
+import 'package:cycle_health_ingestion/cycle_health_ingestion.dart'
+    as ingestion;
 import 'package:cycle_storage/cycle_storage.dart' as storage;
 import 'package:cycle_storage_sqlcipher/cycle_storage_sqlcipher.dart';
 
@@ -87,8 +88,7 @@ class PatientHealthImportService {
     final auditEvents = <storage.AuditEvent>[
       for (var index = 0; index < upserts.length; index++)
         storage.AuditEvent(
-          id:
-              'audit:import:${adapter.sourcePlatform.name}:${timestamp.microsecondsSinceEpoch}:$index',
+          id: 'audit:import:${adapter.sourcePlatform.name}:${timestamp.microsecondsSinceEpoch}:$index',
           action: storage.AuditAction.imported,
           occurredAt: timestamp,
           actorId: 'system:health_import',
@@ -103,8 +103,7 @@ class PatientHealthImportService {
         ),
       for (var index = 0; index < deletedEventIds.length; index++)
         storage.AuditEvent(
-          id:
-              'audit:delete:${adapter.sourcePlatform.name}:${timestamp.microsecondsSinceEpoch}:$index',
+          id: 'audit:delete:${adapter.sourcePlatform.name}:${timestamp.microsecondsSinceEpoch}:$index',
           action: storage.AuditAction.deleted,
           occurredAt: timestamp,
           actorId: 'system:health_import',
@@ -142,6 +141,7 @@ storage.HealthSyncCursorSource _storageSource(
     storage.HealthSyncCursorSource.healthConnect,
   ingestion.HealthSourcePlatform.healthKit =>
     storage.HealthSyncCursorSource.healthKit,
-  ingestion.HealthSourcePlatform.other =>
-    throw UnsupportedError('Unsupported persistent health sync source.'),
+  ingestion.HealthSourcePlatform.other => throw UnsupportedError(
+    'Unsupported persistent health sync source.',
+  ),
 };
