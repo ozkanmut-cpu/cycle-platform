@@ -68,6 +68,10 @@ jobs:
         run: dart pub get
         working-directory: packages/permissions
 
+      - name: Health ingestion dependencies
+        run: dart pub get
+        working-directory: packages/health_ingestion
+
       - name: Secure key store dependencies
         run: flutter pub get
         working-directory: packages/secure_key_store
@@ -108,6 +112,10 @@ jobs:
       - name: Analyze permissions
         run: dart analyze .
         working-directory: packages/permissions
+
+      - name: Analyze health ingestion
+        run: dart analyze .
+        working-directory: packages/health_ingestion
 
       - name: Analyze secure key store
         run: flutter analyze
@@ -156,6 +164,10 @@ jobs:
       - name: Test permissions
         run: dart test
         working-directory: packages/permissions
+
+      - name: Test health ingestion
+        run: dart test
+        working-directory: packages/health_ingestion
 
       - name: Test secure key store
         run: flutter test
