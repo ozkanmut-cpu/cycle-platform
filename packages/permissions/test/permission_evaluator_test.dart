@@ -116,7 +116,10 @@ void main() {
       id: 'grant-doctor',
       recipientId: 'doctor-1',
       recipientKind: RecipientKind.clinician,
-      actions: const <PermissionAction>{PermissionAction.view, PermissionAction.export},
+      actions: const <PermissionAction>{
+        PermissionAction.view,
+        PermissionAction.export,
+      },
       categories: const <String>{'labs'},
       fields: const <String>{'result'},
       purposes: const <String>{'care'},
