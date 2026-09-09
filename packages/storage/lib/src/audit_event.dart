@@ -26,6 +26,25 @@ class AuditEvent {
     this.metadata = const <String, Object?>{},
   });
 
+  factory AuditEvent.now({
+    required AuditAction action,
+    required String actorId,
+    required String subjectType,
+    required String subjectId,
+    Map<String, Object?> metadata = const <String, Object?>{},
+  }) {
+    final now = DateTime.now().toUtc();
+    return AuditEvent(
+      id: 'audit-${now.microsecondsSinceEpoch}',
+      action: action,
+      occurredAt: now,
+      actorId: actorId,
+      subjectType: subjectType,
+      subjectId: subjectId,
+      metadata: metadata,
+    );
+  }
+
   final String id;
   final AuditAction action;
   final DateTime occurredAt;
