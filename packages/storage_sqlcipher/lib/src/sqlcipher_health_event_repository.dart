@@ -12,18 +12,28 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
   final SqlCipherDatabase _db;
 
   @override
-  Future<void> upsert(HealthEvent event) async {
-    await _db.database.insert('health_events', <String, Object?>{
-      'id': event.id,
-      'subject_id': event.subjectId,
-      'event_type': event.eventType,
-      'episode_id': event.episodeId,
-      'payload_json': jsonEncode(_encode(event)),
-      'observed_at': event.temporal.observedAt.toUtc().toIso8601String(),
-      'recorded_at': event.temporal.recordedAt.toUtc().toIso8601String(),
-      'schema_version': event.schemaVersion,
-      'deleted_at': null,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  Future<void> upsert(HealthEvent event) =>
+      upsertWithExecutor(_db.database, event);
+
+  Future<void> upsertWithExecutor(
+    DatabaseExecutor executor,
+    HealthEvent event,
+  ) async {
+    await executor.insert(
+      'health_events',
+      <String, Object?>{
+        'id': event.id,
+        'subject_id': event.subjectId,
+        'event_type': event.eventType,
+        'episode_id': event.episodeId,
+        'payload_json': jsonEncode(_encode(event)),
+        'observed_at': event.temporal.observedAt.toUtc().toIso8601String(),
+        'recorded_at': event.temporal.recordedAt.toUtc().toIso8601String(),
+        'schema_version': event.schemaVersion,
+        'deleted_at': null,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   @override
@@ -84,8 +94,18 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
   Future<void> markDeleted({
     required String eventId,
     required DateTime deletedAt,
+  }) => markDeletedWithExecutor(
+    _db.database,
+    eventId: eventId,
+    deletedAt: deletedAt,
+  );
+
+  Future<void> markDeletedWithExecutor(
+    DatabaseExecutor executor, {
+    required String eventId,
+    required DateTime deletedAt,
   }) async {
-    await _db.database.update(
+    await executor.update(
       'health_events',
       <String, Object?>{'deleted_at': deletedAt.toUtc().toIso8601String()},
       where: 'id = ?',
