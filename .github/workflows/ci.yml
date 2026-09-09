@@ -190,3 +190,34 @@ jobs:
           path: apps/patient/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
           retention-days: 7
+
+  patient-ios-native:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Patient dependencies
+        run: flutter pub get
+        working-directory: apps/patient
+
+      - name: Bootstrap native Patient shell
+        run: bash tool/bootstrap_patient_native.sh
+
+      - name: Verify native Patient security
+        run: bash tool/verify_patient_native_security.sh
+
+      - name: Resolve Patient dependencies after native bootstrap
+        run: flutter pub get
+        working-directory: apps/patient
+
+      - name: Compile Patient iOS native integration
+        run: flutter build ios --config-only --no-codesign --debug
+        working-directory: apps/patient
