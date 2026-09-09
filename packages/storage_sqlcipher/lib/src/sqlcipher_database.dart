@@ -6,7 +6,7 @@ class SqlCipherDatabase {
 
   final Database database;
 
-  static const int schemaVersion = 1;
+  static const int schemaVersion = 2;
 
   static Future<SqlCipherDatabase> openDefault({
     String fileName = 'cycle.db',
@@ -35,39 +35,54 @@ class SqlCipherDatabase {
         await db.execute('PRAGMA secure_delete = ON');
       },
       onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE health_events (
-            id TEXT PRIMARY KEY,
-            subject_id TEXT NOT NULL,
-            event_type TEXT NOT NULL,
-            episode_id TEXT,
-            payload_json TEXT NOT NULL,
-            observed_at TEXT NOT NULL,
-            recorded_at TEXT NOT NULL,
-            schema_version INTEGER NOT NULL,
-            deleted_at TEXT
-          )
-        ''');
-        await db.execute(
-          'CREATE INDEX idx_health_events_subject_observed '
-          'ON health_events(subject_id, observed_at)',
-        );
-        await db.execute('''
-          CREATE TABLE audit_events (
-            id TEXT PRIMARY KEY,
-            action TEXT NOT NULL,
-            subject_id TEXT,
-            record_id TEXT,
-            actor_id TEXT,
-            metadata_json TEXT,
-            occurred_at TEXT NOT NULL
-          )
-        ''');
+        await _createSchema(db);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            "ALTER TABLE audit_events ADD COLUMN subject_type TEXT NOT NULL DEFAULT 'unknown'",
+          );
+        }
       },
     );
 
     await db.rawQuery('SELECT count(*) FROM sqlite_master');
     return SqlCipherDatabase._(db);
+  }
+
+  static Future<void> _createSchema(Database db) async {
+    await db.execute('''
+      CREATE TABLE health_events (
+        id TEXT PRIMARY KEY,
+        subject_id TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        episode_id TEXT,
+        payload_json TEXT NOT NULL,
+        observed_at TEXT NOT NULL,
+        recorded_at TEXT NOT NULL,
+        schema_version INTEGER NOT NULL,
+        deleted_at TEXT
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_health_events_subject_observed '
+      'ON health_events(subject_id, observed_at)',
+    );
+    await db.execute('''
+      CREATE TABLE audit_events (
+        id TEXT PRIMARY KEY,
+        action TEXT NOT NULL,
+        subject_id TEXT NOT NULL,
+        subject_type TEXT NOT NULL,
+        actor_id TEXT NOT NULL,
+        metadata_json TEXT,
+        occurred_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_audit_events_subject_occurred '
+      'ON audit_events(subject_id, occurred_at)',
+    );
   }
 
   Future<void> close() => database.close();
