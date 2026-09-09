@@ -31,9 +31,14 @@ class DoctorHomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Clinical Dashboard', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600)),
+              Text(
+                'Clinical Dashboard',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+              ),
               SizedBox(height: 12),
-              Text('What matters · What changed · Missing · Uncertain · Conflicts · Open loops'),
+              Text(
+                'What matters · What changed · Missing · Uncertain · Conflicts · Open loops',
+              ),
             ],
           ),
         ),
