@@ -63,7 +63,8 @@ class RecoveryDrill {
         attachmentCount: document.manifest.attachmentCount,
         rawSensorEntryCount: document.manifest.rawSensorEntryCount,
         completedAt: DateTime.now().toUtc(),
-        reason: keyRecoverable ? null : 'Backup encryption key is not recoverable.',
+        reason:
+            keyRecoverable ? null : 'Backup encryption key is not recoverable.',
       );
     } on FormatException catch (error) {
       return RecoveryDrillResult(
