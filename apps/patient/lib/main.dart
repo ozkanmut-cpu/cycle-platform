@@ -131,23 +131,23 @@ class _PatientHomePageState extends State<PatientHomePage> {
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
                     : _events.isEmpty
-                        ? const Center(
-                            child: Text('No entries yet. Use “Period started”.'),
-                          )
-                        : ListView.separated(
-                            itemCount: _events.length,
-                            separatorBuilder: (_, __) => const Divider(height: 1),
-                            itemBuilder: (context, index) {
-                              final event = _events[index];
-                              return ListTile(
-                                leading: const Icon(Icons.water_drop_outlined),
-                                title: const Text('Period started'),
-                                subtitle: Text(
-                                  event.temporal.observedAt.toLocal().toString(),
-                                ),
-                              );
-                            },
-                          ),
+                    ? const Center(
+                        child: Text('No entries yet. Use “Period started”.'),
+                      )
+                    : ListView.separated(
+                        itemCount: _events.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final event = _events[index];
+                          return ListTile(
+                            leading: const Icon(Icons.water_drop_outlined),
+                            title: const Text('Period started'),
+                            subtitle: Text(
+                              event.temporal.observedAt.toLocal().toString(),
+                            ),
+                          );
+                        },
+                      ),
               ),
             ],
           ),
