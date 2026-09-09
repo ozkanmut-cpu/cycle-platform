@@ -1,5 +1,6 @@
 library cycle_crypto;
 
+export 'src/aes_gcm_authenticated_cipher.dart';
 export 'src/authenticated_cipher.dart';
 export 'src/cryptographic_erase.dart';
 export 'src/key_deriver.dart';
