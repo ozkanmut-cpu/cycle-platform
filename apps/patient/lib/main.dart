@@ -134,8 +134,37 @@ class _PatientHomePageState extends State<PatientHomePage> {
     await _reload();
   }
 
+  Widget _buildActivity() {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_events.isEmpty) {
+      return const Center(
+        child: Text('No entries yet. Use “Period started”.'),
+      );
+    }
+
+    return ListView.separated(
+      itemCount: _events.length,
+      separatorBuilder: (_, __) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        final event = _events[index];
+        return ListTile(
+          leading: const Icon(Icons.water_drop_outlined),
+          title: const Text('Period started'),
+          subtitle: Text(event.temporal.observedAt.toLocal().toString()),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final vaultSummary = _loading
+        ? 'Opening…'
+        : '${_events.length} local health event(s) · ${_vaultState.name}';
+
     return Scaffold(
       appBar: AppBar(title: const Text('Cycle')),
       floatingActionButton: FloatingActionButton.extended(
@@ -160,11 +189,7 @@ class _PatientHomePageState extends State<PatientHomePage> {
                 child: ListTile(
                   leading: const Icon(Icons.lock_outline),
                   title: const Text('Encrypted local vault'),
-                  subtitle: Text(
-                    _loading
-                        ? 'Opening…'
-                        : '${_events.length} local health event(s) · ${_vaultState.name}',
-                  ),
+                  subtitle: Text(vaultSummary),
                 ),
               ),
               const SizedBox(height: 16),
@@ -173,28 +198,7 @@ class _PatientHomePageState extends State<PatientHomePage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
-              Expanded(
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _events.isEmpty
-                    ? const Center(
-                        child: Text('No entries yet. Use “Period started”.'),
-                      )
-                    : ListView.separated(
-                        itemCount: _events.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final event = _events[index];
-                          return ListTile(
-                            leading: const Icon(Icons.water_drop_outlined),
-                            title: const Text('Period started'),
-                            subtitle: Text(
-                              event.temporal.observedAt.toLocal().toString(),
-                            ),
-                          );
-                        },
-                      ),
-              ),
+              Expanded(child: _buildActivity()),
             ],
           ),
         ),
