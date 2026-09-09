@@ -1,17 +1,6 @@
-enum PermissionAction {
-  view,
-  notify,
-  backup,
-  export,
-}
+enum PermissionAction { view, notify, backup, export }
 
-enum RecipientKind {
-  partner,
-  clinician,
-  caregiver,
-  trustedPerson,
-  unknown,
-}
+enum RecipientKind { partner, clinician, caregiver, trustedPerson, unknown }
 
 class PermissionScope {
   const PermissionScope({
@@ -101,17 +90,10 @@ class PermissionDecision {
   });
 
   const PermissionDecision.allow(String grantId)
-      : this._(
-          allowed: true,
-          reason: 'allowed',
-          matchedGrantId: grantId,
-        );
+    : this._(allowed: true, reason: 'allowed', matchedGrantId: grantId);
 
   const PermissionDecision.deny(String reason)
-      : this._(
-          allowed: false,
-          reason: reason,
-        );
+    : this._(allowed: false, reason: reason);
 
   final bool allowed;
   final String reason;
