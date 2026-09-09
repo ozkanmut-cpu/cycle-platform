@@ -12,16 +12,20 @@ Future<void> main() async {
 
   final keyStore = FlutterSecureKeyStore();
   final databaseKey = await keyStore.createKey(KeyPurpose.database);
-  final database = await SqlCipherDatabase.openDefault(
+  final vault = SqlCipherVaultLifecycle(
     password: base64UrlEncode(databaseKey.wrappedKey),
   );
-  final repository = SqlCipherHealthEventRepository(database);
-  final auditLog = SqlCipherAuditLogRepository(database);
+  await vault.initialize();
+  await vault.verifyIntegrity();
+
+  final repository = SqlCipherHealthEventRepository(vault.database);
+  final auditLog = SqlCipherAuditLogRepository(vault.database);
 
   runApp(
     CyclePatientApp(
       repository: repository,
       auditLog: auditLog,
+      vault: vault,
     ),
   );
 }
@@ -30,11 +34,13 @@ class CyclePatientApp extends StatelessWidget {
   const CyclePatientApp({
     required this.repository,
     required this.auditLog,
+    required this.vault,
     super.key,
   });
 
   final HealthEventRepository repository;
   final AuditLogRepository auditLog;
+  final VaultLifecycle vault;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +51,7 @@ class CyclePatientApp extends StatelessWidget {
       home: PatientHomePage(
         repository: repository,
         auditLog: auditLog,
+        vault: vault,
       ),
     );
   }
@@ -54,11 +61,13 @@ class PatientHomePage extends StatefulWidget {
   const PatientHomePage({
     required this.repository,
     required this.auditLog,
+    required this.vault,
     super.key,
   });
 
   final HealthEventRepository repository;
   final AuditLogRepository auditLog;
+  final VaultLifecycle vault;
 
   @override
   State<PatientHomePage> createState() => _PatientHomePageState();
@@ -70,6 +79,7 @@ class _PatientHomePageState extends State<PatientHomePage> {
 
   bool _loading = true;
   List<HealthEvent> _events = const <HealthEvent>[];
+  VaultState _vaultState = VaultState.uninitialized;
 
   @override
   void initState() {
@@ -79,9 +89,11 @@ class _PatientHomePageState extends State<PatientHomePage> {
 
   Future<void> _reload() async {
     final events = await widget.repository.query(subjectId: _subjectId);
+    final vaultState = await widget.vault.state();
     if (!mounted) return;
     setState(() {
       _events = events;
+      _vaultState = vaultState;
       _loading = false;
     });
   }
@@ -151,7 +163,7 @@ class _PatientHomePageState extends State<PatientHomePage> {
                   subtitle: Text(
                     _loading
                         ? 'Opening…'
-                        : '${_events.length} local health event(s)',
+                        : '${_events.length} local health event(s) · ${_vaultState.name}',
                   ),
                 ),
               ),
