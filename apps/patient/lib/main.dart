@@ -22,11 +22,7 @@ Future<void> main() async {
   final auditLog = SqlCipherAuditLogRepository(vault.database);
 
   runApp(
-    CyclePatientApp(
-      repository: repository,
-      auditLog: auditLog,
-      vault: vault,
-    ),
+    CyclePatientApp(repository: repository, auditLog: auditLog, vault: vault),
   );
 }
 
@@ -140,9 +136,7 @@ class _PatientHomePageState extends State<PatientHomePage> {
     }
 
     if (_events.isEmpty) {
-      return const Center(
-        child: Text('No entries yet. Use “Period started”.'),
-      );
+      return const Center(child: Text('No entries yet. Use “Period started”.'));
     }
 
     return ListView.separated(
