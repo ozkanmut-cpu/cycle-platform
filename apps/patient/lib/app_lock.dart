@@ -5,8 +5,8 @@ class AppLockService {
   AppLockService({
     LocalAuthentication? authentication,
     ReauthenticationPolicy policy = ReauthenticationPolicy.secureDefault,
-  })  : _authentication = authentication ?? LocalAuthentication(),
-        _policy = policy;
+  }) : _authentication = authentication ?? LocalAuthentication(),
+       _policy = policy;
 
   final LocalAuthentication _authentication;
   final ReauthenticationPolicy _policy;
