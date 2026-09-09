@@ -33,10 +33,9 @@ class NativeHealthBridge {
   Future<bool> requestHealthKitPermissions(
     Set<HealthDataCategory> categories,
   ) async =>
-      await _channel.invokeMethod<bool>(
-        'healthKit.requestPermissions',
-        {'categories': _encodeCategories(categories)},
-      ) ??
+      await _channel.invokeMethod<bool>('healthKit.requestPermissions', {
+        'categories': _encodeCategories(categories),
+      }) ??
       false;
 }
 
