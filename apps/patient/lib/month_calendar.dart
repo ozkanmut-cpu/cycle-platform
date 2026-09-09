@@ -4,11 +4,7 @@ import 'package:flutter/material.dart';
 import 'cycle_timeline.dart';
 
 class MonthCalendar extends StatefulWidget {
-  const MonthCalendar({
-    required this.events,
-    this.initialMonth,
-    super.key,
-  });
+  const MonthCalendar({required this.events, this.initialMonth, super.key});
 
   final List<HealthEvent> events;
   final DateTime? initialMonth;
@@ -98,10 +94,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
           ),
         if (_selectedDay != null) ...[
           const SizedBox(height: 12),
-          _SelectedDaySummary(
-            day: _selectedDay!,
-            timeline: timeline,
-          ),
+          _SelectedDaySummary(day: _selectedDay!, timeline: timeline),
         ],
       ],
     );
@@ -119,7 +112,8 @@ class _MonthCalendarState extends State<MonthCalendar> {
 
     final date = DateTime(_month.year, _month.month, dayNumber);
     final events = timeline.eventsForDay(date);
-    final isSelected = _selectedDay != null &&
+    final isSelected =
+        _selectedDay != null &&
         _selectedDay!.year == date.year &&
         _selectedDay!.month == date.month &&
         _selectedDay!.day == date.day;
@@ -162,10 +156,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
 }
 
 class _SelectedDaySummary extends StatelessWidget {
-  const _SelectedDaySummary({
-    required this.day,
-    required this.timeline,
-  });
+  const _SelectedDaySummary({required this.day, required this.timeline});
 
   final DateTime day;
   final CycleTimeline timeline;
@@ -174,7 +165,9 @@ class _SelectedDaySummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final events = timeline.eventsForDay(day);
     final cycleDay = timeline.cycleDayFor(day);
-    final cycleText = cycleDay == null ? 'Cycle day unknown' : 'Cycle day $cycleDay';
+    final cycleText = cycleDay == null
+        ? 'Cycle day unknown'
+        : 'Cycle day $cycleDay';
 
     return Card(
       child: Padding(
