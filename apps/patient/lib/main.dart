@@ -77,17 +77,18 @@ class _PatientHomePageState extends State<PatientHomePage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.resumed:
-        if (_privacyCovered) {
-          unawaited(_authenticateAndOpen());
-        }
-      case AppLifecycleState.inactive:
-      case AppLifecycleState.paused:
-      case AppLifecycleState.hidden:
-      case AppLifecycleState.detached:
-        unawaited(_protectAndLock());
+    if (state == AppLifecycleState.resumed) {
+      if (_privacyCovered && !widget.appLock.authInProgress) {
+        unawaited(_authenticateAndOpen());
+      }
+      return;
     }
+
+    if (state == AppLifecycleState.inactive && widget.appLock.authInProgress) {
+      return;
+    }
+
+    unawaited(_protectAndLock());
   }
 
   Future<void> _protectAndLock() async {
