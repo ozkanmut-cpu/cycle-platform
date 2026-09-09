@@ -34,7 +34,13 @@ class SqlCipherHealthSyncCursorRepository
   }
 
   @override
-  Future<void> save(PersistedHealthSyncCursor cursor) async {
+  Future<void> save(PersistedHealthSyncCursor cursor) =>
+      saveWithExecutor(_db.database, cursor);
+
+  Future<void> saveWithExecutor(
+    DatabaseExecutor executor,
+    PersistedHealthSyncCursor cursor,
+  ) async {
     if (cursor.subjectId.isEmpty) {
       throw ArgumentError.value(cursor.subjectId, 'subjectId', 'must not be empty');
     }
@@ -42,7 +48,7 @@ class SqlCipherHealthSyncCursorRepository
       throw ArgumentError.value(cursor.value, 'value', 'must not be empty');
     }
 
-    await _db.database.insert(
+    await executor.insert(
       'health_sync_cursors',
       <String, Object?>{
         'subject_id': cursor.subjectId,
@@ -58,8 +64,18 @@ class SqlCipherHealthSyncCursorRepository
   Future<void> clear({
     required String subjectId,
     required HealthSyncCursorSource source,
+  }) => clearWithExecutor(
+    _db.database,
+    subjectId: subjectId,
+    source: source,
+  );
+
+  Future<void> clearWithExecutor(
+    DatabaseExecutor executor, {
+    required String subjectId,
+    required HealthSyncCursorSource source,
   }) async {
-    await _db.database.delete(
+    await executor.delete(
       'health_sync_cursors',
       where: 'subject_id = ? AND source = ?',
       whereArgs: <Object?>[subjectId, source.name],
