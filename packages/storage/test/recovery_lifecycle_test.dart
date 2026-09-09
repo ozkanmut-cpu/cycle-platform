@@ -12,15 +12,8 @@ void main() {
   );
 
   test('restore requires integrity, key recovery and schema support', () {
-    const valid = RecoveryValidationResult(
-      snapshot: RecoverySnapshot(
-        id: 'backup-1',
-        createdAt: _fixedTime,
-        schemaVersion: 1,
-        recordCount: 120,
-        attachmentCount: 4,
-        integrityHash: 'sha256:example',
-      ),
+    final valid = RecoveryValidationResult(
+      snapshot: snapshot,
       integrityValid: true,
       keyRecoverable: true,
       schemaSupported: true,
@@ -52,8 +45,3 @@ void main() {
     expect(unsupportedSchema.canRestore, isFalse);
   });
 }
-
-const _fixedTime = DateTime.fromMillisecondsSinceEpoch(
-  1788969600000,
-  isUtc: true,
-);
