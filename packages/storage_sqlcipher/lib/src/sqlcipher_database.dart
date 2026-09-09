@@ -6,7 +6,7 @@ class SqlCipherDatabase {
 
   final Database database;
 
-  static const int schemaVersion = 2;
+  static const int schemaVersion = 3;
 
   static Future<SqlCipherDatabase> openDefault({
     String fileName = 'cycle.db',
@@ -42,6 +42,9 @@ class SqlCipherDatabase {
           await db.execute(
             "ALTER TABLE audit_events ADD COLUMN subject_type TEXT NOT NULL DEFAULT 'unknown'",
           );
+        }
+        if (oldVersion < 3) {
+          await _createHealthSyncCursorSchema(db);
         }
       },
     );
@@ -83,6 +86,19 @@ class SqlCipherDatabase {
       'CREATE INDEX idx_audit_events_subject_occurred '
       'ON audit_events(subject_id, occurred_at)',
     );
+    await _createHealthSyncCursorSchema(db);
+  }
+
+  static Future<void> _createHealthSyncCursorSchema(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS health_sync_cursors (
+        subject_id TEXT NOT NULL,
+        source TEXT NOT NULL,
+        cursor_value TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY(subject_id, source)
+      )
+    ''');
   }
 
   Future<void> close() => database.close();
