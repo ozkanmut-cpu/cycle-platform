@@ -8,7 +8,8 @@ class NativeHealthBridge {
 
   final MethodChannel _channel;
 
-  HealthConnectGateway get healthConnect => _MethodChannelHealthConnectGateway(_channel);
+  HealthConnectGateway get healthConnect =>
+      _MethodChannelHealthConnectGateway(_channel);
   HealthKitGateway get healthKit => _MethodChannelHealthKitGateway(_channel);
 }
 
@@ -19,7 +20,8 @@ class _MethodChannelHealthConnectGateway implements HealthConnectGateway {
 
   @override
   Future<Set<HealthDataCategory>> grantedCategories() async {
-    final raw = await channel.invokeListMethod<String>(
+    final raw =
+        await channel.invokeListMethod<String>(
           'healthConnect.grantedCategories',
         ) ??
         const <String>[];
@@ -32,7 +34,8 @@ class _MethodChannelHealthConnectGateway implements HealthConnectGateway {
     required DateTime to,
     required Set<HealthDataCategory> categories,
   }) async {
-    final rows = await channel.invokeListMethod<Object?>(
+    final rows =
+        await channel.invokeListMethod<Object?>(
           'healthConnect.readRecords',
           _rangeArgs(from, to, categories),
         ) ??
@@ -61,12 +64,10 @@ class _MethodChannelHealthConnectGateway implements HealthConnectGateway {
   }) async {
     final raw = await channel.invokeMapMethod<String, Object?>(
       'healthConnect.readChanges',
-      {
-        'token': token,
-        'categories': _encodeCategories(categories),
-      },
+      {'token': token, 'categories': _encodeCategories(categories)},
     );
-    if (raw == null) throw StateError('Health Connect returned no change page.');
+    if (raw == null)
+      throw StateError('Health Connect returned no change page.');
     return _decodeHealthConnectPage(raw);
   }
 }
@@ -78,9 +79,8 @@ class _MethodChannelHealthKitGateway implements HealthKitGateway {
 
   @override
   Future<Set<HealthDataCategory>> grantedCategories() async {
-    final raw = await channel.invokeListMethod<String>(
-          'healthKit.grantedCategories',
-        ) ??
+    final raw =
+        await channel.invokeListMethod<String>('healthKit.grantedCategories') ??
         const <String>[];
     return _decodeCategories(raw);
   }
@@ -91,7 +91,8 @@ class _MethodChannelHealthKitGateway implements HealthKitGateway {
     required DateTime to,
     required Set<HealthDataCategory> categories,
   }) async {
-    final rows = await channel.invokeListMethod<Object?>(
+    final rows =
+        await channel.invokeListMethod<Object?>(
           'healthKit.readRecords',
           _rangeArgs(from, to, categories),
         ) ??
@@ -120,10 +121,7 @@ class _MethodChannelHealthKitGateway implements HealthKitGateway {
   }) async {
     final raw = await channel.invokeMapMethod<String, Object?>(
       'healthKit.readAnchoredChanges',
-      {
-        'anchor': anchor,
-        'categories': _encodeCategories(categories),
-      },
+      {'anchor': anchor, 'categories': _encodeCategories(categories)},
     );
     if (raw == null) throw StateError('HealthKit returned no anchored page.');
 
@@ -152,18 +150,19 @@ Map<String, Object?> _rangeArgs(
   DateTime from,
   DateTime to,
   Set<HealthDataCategory> categories,
-) =>
-    {
-      'fromEpochMillis': from.toUtc().millisecondsSinceEpoch,
-      'toEpochMillis': to.toUtc().millisecondsSinceEpoch,
-      'categories': _encodeCategories(categories),
-    };
+) => {
+  'fromEpochMillis': from.toUtc().millisecondsSinceEpoch,
+  'toEpochMillis': to.toUtc().millisecondsSinceEpoch,
+  'categories': _encodeCategories(categories),
+};
 
 List<String> _encodeCategories(Set<HealthDataCategory> categories) =>
     categories.map((category) => category.name).toList(growable: false);
 
 Set<HealthDataCategory> _decodeCategories(Iterable<String> values) => values
-    .map((value) => HealthDataCategory.values.where((item) => item.name == value))
+    .map(
+      (value) => HealthDataCategory.values.where((item) => item.name == value),
+    )
     .where((matches) => matches.isNotEmpty)
     .map((matches) => matches.first)
     .toSet();
@@ -171,12 +170,11 @@ Set<HealthDataCategory> _decodeCategories(Iterable<String> values) => values
 List<RawHealthRecord> _decodeRecords(
   List<Object?> rows,
   HealthSourcePlatform platform,
-) =>
-    List<RawHealthRecord>.unmodifiable(
-      rows.whereType<Map<Object?, Object?>>().map(
-            (row) => _decodeRecord(row, platform),
-          ),
-    );
+) => List<RawHealthRecord>.unmodifiable(
+  rows.whereType<Map<Object?, Object?>>().map(
+    (row) => _decodeRecord(row, platform),
+  ),
+);
 
 RawHealthRecord _decodeRecord(
   Map<Object?, Object?> row,
@@ -204,7 +202,8 @@ RawHealthRecord _decodeRecord(
     sourceName: row['sourceName'] as String?,
     deviceName: row['deviceName'] as String?,
     metadata: Map<String, Object?>.unmodifiable(
-      ((row['metadata'] as Map<Object?, Object?>?) ?? const <Object?, Object?>{})
+      ((row['metadata'] as Map<Object?, Object?>?) ??
+              const <Object?, Object?>{})
           .map((key, value) => MapEntry(key.toString(), value)),
     ),
   );
