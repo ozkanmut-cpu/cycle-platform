@@ -1,42 +1,24 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:cycle_core_domain/cycle_core_domain.dart';
-import 'package:cycle_crypto/cycle_crypto.dart';
-import 'package:cycle_secure_key_store/cycle_secure_key_store.dart';
 import 'package:cycle_storage/cycle_storage.dart';
-import 'package:cycle_storage_sqlcipher/cycle_storage_sqlcipher.dart';
 import 'package:flutter/material.dart';
+
+import 'vault_session.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final keyStore = FlutterSecureKeyStore();
-  final databaseKey = await keyStore.createKey(KeyPurpose.database);
-  final vault = SqlCipherVaultLifecycle(
-    password: base64UrlEncode(databaseKey.wrappedKey),
-  );
-  await vault.initialize();
-  await vault.verifyIntegrity();
+  final session = PatientVaultSession();
+  await session.initialize();
 
-  final repository = SqlCipherHealthEventRepository(vault.database);
-  final auditLog = SqlCipherAuditLogRepository(vault.database);
-
-  runApp(
-    CyclePatientApp(repository: repository, auditLog: auditLog, vault: vault),
-  );
+  runApp(CyclePatientApp(session: session));
 }
 
 class CyclePatientApp extends StatelessWidget {
-  const CyclePatientApp({
-    required this.repository,
-    required this.auditLog,
-    required this.vault,
-    super.key,
-  });
+  const CyclePatientApp({required this.session, super.key});
 
-  final HealthEventRepository repository;
-  final AuditLogRepository auditLog;
-  final VaultLifecycle vault;
+  final PatientVaultSession session;
 
   @override
   Widget build(BuildContext context) {
@@ -44,48 +26,86 @@ class CyclePatientApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Cycle',
       theme: ThemeData(useMaterial3: true),
-      home: PatientHomePage(
-        repository: repository,
-        auditLog: auditLog,
-        vault: vault,
-      ),
+      home: PatientHomePage(session: session),
     );
   }
 }
 
 class PatientHomePage extends StatefulWidget {
-  const PatientHomePage({
-    required this.repository,
-    required this.auditLog,
-    required this.vault,
-    super.key,
-  });
+  const PatientHomePage({required this.session, super.key});
 
-  final HealthEventRepository repository;
-  final AuditLogRepository auditLog;
-  final VaultLifecycle vault;
+  final PatientVaultSession session;
 
   @override
   State<PatientHomePage> createState() => _PatientHomePageState();
 }
 
-class _PatientHomePageState extends State<PatientHomePage> {
+class _PatientHomePageState extends State<PatientHomePage>
+    with WidgetsBindingObserver {
   static const _subjectId = 'local-owner';
   static const _actorId = 'patient:self';
 
   bool _loading = true;
+  bool _privacyCovered = false;
   List<HealthEvent> _events = const <HealthEvent>[];
   VaultState _vaultState = VaultState.uninitialized;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _reload();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        unawaited(_resumeSession());
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        unawaited(_protectAndLock());
+    }
+  }
+
+  Future<void> _protectAndLock() async {
+    if (mounted) {
+      setState(() {
+        _privacyCovered = true;
+        _vaultState = VaultState.locked;
+      });
+    }
+    await widget.session.lock();
+  }
+
+  Future<void> _resumeSession() async {
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _privacyCovered = true;
+      });
+    }
+
+    await widget.session.unlock();
+    await _reload();
+
+    if (!mounted) return;
+    setState(() {
+      _privacyCovered = false;
+    });
+  }
+
   Future<void> _reload() async {
-    final events = await widget.repository.query(subjectId: _subjectId);
-    final vaultState = await widget.vault.state();
+    final events = await widget.session.repository.query(subjectId: _subjectId);
+    final vaultState = await widget.session.state();
     if (!mounted) return;
     setState(() {
       _events = events;
@@ -113,8 +133,8 @@ class _PatientHomePageState extends State<PatientHomePage> {
       schemaVersion: 1,
     );
 
-    await widget.repository.upsert(event);
-    await widget.auditLog.append(
+    await widget.session.repository.upsert(event);
+    await widget.session.auditLog.append(
       AuditEvent.now(
         action: AuditAction.created,
         actorId: _actorId,
@@ -153,13 +173,31 @@ class _PatientHomePageState extends State<PatientHomePage> {
     );
   }
 
+  Widget _buildPrivateCover() {
+    return const ColoredBox(
+      color: Colors.white,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.lock_outline, size: 42),
+            SizedBox(height: 12),
+            Text('Cycle', style: TextStyle(fontSize: 24)),
+            SizedBox(height: 6),
+            Text('Private health data is locked.'),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final vaultSummary = _loading
         ? 'Opening…'
         : '${_events.length} local health event(s) · ${_vaultState.name}';
 
-    return Scaffold(
+    final content = Scaffold(
       appBar: AppBar(title: const Text('Cycle')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _logPeriodStart,
@@ -197,6 +235,11 @@ class _PatientHomePageState extends State<PatientHomePage> {
           ),
         ),
       ),
+    );
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [content, if (_privacyCovered) _buildPrivateCover()],
     );
   }
 }
