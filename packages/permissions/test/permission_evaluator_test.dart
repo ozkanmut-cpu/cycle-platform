@@ -48,7 +48,6 @@ void main() {
       ),
       grants: const <PermissionGrant>[],
     );
-
     expect(decision.allowed, isFalse);
     expect(decision.reason, 'default-deny');
   });
@@ -63,7 +62,6 @@ void main() {
       categories: const <String>{'cycle'},
       fields: const <String>{'cycleDay', 'periodWindow'},
     );
-
     final allowed = evaluator.evaluate(
       request: PermissionRequest(
         ownerId: 'patient-1',
@@ -86,7 +84,6 @@ void main() {
       ),
       grants: <PermissionGrant>[partnerGrant],
     );
-
     expect(allowed.allowed, isTrue);
     expect(denied.allowed, isFalse);
   });
@@ -100,7 +97,6 @@ void main() {
       actions: const <PermissionAction>{PermissionAction.view},
       categories: const <String>{'cycle'},
     );
-
     final notify = evaluator.evaluate(
       request: PermissionRequest(
         ownerId: 'patient-1',
@@ -111,7 +107,6 @@ void main() {
       ),
       grants: <PermissionGrant>[partnerGrant],
     );
-
     expect(notify.allowed, isFalse);
   });
 
@@ -121,15 +116,11 @@ void main() {
       id: 'grant-doctor',
       recipientId: 'doctor-1',
       recipientKind: RecipientKind.clinician,
-      actions: const <PermissionAction>{
-        PermissionAction.view,
-        PermissionAction.export,
-      },
+      actions: const <PermissionAction>{PermissionAction.view, PermissionAction.export},
       categories: const <String>{'labs'},
       fields: const <String>{'result'},
       purposes: const <String>{'care'},
     );
-
     final careExport = evaluator.evaluate(
       request: PermissionRequest(
         ownerId: 'patient-1',
@@ -154,7 +145,6 @@ void main() {
       ),
       grants: <PermissionGrant>[doctorGrant],
     );
-
     expect(careExport.allowed, isTrue);
     expect(researchExport.allowed, isFalse);
   });
@@ -170,7 +160,6 @@ void main() {
       dataFrom: DateTime.utc(2026, 8, 1),
       dataUntil: DateTime.utc(2026, 9, 30),
     );
-
     final inside = evaluator.evaluate(
       request: PermissionRequest(
         ownerId: 'patient-1',
@@ -193,7 +182,6 @@ void main() {
       ),
       grants: <PermissionGrant>[doctorGrant],
     );
-
     expect(inside.allowed, isTrue);
     expect(outside.allowed, isFalse);
   });
@@ -223,13 +211,16 @@ void main() {
       category: 'cycle',
       at: now,
     );
-
     expect(
-      evaluator.evaluate(request: request, grants: <PermissionGrant>[expired]).allowed,
+      evaluator
+          .evaluate(request: request, grants: <PermissionGrant>[expired])
+          .allowed,
       isFalse,
     );
     expect(
-      evaluator.evaluate(request: request, grants: <PermissionGrant>[revoked]).allowed,
+      evaluator
+          .evaluate(request: request, grants: <PermissionGrant>[revoked])
+          .allowed,
       isFalse,
     );
   });
@@ -254,9 +245,7 @@ void main() {
       onStopNotifications: (_) async => notificationsStopped++,
       onInvalidateExports: (_) async => exportsInvalidated++,
     );
-
     final effect = await revoker.revoke(doctorGrant);
-
     expect(effect.rotateRecipientKeys, isTrue);
     expect(rotated, 1);
     expect(notificationsStopped, 1);
@@ -273,7 +262,6 @@ void main() {
       categories: const <String>{'cycle'},
       fields: const <String>{'cycleDay'},
     );
-
     final result = simulator.simulate(
       requests: <PermissionRequest>[
         PermissionRequest(
@@ -295,7 +283,6 @@ void main() {
       ],
       grants: <PermissionGrant>[partnerGrant],
     );
-
     expect(result.visible.length, 1);
     expect(result.hidden.length, 1);
   });
