@@ -21,8 +21,15 @@ main_activity = app / "android/app/src/main/kotlin/com/cyclehealth/cycle_patient
 main_activity.parent.mkdir(parents=True, exist_ok=True)
 main_activity.write_text(
     "package com.cyclehealth.cycle_patient\n\n"
+    "import android.os.Bundle\n"
+    "import android.view.WindowManager\n"
     "import io.flutter.embedding.android.FlutterFragmentActivity\n\n"
-    "class MainActivity : FlutterFragmentActivity()\n",
+    "class MainActivity : FlutterFragmentActivity() {\n"
+    "    override fun onCreate(savedInstanceState: Bundle?) {\n"
+    "        super.onCreate(savedInstanceState)\n"
+    "        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)\n"
+    "    }\n"
+    "}\n",
     encoding="utf-8",
 )
 
@@ -62,6 +69,30 @@ plist["NSFaceIDUsageDescription"] = (
 with info.open("wb") as handle:
     plistlib.dump(plist, handle, fmt=plistlib.FMT_XML, sort_keys=False)
 
+scene_delegate = app / "ios/Runner/SceneDelegate.swift"
+scene_delegate.write_text(
+    "import Flutter\n"
+    "import UIKit\n\n"
+    "class SceneDelegate: FlutterSceneDelegate {\n"
+    "  private var privacyView: UIView?\n\n"
+    "  override func sceneWillResignActive(_ scene: UIScene) {\n"
+    "    super.sceneWillResignActive(scene)\n"
+    "    guard let window = window, privacyView == nil else { return }\n"
+    "    let cover = UIView(frame: window.bounds)\n"
+    "    cover.backgroundColor = .systemBackground\n"
+    "    cover.autoresizingMask = [.flexibleWidth, .flexibleHeight]\n"
+    "    window.addSubview(cover)\n"
+    "    privacyView = cover\n"
+    "  }\n\n"
+    "  override func sceneDidBecomeActive(_ scene: UIScene) {\n"
+    "    super.sceneDidBecomeActive(scene)\n"
+    "    privacyView?.removeFromSuperview()\n"
+    "    privacyView = nil\n"
+    "  }\n"
+    "}\n",
+    encoding="utf-8",
+)
+
 entitlements = {
     "keychain-access-groups": [],
 }
@@ -71,4 +102,4 @@ for name in ("DebugProfile.entitlements", "Release.entitlements"):
         plistlib.dump(entitlements, handle, fmt=plistlib.FMT_XML, sort_keys=False)
 PY
 
-echo "Patient Android/iOS shell configured for local authentication, API 37, and Keychain storage."
+echo "Patient Android/iOS shell configured for local authentication, API 37, screenshot protection, app-switcher privacy, and Keychain storage."
