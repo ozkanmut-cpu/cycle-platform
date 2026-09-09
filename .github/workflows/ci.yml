@@ -58,6 +58,10 @@ jobs:
         run: dart pub get
         working-directory: packages/security
 
+      - name: Permission dependencies
+        run: dart pub get
+        working-directory: packages/permissions
+
       - name: Secure key store dependencies
         run: flutter pub get
         working-directory: packages/secure_key_store
@@ -94,6 +98,10 @@ jobs:
       - name: Analyze security
         run: dart analyze .
         working-directory: packages/security
+
+      - name: Analyze permissions
+        run: dart analyze .
+        working-directory: packages/permissions
 
       - name: Analyze secure key store
         run: flutter analyze
@@ -138,6 +146,10 @@ jobs:
       - name: Test security
         run: dart test
         working-directory: packages/security
+
+      - name: Test permissions
+        run: dart test
+        working-directory: packages/permissions
 
       - name: Test encrypted file vault
         run: dart test
