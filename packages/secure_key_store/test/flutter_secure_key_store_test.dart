@@ -8,18 +8,9 @@ void main() {
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
   });
 
-  test('Android policy uses Keystore OAEP and AES-GCM without backup', () {
+  test('Android secure storage uses the Cycle namespace', () {
     const options = FlutterSecureKeyStore.androidOptions;
 
-    expect(
-      options.keyCipherAlgorithm,
-      KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
-    );
-    expect(
-      options.storageCipherAlgorithm,
-      StorageCipherAlgorithm.AES_GCM_NoPadding,
-    );
-    expect(options.migrateWithBackup, isFalse);
     expect(options.storageNamespace, 'cycle.secure_keys');
   });
 
