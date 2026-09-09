@@ -20,9 +20,14 @@ class CyclePartnerApp extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Cycle Partner', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600)),
+                Text(
+                  'Cycle Partner',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+                ),
                 SizedBox(height: 12),
-                Text('Only the health information explicitly shared with you will appear here.'),
+                Text(
+                  'Only the health information explicitly shared with you will appear here.',
+                ),
               ],
             ),
           ),
