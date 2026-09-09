@@ -11,7 +11,7 @@ dependencies:
     path: ../crypto
   cycle_storage:
     path: ../storage
-
+  crypto: ^3.0.7
   path: ^1.9.1
 
 dev_dependencies:
