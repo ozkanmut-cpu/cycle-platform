@@ -8,6 +8,31 @@ void main() {
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
   });
 
+  test('Android policy uses Keystore OAEP and AES-GCM without backup', () {
+    const options = FlutterSecureKeyStore.androidOptions;
+
+    expect(
+      options.keyCipherAlgorithm,
+      KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
+    );
+    expect(
+      options.storageCipherAlgorithm,
+      StorageCipherAlgorithm.AES_GCM_NoPadding,
+    );
+    expect(options.migrateWithBackup, isFalse);
+    expect(options.storageNamespace, 'cycle.secure_keys');
+  });
+
+  test('iOS policy keeps keys device-bound while unlocked', () {
+    const options = FlutterSecureKeyStore.iosOptions;
+
+    expect(
+      options.accessibility,
+      KeychainAccessibility.unlocked_this_device,
+    );
+    expect(options.synchronizable, isFalse);
+  });
+
   test('createKey is idempotent for an active purpose', () async {
     final store = FlutterSecureKeyStore(
       storage: const FlutterSecureStorage(),
