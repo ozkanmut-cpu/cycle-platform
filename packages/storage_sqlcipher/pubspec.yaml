@@ -1,0 +1,20 @@
+name: cycle_storage_sqlcipher
+description: SQLCipher-backed storage implementation for Cycle Platform.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: '>=3.35.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cycle_core_domain:
+    path: ../core_domain
+  cycle_storage:
+    path: ../storage
+  sqflite_sqlcipher: ^3.4.1
+  path: ^1.9.1
+
+flutter:
