@@ -122,13 +122,21 @@ class HealthSourceSynchronizer {
           case HealthSyncChangeKind.upsert:
             final record = change.record;
             if (record != null) upserts.add(record);
+            break;
           case HealthSyncChangeKind.delete:
             final id = change.deletedSourceRecordId;
             if (id != null) deletes.add(id);
+            break;
         }
       }
 
-      token = page.nextToken ?? token;
+      final nextToken = page.nextToken ?? token;
+      if (page.hasMore && nextToken == token) {
+        throw StateError(
+          'Health sync source reported more pages without advancing its token.',
+        );
+      }
+      token = nextToken;
       if (!page.hasMore) break;
     }
 
