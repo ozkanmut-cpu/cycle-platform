@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  analyze-and-test:
+  analyze-test-and-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -143,27 +143,21 @@ jobs:
         run: dart test
         working-directory: packages/storage_file_vault
 
-  patient-android-build:
-    needs: analyze-and-test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
       - name: Bootstrap native Patient shell
         run: bash tool/bootstrap_patient_native.sh
 
-      - name: Resolve Patient dependencies
+      - name: Resolve Patient dependencies after native bootstrap
         run: flutter pub get
         working-directory: apps/patient
 
       - name: Build Patient debug APK
         run: flutter build apk --debug
         working-directory: apps/patient
+
+      - name: Upload Patient debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle-patient-debug-apk
+          path: apps/patient/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
