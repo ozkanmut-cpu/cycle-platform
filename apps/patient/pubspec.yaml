@@ -16,10 +16,13 @@ dependencies:
     path: ../../packages/crypto
   cycle_storage:
     path: ../../packages/storage
+  cycle_storage_file_vault:
+    path: ../../packages/storage_file_vault
   cycle_storage_sqlcipher:
     path: ../../packages/storage_sqlcipher
   cycle_secure_key_store:
     path: ../../packages/secure_key_store
+  path_provider: ^2.1.6
 
 flutter:
   uses-material-design: true
