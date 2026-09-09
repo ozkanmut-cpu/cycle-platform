@@ -83,10 +83,13 @@ class FlutterSecureKeyStore implements SecureKeyStore {
   @override
   Future<void> destroyAllKeys() async {
     final all = await _storage.readAll();
-    for (final key in all.keys) {
-      if (key.startsWith(_prefix) || key.startsWith(_activePrefix)) {
-        await _storage.delete(key: key);
-      }
+    final keys = all.keys
+        .where(
+          (key) => key.startsWith(_prefix) || key.startsWith(_activePrefix),
+        )
+        .toList(growable: false);
+    for (final key in keys) {
+      await _storage.delete(key: key);
     }
   }
 
