@@ -6,14 +6,14 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class FlutterSecureKeyStore implements SecureKeyStore {
   FlutterSecureKeyStore({FlutterSecureStorage? storage})
-      : _storage =
-            storage ??
-            const FlutterSecureStorage(
-              aOptions: AndroidOptions(),
-              iOptions: IOSOptions(
-                accessibility: KeychainAccessibility.unlocked_this_device,
-              ),
-            );
+    : _storage =
+          storage ??
+          const FlutterSecureStorage(
+            aOptions: AndroidOptions(),
+            iOptions: IOSOptions(
+              accessibility: KeychainAccessibility.unlocked_this_device,
+            ),
+          );
 
   final FlutterSecureStorage _storage;
 
