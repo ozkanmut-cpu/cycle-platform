@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cycle_crypto/cycle_crypto.dart';
 import 'package:cycle_secure_key_store/cycle_secure_key_store.dart';
@@ -140,14 +141,20 @@ class PatientVaultSession {
       },
     );
     final supportDirectory = await getApplicationSupportDirectory();
+    final attachmentDirectory = Directory(
+      '${supportDirectory.path}${Platform.pathSeparator}attachments',
+    );
+    final sensorDirectory = Directory(
+      '${supportDirectory.path}${Platform.pathSeparator}raw-sensors',
+    );
 
     _attachmentVault = EncryptedAttachmentVault(
-      directory: supportDirectory.createTempSync('cycle-attachments-'),
+      directory: attachmentDirectory,
       cipher: attachmentCipher,
       keyEnvelopeId: attachmentKeyId,
     );
     _rawSensorVault = EncryptedRawSensorVault(
-      directory: supportDirectory.createTempSync('cycle-sensors-'),
+      directory: sensorDirectory,
       cipher: sensorCipher,
       keyEnvelopeId: sensorKeyId,
     );
