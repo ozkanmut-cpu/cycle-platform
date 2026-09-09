@@ -184,6 +184,9 @@ jobs:
       - name: Bootstrap native Patient shell
         run: bash tool/bootstrap_patient_native.sh
 
+      - name: Enforce Patient Android minimum SDK
+        run: bash tool/ensure_patient_android_sdk.sh
+
       - name: Verify native Patient security
         run: bash tool/verify_patient_native_security.sh
 
