@@ -1,0 +1,17 @@
+name: cycle_secure_key_store
+description: Platform secure key storage adapter for Cycle Platform.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: '>=3.35.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cycle_crypto:
+    path: ../crypto
+  flutter_secure_storage: ^11.0.0
+
+flutter:
