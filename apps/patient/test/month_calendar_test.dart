@@ -46,10 +46,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: MonthCalendar(
-            events: events,
-            initialMonth: DateTime(2026, 9),
-          ),
+          body: MonthCalendar(events: events, initialMonth: DateTime(2026, 9)),
         ),
       ),
     );
