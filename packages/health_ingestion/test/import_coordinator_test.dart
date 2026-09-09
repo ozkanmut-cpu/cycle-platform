@@ -2,7 +2,8 @@ import 'package:cycle_health_ingestion/cycle_health_ingestion.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('coordinator normalizes upserts and preserves delete tombstones', () async {
+  test('coordinator normalizes upserts and preserves delete tombstones',
+      () async {
     final adapter = _CoordinatorAdapter();
     final coordinator = HealthImportCoordinator(
       synchronizer: const HealthSourceSynchronizer(),
@@ -27,7 +28,8 @@ void main() {
 
     expect(result.usedFullRefresh, isFalse);
     expect(result.ingestion.records, hasLength(1));
-    expect(result.ingestion.records.single.mapping.canonicalCode, 'vital.heart_rate');
+    expect(result.ingestion.records.single.mapping.canonicalCode,
+        'vital.heart_rate');
     expect(result.deletedSourceRecordIds, ['old-heart-rate']);
     expect(result.cursor.token, 'token-2');
   });
