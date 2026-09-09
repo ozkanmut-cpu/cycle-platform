@@ -71,7 +71,8 @@ class CycleVaultCodec {
     required List<CycleVaultEntry> entries,
   }) {
     _validateEntryNames(entries);
-    final sortedEntries = [...entries]..sort((a, b) => a.name.compareTo(b.name));
+    final sortedEntries = [...entries]
+      ..sort((a, b) => a.name.compareTo(b.name));
     final encodedEntries = <String, Object?>{};
     final entryHashes = <String, String>{};
 
@@ -124,7 +125,8 @@ class CycleVaultCodec {
     }
 
     final entriesMap = Map<String, Object?>.from(root['entries']! as Map);
-    final entryHashes = Map<String, String>.from(manifestMap['entryHashes']! as Map);
+    final entryHashes =
+        Map<String, String>.from(manifestMap['entryHashes']! as Map);
     if (entriesMap.length != entryHashes.length ||
         !entriesMap.keys.toSet().containsAll(entryHashes.keys)) {
       throw const FormatException('Cycle vault entry manifest mismatch.');
@@ -134,7 +136,8 @@ class CycleVaultCodec {
       final expected = entryHashes[entry.key];
       final actual = _sha256Canonical(entry.value);
       if (expected == null || expected != actual) {
-        throw FormatException('Cycle vault entry integrity failed: ${entry.key}.');
+        throw FormatException(
+            'Cycle vault entry integrity failed: ${entry.key}.');
       }
     }
 
@@ -210,11 +213,15 @@ class CycleVaultCodec {
   void _validateEntryNames(List<CycleVaultEntry> entries) {
     final names = <String>{};
     for (final entry in entries) {
-      if (entry.name.isEmpty || entry.name.contains('..') || entry.name.startsWith('/')) {
-        throw ArgumentError.value(entry.name, 'entry.name', 'Unsafe vault entry name.');
+      if (entry.name.isEmpty ||
+          entry.name.contains('..') ||
+          entry.name.startsWith('/')) {
+        throw ArgumentError.value(
+            entry.name, 'entry.name', 'Unsafe vault entry name.');
       }
       if (!names.add(entry.name)) {
-        throw ArgumentError.value(entry.name, 'entry.name', 'Duplicate vault entry name.');
+        throw ArgumentError.value(
+            entry.name, 'entry.name', 'Duplicate vault entry name.');
       }
     }
   }
