@@ -157,6 +157,10 @@ jobs:
         run: dart test
         working-directory: packages/permissions
 
+      - name: Test secure key store
+        run: flutter test
+        working-directory: packages/secure_key_store
+
       - name: Test encrypted file vault
         run: dart test
         working-directory: packages/storage_file_vault
