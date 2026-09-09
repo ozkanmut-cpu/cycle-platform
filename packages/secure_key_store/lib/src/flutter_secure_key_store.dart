@@ -6,7 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class FlutterSecureKeyStore implements SecureKeyStore {
   FlutterSecureKeyStore({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 
@@ -76,7 +76,8 @@ class FlutterSecureKeyStore implements SecureKeyStore {
     String? rotatedFromEnvelopeId,
   }) async {
     final bytes = List<int>.generate(32, (_) => Random.secure().nextInt(256));
-    final id = '${purpose.name}-$version-${DateTime.now().microsecondsSinceEpoch}';
+    final id =
+        '${purpose.name}-$version-${DateTime.now().microsecondsSinceEpoch}';
     return KeyEnvelope(
       id: id,
       purpose: purpose,
