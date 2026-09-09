@@ -22,7 +22,11 @@ class KeyDeriver {
       );
     }
     if (length <= 0 || length > 255 * 32) {
-      throw ArgumentError.value(length, 'length', 'Invalid HKDF output length.');
+      throw ArgumentError.value(
+        length,
+        'length',
+        'Invalid HKDF output length.',
+      );
     }
 
     final effectiveSalt = salt.isEmpty ? List<int>.filled(32, 0) : salt;
