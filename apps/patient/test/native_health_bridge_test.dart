@@ -16,23 +16,27 @@ void main() {
   test('Health Connect bridge decodes records and provenance inputs', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-      if (call.method == 'healthConnect.readRecords') {
-        return [
-          {
-            'sourceType': 'heart_rate',
-            'sourceRecordId': 'hc-1',
-            'observedAtEpochMillis':
-                DateTime.utc(2026, 9, 9, 10).millisecondsSinceEpoch,
-            'value': 76,
-            'unit': 'bpm',
-            'sourceName': 'Health Connect',
-            'deviceName': 'Watch',
-            'metadata': {'origin': 'example.app'},
-          },
-        ];
-      }
-      return null;
-    });
+          if (call.method == 'healthConnect.readRecords') {
+            return [
+              {
+                'sourceType': 'heart_rate',
+                'sourceRecordId': 'hc-1',
+                'observedAtEpochMillis': DateTime.utc(
+                  2026,
+                  9,
+                  9,
+                  10,
+                ).millisecondsSinceEpoch,
+                'value': 76,
+                'unit': 'bpm',
+                'sourceName': 'Health Connect',
+                'deviceName': 'Watch',
+                'metadata': {'origin': 'example.app'},
+              },
+            ];
+          }
+          return null;
+        });
 
     final records = await bridge.healthConnect.readRecords(
       from: DateTime.utc(2026, 9, 9),
@@ -46,43 +50,50 @@ void main() {
     expect(records.single.metadata['origin'], 'example.app');
   });
 
-  test('Health Connect bridge decodes upserts deletes and cursor state', () async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (call) async {
-      if (call.method == 'healthConnect.readChanges') {
-        return {
-          'nextToken': 'token-2',
-          'hasMore': false,
-          'tokenExpired': false,
-          'changes': [
-            {
-              'kind': 'upsert',
-              'record': {
-                'sourceType': 'oxygen_saturation',
-                'sourceRecordId': 'spo2-new',
-                'observedAtEpochMillis':
-                    DateTime.utc(2026, 9, 9, 10).millisecondsSinceEpoch,
-                'value': 97,
-                'unit': '%',
-              },
-            },
-            {'kind': 'delete', 'sourceRecordId': 'spo2-old'},
-          ],
-        };
-      }
-      return null;
-    });
+  test(
+    'Health Connect bridge decodes upserts deletes and cursor state',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            if (call.method == 'healthConnect.readChanges') {
+              return {
+                'nextToken': 'token-2',
+                'hasMore': false,
+                'tokenExpired': false,
+                'changes': [
+                  {
+                    'kind': 'upsert',
+                    'record': {
+                      'sourceType': 'oxygen_saturation',
+                      'sourceRecordId': 'spo2-new',
+                      'observedAtEpochMillis': DateTime.utc(
+                        2026,
+                        9,
+                        9,
+                        10,
+                      ).millisecondsSinceEpoch,
+                      'value': 97,
+                      'unit': '%',
+                    },
+                  },
+                  {'kind': 'delete', 'sourceRecordId': 'spo2-old'},
+                ],
+              };
+            }
+            return null;
+          });
 
-    final page = await bridge.healthConnect.readChanges(
-      token: 'token-1',
-      categories: {HealthDataCategory.vitals},
-    );
+      final page = await bridge.healthConnect.readChanges(
+        token: 'token-1',
+        categories: {HealthDataCategory.vitals},
+      );
 
-    expect(page.nextToken, 'token-2');
-    expect(page.changes, hasLength(2));
-    expect(page.changes.first.record?.sourceRecordId, 'spo2-new');
-    expect(page.changes.last.deletedSourceRecordId, 'spo2-old');
-  });
+      expect(page.nextToken, 'token-2');
+      expect(page.changes, hasLength(2));
+      expect(page.changes.first.record?.sourceRecordId, 'spo2-new');
+      expect(page.changes.last.deletedSourceRecordId, 'spo2-old');
+    },
+  );
 
   test('bridge rejects missing native cursor', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
