@@ -291,7 +291,9 @@ class _PatientHomePageState extends State<PatientHomePage>
                 child: ListTile(
                   leading: const Icon(Icons.calendar_today_outlined),
                   title: Text(
-                    cycleDay == null ? 'Cycle day unknown' : 'Cycle day $cycleDay',
+                    cycleDay == null
+                        ? 'Cycle day unknown'
+                        : 'Cycle day $cycleDay',
                   ),
                   subtitle: Text(
                     cycleDay == null
