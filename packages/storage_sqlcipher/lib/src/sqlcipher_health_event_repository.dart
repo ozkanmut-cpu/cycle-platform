@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cycle_core_domain/cycle_core_domain.dart';
 import 'package:cycle_storage/cycle_storage.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import 'sqlcipher_database.dart';
 
