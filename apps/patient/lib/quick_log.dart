@@ -97,12 +97,14 @@ Future<QuickLogSelection?> showQuickLogSheet(BuildContext context) {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: quickLogSelections.map((selection) {
-                return ActionChip(
-                  label: Text(selection.label),
-                  onPressed: () => Navigator.of(context).pop(selection),
-                );
-              }).toList(growable: false),
+              children: quickLogSelections
+                  .map((selection) {
+                    return ActionChip(
+                      label: Text(selection.label),
+                      onPressed: () => Navigator.of(context).pop(selection),
+                    );
+                  })
+                  .toList(growable: false),
             ),
           ],
         ),
