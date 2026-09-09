@@ -68,7 +68,7 @@ class _PatientHomePageState extends State<PatientHomePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    unawaited(_authenticateAndOpen(initial: true));
+    unawaited(_authenticateAndOpen());
   }
 
   @override
@@ -107,7 +107,7 @@ class _PatientHomePageState extends State<PatientHomePage>
     }
   }
 
-  Future<void> _authenticateAndOpen({bool initial = false}) async {
+  Future<void> _authenticateAndOpen() async {
     if (mounted) {
       setState(() {
         _loading = true;
