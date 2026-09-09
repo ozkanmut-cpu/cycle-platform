@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cycle_storage/cycle_storage.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import 'sqlcipher_database.dart';
 
@@ -10,8 +11,14 @@ class SqlCipherAuditLogRepository implements AuditLogRepository {
   final SqlCipherDatabase _db;
 
   @override
-  Future<void> append(AuditEvent event) async {
-    await _db.database.insert('audit_events', <String, Object?>{
+  Future<void> append(AuditEvent event) =>
+      appendWithExecutor(_db.database, event);
+
+  Future<void> appendWithExecutor(
+    DatabaseExecutor executor,
+    AuditEvent event,
+  ) async {
+    await executor.insert('audit_events', <String, Object?>{
       'id': event.id,
       'action': event.action.name,
       'subject_id': event.subjectId,
