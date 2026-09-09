@@ -2,7 +2,8 @@ import 'package:cycle_health_ingestion/cycle_health_ingestion.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('HealthKit adapter maps anchor changes to common sync changes', () async {
+  test('HealthKit adapter maps anchor changes to common sync changes',
+      () async {
     final adapter = HealthKitSyncAdapter(_FakeHealthKitGateway());
 
     final page = await adapter.readChanges(
@@ -36,7 +37,8 @@ void main() {
   });
 }
 
-RawHealthRecord _record(HealthSourcePlatform platform, String id) => RawHealthRecord(
+RawHealthRecord _record(HealthSourcePlatform platform, String id) =>
+    RawHealthRecord(
       sourcePlatform: platform,
       sourceType: 'heart_rate',
       sourceRecordId: id,
@@ -47,7 +49,8 @@ RawHealthRecord _record(HealthSourcePlatform platform, String id) => RawHealthRe
 
 class _FakeHealthKitGateway implements HealthKitGateway {
   @override
-  Future<String> createAnchor({required Set<HealthDataCategory> categories}) async =>
+  Future<String> createAnchor(
+          {required Set<HealthDataCategory> categories}) async =>
       'anchor-1';
 
   @override
