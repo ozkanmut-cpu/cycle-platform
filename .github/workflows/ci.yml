@@ -50,6 +50,10 @@ jobs:
         run: dart pub get
         working-directory: packages/storage
 
+      - name: Backup dependencies
+        run: dart pub get
+        working-directory: packages/backup
+
       - name: Secure key store dependencies
         run: flutter pub get
         working-directory: packages/secure_key_store
@@ -78,6 +82,10 @@ jobs:
       - name: Analyze storage
         run: dart analyze .
         working-directory: packages/storage
+
+      - name: Analyze backup
+        run: dart analyze .
+        working-directory: packages/backup
 
       - name: Analyze secure key store
         run: flutter analyze
@@ -114,6 +122,10 @@ jobs:
       - name: Test storage
         run: dart test
         working-directory: packages/storage
+
+      - name: Test backup
+        run: dart test
+        working-directory: packages/backup
 
       - name: Test encrypted file vault
         run: dart test
