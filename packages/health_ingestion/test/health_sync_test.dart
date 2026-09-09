@@ -40,10 +40,10 @@ void main() {
         ),
       ],
     );
-    const previous = HealthSyncCursor(
+    final previous = HealthSyncCursor(
       sourcePlatform: HealthSourcePlatform.healthConnect,
       token: 'token-1',
-      updatedAt: _fixedTime,
+      updatedAt: DateTime.utc(2026, 9, 1),
     );
 
     final result = await const HealthSourceSynchronizer().synchronize(
@@ -71,10 +71,10 @@ void main() {
         ),
       ],
     );
-    const previous = HealthSyncCursor(
+    final previous = HealthSyncCursor(
       sourcePlatform: HealthSourcePlatform.healthConnect,
       token: 'expired-token',
-      updatedAt: _fixedTime,
+      updatedAt: DateTime.utc(2026, 9, 1),
     );
 
     final result = await const HealthSourceSynchronizer().synchronize(
@@ -88,8 +88,6 @@ void main() {
     expect(result.cursor.token, 'token-1');
   });
 }
-
-const _fixedTime = DateTime.utc(2026, 9, 1);
 
 RawHealthRecord _record(String id) => RawHealthRecord(
       sourcePlatform: HealthSourcePlatform.healthConnect,
