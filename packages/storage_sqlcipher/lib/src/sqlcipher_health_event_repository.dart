@@ -80,9 +80,7 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
         .map((event) => event.supersedesEventId)
         .whereType<String>()
         .toSet();
-    return events
-        .where((event) => !supersededIds.contains(event.id))
-        .toList();
+    return events.where((event) => !supersededIds.contains(event.id)).toList();
   }
 
   @override
