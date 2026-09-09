@@ -1,5 +1,6 @@
 import 'package:cycle_core_domain/cycle_core_domain.dart';
-import 'package:cycle_health_ingestion/cycle_health_ingestion.dart' as ingestion;
+import 'package:cycle_health_ingestion/cycle_health_ingestion.dart'
+    as ingestion;
 import 'package:cycle_patient/health/health_sync_cursor_store.dart';
 import 'package:cycle_patient/health/normalized_health_event_mapper.dart';
 import 'package:cycle_patient/health/patient_health_import_service.dart';
@@ -7,25 +8,31 @@ import 'package:cycle_storage/cycle_storage.dart' as storage;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('full refresh commits normalized event and new cursor together', () async {
-    final cursorRepository = _MemoryCursorRepository();
-    final commitSink = _FakeCommitter();
-    final service = _service(cursorRepository, commitSink);
-    final now = DateTime.utc(2026, 9, 9, 20);
+  test(
+    'full refresh commits normalized event and new cursor together',
+    () async {
+      final cursorRepository = _MemoryCursorRepository();
+      final commitSink = _FakeCommitter();
+      final service = _service(cursorRepository, commitSink);
+      final now = DateTime.utc(2026, 9, 9, 20);
 
-    final result = await service.importSource(
-      subjectId: 'local-owner',
-      adapter: _FakeAdapter.initial(),
-      now: now,
-    );
+      final result = await service.importSource(
+        subjectId: 'local-owner',
+        adapter: _FakeAdapter.initial(),
+        now: now,
+      );
 
-    expect(result.usedFullRefresh, isTrue);
-    expect(commitSink.upserts, hasLength(1));
-    expect(commitSink.upserts.single.id, 'import:healthConnect:weight-1');
-    expect(commitSink.upserts.single.eventType, 'body.weight');
-    expect(commitSink.cursor?.value, 'token-1');
-    expect(commitSink.auditEvents.single.action, storage.AuditAction.imported);
-  });
+      expect(result.usedFullRefresh, isTrue);
+      expect(commitSink.upserts, hasLength(1));
+      expect(commitSink.upserts.single.id, 'import:healthConnect:weight-1');
+      expect(commitSink.upserts.single.eventType, 'body.weight');
+      expect(commitSink.cursor?.value, 'token-1');
+      expect(
+        commitSink.auditEvents.single.action,
+        storage.AuditAction.imported,
+      );
+    },
+  );
 
   test('incremental deletion maps tombstone and advances cursor', () async {
     final cursorRepository = _MemoryCursorRepository();
@@ -117,14 +124,12 @@ class _FakeAdapter implements ingestion.HealthSourceSyncAdapter {
     required DateTime from,
     required DateTime to,
     required Set<ingestion.HealthDataCategory> categories,
-  }) async =>
-      initialRecords;
+  }) async => initialRecords;
 
   @override
   Future<String> createChangeToken({
     required Set<ingestion.HealthDataCategory> categories,
-  }) async =>
-      'token-1';
+  }) async => 'token-1';
 
   @override
   Future<ingestion.HealthSyncPage> readChanges({
@@ -152,8 +157,7 @@ class _MemoryCursorRepository implements storage.HealthSyncCursorRepository {
   Future<storage.PersistedHealthSyncCursor?> load({
     required String subjectId,
     required storage.HealthSyncCursorSource source,
-  }) async =>
-      _values[_key(subjectId, source)];
+  }) async => _values[_key(subjectId, source)];
 
   @override
   Future<void> save(storage.PersistedHealthSyncCursor cursor) async {
