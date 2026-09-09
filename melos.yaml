@@ -1,0 +1,13 @@
+name: cycle_platform
+
+packages:
+  - apps/**
+  - packages/**
+
+scripts:
+  format:
+    run: dart format .
+  analyze:
+    run: melos exec -- dart analyze .
+  test:
+    run: melos exec --fail-fast --dir-exists=test -- dart test
