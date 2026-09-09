@@ -54,7 +54,8 @@ void main() {
       attachmentCount: 0,
       rawSensorEntryCount: 0,
       payloads: const <CycleVaultPayload>[
-        CycleVaultPayload(name: 'database.snapshot', kind: 'database', bytes: <int>[1]),
+        CycleVaultPayload(
+            name: 'database.snapshot', kind: 'database', bytes: <int>[1]),
       ],
     );
     final decryptCipher = AesGcmAuthenticatedCipher(
