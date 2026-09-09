@@ -23,9 +23,13 @@ class HealthSyncCursor {
     required this.updatedAt,
   });
 
+  static const permissionlessTokenPrefix = 'permissionless:';
+
   final HealthSourcePlatform sourcePlatform;
   final String token;
   final DateTime updatedAt;
+
+  bool get isPermissionless => token.startsWith(permissionlessTokenPrefix);
 }
 
 class HealthSyncPage {
@@ -78,8 +82,9 @@ class HealthSourceSyncResult {
 }
 
 class HealthSourceSynchronizer {
-  const HealthSourceSynchronizer(
-      {this.initialLookback = const Duration(days: 30)});
+  const HealthSourceSynchronizer({
+    this.initialLookback = const Duration(days: 30),
+  });
 
   final Duration initialLookback;
 
@@ -90,13 +95,13 @@ class HealthSourceSynchronizer {
   }) async {
     final granted = await adapter.grantedCategories();
     if (granted.isEmpty) {
-      final token = await adapter.createChangeToken(categories: granted);
       return HealthSourceSyncResult(
         upserts: const [],
         deletedSourceRecordIds: const [],
         cursor: HealthSyncCursor(
           sourcePlatform: adapter.sourcePlatform,
-          token: token,
+          token:
+              '${HealthSyncCursor.permissionlessTokenPrefix}${adapter.sourcePlatform.name}',
           updatedAt: now.toUtc(),
         ),
         usedFullRefresh: previousCursor == null,
@@ -104,7 +109,8 @@ class HealthSourceSynchronizer {
     }
 
     if (previousCursor == null ||
-        previousCursor.sourcePlatform != adapter.sourcePlatform) {
+        previousCursor.sourcePlatform != adapter.sourcePlatform ||
+        previousCursor.isPermissionless) {
       return _fullRefresh(adapter: adapter, granted: granted, now: now);
     }
 
