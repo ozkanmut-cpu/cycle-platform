@@ -9,9 +9,18 @@ class FlutterSecureKeyStore implements SecureKeyStore {
     : _storage =
           storage ??
           const FlutterSecureStorage(
-            aOptions: AndroidOptions(),
+            aOptions: AndroidOptions(
+              resetOnError: true,
+              migrateOnAlgorithmChange: true,
+              migrateWithBackup: false,
+              keyCipherAlgorithm:
+                  KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
+              storageCipherAlgorithm: StorageCipherAlgorithm.AES_GCM_NoPadding,
+              storageNamespace: 'cycle.secure_keys',
+            ),
             iOptions: IOSOptions(
               accessibility: KeychainAccessibility.unlocked_this_device,
+              synchronizable: false,
             ),
           );
 
@@ -82,7 +91,8 @@ class FlutterSecureKeyStore implements SecureKeyStore {
     required int version,
     String? rotatedFromEnvelopeId,
   }) async {
-    final bytes = List<int>.generate(32, (_) => Random.secure().nextInt(256));
+    final random = Random.secure();
+    final bytes = List<int>.generate(32, (_) => random.nextInt(256));
     final id =
         '${purpose.name}-$version-${DateTime.now().microsecondsSinceEpoch}';
     return KeyEnvelope(
