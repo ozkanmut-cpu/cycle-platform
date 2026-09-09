@@ -184,6 +184,10 @@ jobs:
       - name: Bootstrap native Patient shell
         run: bash tool/bootstrap_patient_native.sh
 
+      - name: Configure Patient HealthKit bridge
+        run: python3 ../../tool/configure_patient_healthkit.py
+        working-directory: apps/patient
+
       - name: Enforce Patient Android minimum SDK
         run: bash tool/ensure_patient_android_sdk.sh
 
@@ -225,6 +229,10 @@ jobs:
 
       - name: Bootstrap native Patient shell
         run: bash tool/bootstrap_patient_native.sh
+
+      - name: Configure Patient HealthKit bridge
+        run: python3 ../../tool/configure_patient_healthkit.py
+        working-directory: apps/patient
 
       - name: Verify native Patient security
         run: bash tool/verify_patient_native_security.sh
