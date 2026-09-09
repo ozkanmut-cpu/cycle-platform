@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cycle_crypto/cycle_crypto.dart';
 
 import 'cycle_vault.dart';
@@ -32,6 +34,13 @@ class CycleVaultRestorer {
 
     final payloads = <CycleVaultPayload>[];
     for (final entry in document.entries) {
+      final expectedAad = utf8.encode(
+        'cyclevault/v1|${document.manifest.snapshotId}|${entry.kind}|${entry.name}',
+      );
+      if (!_constantTimeEquals(entry.envelope.associatedData, expectedAad)) {
+        throw const FormatException('Cycle vault entry context mismatch.');
+      }
+
       final plaintext = await cipher.decrypt(entry.envelope);
       payloads.add(
         CycleVaultPayload(
@@ -46,5 +55,14 @@ class CycleVaultRestorer {
       document: document,
       payloads: List.unmodifiable(payloads),
     );
+  }
+
+  bool _constantTimeEquals(List<int>? actual, List<int> expected) {
+    if (actual == null || actual.length != expected.length) return false;
+    var difference = 0;
+    for (var index = 0; index < expected.length; index += 1) {
+      difference |= actual[index] ^ expected[index];
+    }
+    return difference == 0;
   }
 }
