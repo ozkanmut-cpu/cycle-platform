@@ -12,10 +12,10 @@ class EncryptedFileVault implements BinaryVault {
     required AuthenticatedCipher cipher,
     required String keyEnvelopeId,
     required String namespace,
-  }) : _directory = directory,
-       _cipher = cipher,
-       _keyEnvelopeId = keyEnvelopeId,
-       _namespace = namespace;
+  })  : _directory = directory,
+        _cipher = cipher,
+        _keyEnvelopeId = keyEnvelopeId,
+        _namespace = namespace;
 
   final Directory _directory;
   final AuthenticatedCipher _cipher;
