@@ -31,9 +31,11 @@ class CycleTimeline {
 
   List<HealthEvent> eventsForDay(DateTime date) {
     final day = _dateOnly(date);
-    final result = events.where((event) {
-      return _dateOnly(event.temporal.observedAt) == day;
-    }).toList(growable: false);
+    final result = events
+        .where((event) {
+          return _dateOnly(event.temporal.observedAt) == day;
+        })
+        .toList(growable: false);
     result.sort(
       (a, b) => b.temporal.observedAt.compareTo(a.temporal.observedAt),
     );
