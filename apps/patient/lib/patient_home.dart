@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'app_lock.dart';
 import 'cycle_timeline.dart';
+import 'month_calendar.dart';
 import 'quick_log.dart';
 import 'timeline_view.dart';
 import 'vault_session.dart';
@@ -131,6 +132,25 @@ class _PatientHomePageState extends State<PatientHomePage>
     await _logSelection(selection);
   }
 
+  Future<void> _openCalendar() async {
+    if (_privacyCovered) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.88,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            child: MonthCalendar(events: _events),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _logSelection(QuickLogSelection selection) async {
     final now = DateTime.now().toUtc();
     final event = HealthEvent(
@@ -239,7 +259,16 @@ class _PatientHomePageState extends State<PatientHomePage>
     final cycleDay = timeline.cycleDayFor(DateTime.now());
 
     final content = Scaffold(
-      appBar: AppBar(title: const Text('Cycle')),
+      appBar: AppBar(
+        title: const Text('Cycle'),
+        actions: [
+          IconButton(
+            tooltip: 'Calendar',
+            onPressed: _privacyCovered ? null : _openCalendar,
+            icon: const Icon(Icons.calendar_month_outlined),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _privacyCovered ? null : _openQuickLog,
         icon: const Icon(Icons.add),
@@ -269,6 +298,8 @@ class _PatientHomePageState extends State<PatientHomePage>
                         ? 'Log a period start when it happens.'
                         : 'Based on your latest logged period start.',
                   ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _privacyCovered ? null : _openCalendar,
                 ),
               ),
               const SizedBox(height: 12),
