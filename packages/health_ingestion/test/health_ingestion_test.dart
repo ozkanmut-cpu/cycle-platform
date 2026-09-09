@@ -30,7 +30,10 @@ void main() {
     expect(result.records, hasLength(1));
     expect(result.records.single.normalizedUnit, 'kg');
     expect(result.records.single.normalizedValue, closeTo(68.0388555, 0.0001));
-    expect(result.records.single.provenance.sourceKind, SourceKind.healthConnect);
+    expect(
+      result.records.single.provenance.sourceKind,
+      SourceKind.healthConnect,
+    );
     expect(result.records.single.provenance.sourceRecordId, 'hc-weight-1');
   });
 
