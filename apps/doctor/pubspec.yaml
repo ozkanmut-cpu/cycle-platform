@@ -1,0 +1,16 @@
+name: cycle_doctor
+description: Cycle Doctor application.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cycle_core_domain:
+    path: ../../packages/core_domain
+
+flutter:
+  uses-material-design: true
