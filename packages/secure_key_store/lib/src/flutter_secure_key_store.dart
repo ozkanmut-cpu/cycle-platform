@@ -9,20 +9,24 @@ class FlutterSecureKeyStore implements SecureKeyStore {
     : _storage =
           storage ??
           const FlutterSecureStorage(
-            aOptions: AndroidOptions(
-              resetOnError: true,
-              migrateOnAlgorithmChange: true,
-              migrateWithBackup: false,
-              keyCipherAlgorithm:
-                  KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
-              storageCipherAlgorithm: StorageCipherAlgorithm.AES_GCM_NoPadding,
-              storageNamespace: 'cycle.secure_keys',
-            ),
-            iOptions: IOSOptions(
-              accessibility: KeychainAccessibility.unlocked_this_device,
-              synchronizable: false,
-            ),
+            aOptions: androidOptions,
+            iOptions: iosOptions,
           );
+
+  static const AndroidOptions androidOptions = AndroidOptions(
+    resetOnError: true,
+    migrateOnAlgorithmChange: true,
+    migrateWithBackup: false,
+    keyCipherAlgorithm:
+        KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
+    storageCipherAlgorithm: StorageCipherAlgorithm.AES_GCM_NoPadding,
+    storageNamespace: 'cycle.secure_keys',
+  );
+
+  static const IOSOptions iosOptions = IOSOptions(
+    accessibility: KeychainAccessibility.unlocked_this_device,
+    synchronizable: false,
+  );
 
   final FlutterSecureStorage _storage;
 
