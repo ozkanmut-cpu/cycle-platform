@@ -124,9 +124,10 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
           'observedAt': event.temporal.observedAt.toUtc().toIso8601String(),
           'recordedAt': event.temporal.recordedAt.toUtc().toIso8601String(),
           'importedAt': event.temporal.importedAt?.toUtc().toIso8601String(),
+          'verifiedAt': event.temporal.verifiedAt?.toUtc().toIso8601String(),
           'validFrom': event.temporal.validFrom?.toUtc().toIso8601String(),
           'validTo': event.temporal.validTo?.toUtc().toIso8601String(),
-          'timezone': event.temporal.timezone,
+          'knownAt': event.temporal.knownAt?.toUtc().toIso8601String(),
         },
         'supersedesEventId': event.supersedesEventId,
         'relatedEventIds': event.relatedEventIds,
@@ -180,13 +181,18 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
         importedAt: temporalMap['importedAt'] == null
             ? null
             : DateTime.parse(temporalMap['importedAt']! as String),
+        verifiedAt: temporalMap['verifiedAt'] == null
+            ? null
+            : DateTime.parse(temporalMap['verifiedAt']! as String),
         validFrom: temporalMap['validFrom'] == null
             ? null
             : DateTime.parse(temporalMap['validFrom']! as String),
         validTo: temporalMap['validTo'] == null
             ? null
             : DateTime.parse(temporalMap['validTo']! as String),
-        timezone: temporalMap['timezone']! as String,
+        knownAt: temporalMap['knownAt'] == null
+            ? null
+            : DateTime.parse(temporalMap['knownAt']! as String),
       ),
       supersedesEventId: map['supersedesEventId'] as String?,
       relatedEventIds: (map['relatedEventIds'] as List<Object?>? ?? const <Object?>[])
