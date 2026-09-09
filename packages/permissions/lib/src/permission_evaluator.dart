@@ -21,6 +21,11 @@ class PermissionEvaluator {
       final purpose = request.purpose;
       if (purpose != null && !grant.scope.purposes.contains(purpose)) continue;
 
+      final observedAt = request.resourceObservedAt;
+      if (observedAt != null && !grant.scope.includesObservedAt(observedAt)) {
+        continue;
+      }
+
       return PermissionDecision.allow(grant.id);
     }
 
