@@ -1,0 +1,18 @@
+name: cycle_storage_file_vault
+description: Encrypted attachment and raw sensor file vaults for Cycle Platform.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  cycle_crypto:
+    path: ../crypto
+  cycle_storage:
+    path: ../storage
+
+  path: ^1.9.1
+
+dev_dependencies:
+  test: ^1.25.8
