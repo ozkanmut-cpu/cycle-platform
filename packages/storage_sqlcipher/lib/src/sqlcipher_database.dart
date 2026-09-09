@@ -8,6 +8,14 @@ class SqlCipherDatabase {
 
   static const int schemaVersion = 1;
 
+  static Future<SqlCipherDatabase> openDefault({
+    String fileName = 'cycle.db',
+    required String password,
+  }) async {
+    final directory = await getDatabasesPath();
+    return open(directory: directory, fileName: fileName, password: password);
+  }
+
   static Future<SqlCipherDatabase> open({
     required String directory,
     required String fileName,
@@ -58,7 +66,6 @@ class SqlCipherDatabase {
       },
     );
 
-    // Verifies that the supplied key can actually decrypt the database.
     await db.rawQuery('SELECT count(*) FROM sqlite_master');
     return SqlCipherDatabase._(db);
   }
