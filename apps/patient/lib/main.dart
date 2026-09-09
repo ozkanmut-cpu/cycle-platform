@@ -4,21 +4,28 @@ import 'package:cycle_core_domain/cycle_core_domain.dart';
 import 'package:cycle_storage/cycle_storage.dart';
 import 'package:flutter/material.dart';
 
+import 'app_lock.dart';
 import 'vault_session.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final session = PatientVaultSession();
-  await session.initialize();
-
-  runApp(CyclePatientApp(session: session));
+  runApp(
+    CyclePatientApp(
+      session: PatientVaultSession(),
+      appLock: AppLockService(),
+    ),
+  );
 }
 
 class CyclePatientApp extends StatelessWidget {
-  const CyclePatientApp({required this.session, super.key});
+  const CyclePatientApp({
+    required this.session,
+    required this.appLock,
+    super.key,
+  });
 
   final PatientVaultSession session;
+  final AppLockService appLock;
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +33,20 @@ class CyclePatientApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Cycle',
       theme: ThemeData(useMaterial3: true),
-      home: PatientHomePage(session: session),
+      home: PatientHomePage(session: session, appLock: appLock),
     );
   }
 }
 
 class PatientHomePage extends StatefulWidget {
-  const PatientHomePage({required this.session, super.key});
+  const PatientHomePage({
+    required this.session,
+    required this.appLock,
+    super.key,
+  });
 
   final PatientVaultSession session;
+  final AppLockService appLock;
 
   @override
   State<PatientHomePage> createState() => _PatientHomePageState();
@@ -46,7 +58,9 @@ class _PatientHomePageState extends State<PatientHomePage>
   static const _actorId = 'patient:self';
 
   bool _loading = true;
-  bool _privacyCovered = false;
+  bool _privacyCovered = true;
+  bool _unlockFailed = false;
+  bool _sessionInitialized = false;
   List<HealthEvent> _events = const <HealthEvent>[];
   VaultState _vaultState = VaultState.uninitialized;
 
@@ -54,12 +68,13 @@ class _PatientHomePageState extends State<PatientHomePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _reload();
+    unawaited(_authenticateAndOpen(initial: true));
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    unawaited(widget.appLock.cancel());
     super.dispose();
   }
 
@@ -67,7 +82,9 @@ class _PatientHomePageState extends State<PatientHomePage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
-        unawaited(_resumeSession());
+        if (_privacyCovered) {
+          unawaited(_authenticateAndOpen());
+        }
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
@@ -80,26 +97,47 @@ class _PatientHomePageState extends State<PatientHomePage>
     if (mounted) {
       setState(() {
         _privacyCovered = true;
+        _unlockFailed = false;
         _vaultState = VaultState.locked;
       });
     }
-    await widget.session.lock();
+    await widget.appLock.cancel();
+    if (_sessionInitialized) {
+      await widget.session.lock();
+    }
   }
 
-  Future<void> _resumeSession() async {
+  Future<void> _authenticateAndOpen({bool initial = false}) async {
     if (mounted) {
       setState(() {
         _loading = true;
         _privacyCovered = true;
+        _unlockFailed = false;
       });
     }
 
-    await widget.session.unlock();
-    await _reload();
+    final authenticated = await widget.appLock.authenticate();
+    if (!authenticated) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _unlockFailed = true;
+      });
+      return;
+    }
 
+    if (!_sessionInitialized) {
+      await widget.session.initialize();
+      _sessionInitialized = true;
+    } else {
+      await widget.session.unlock();
+    }
+
+    await _reload();
     if (!mounted) return;
     setState(() {
       _privacyCovered = false;
+      _unlockFailed = false;
     });
   }
 
@@ -174,17 +212,30 @@ class _PatientHomePageState extends State<PatientHomePage>
   }
 
   Widget _buildPrivateCover() {
-    return const ColoredBox(
+    return ColoredBox(
       color: Colors.white,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.lock_outline, size: 42),
-            SizedBox(height: 12),
-            Text('Cycle', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 6),
-            Text('Private health data is locked.'),
+            const Icon(Icons.lock_outline, size: 42),
+            const SizedBox(height: 12),
+            const Text('Cycle', style: TextStyle(fontSize: 24)),
+            const SizedBox(height: 6),
+            Text(
+              _unlockFailed
+                  ? 'Authentication is required to open private health data.'
+                  : 'Private health data is locked.',
+              textAlign: TextAlign.center,
+            ),
+            if (_unlockFailed) ...[
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _authenticateAndOpen,
+                icon: const Icon(Icons.fingerprint),
+                label: const Text('Unlock'),
+              ),
+            ],
           ],
         ),
       ),
@@ -200,7 +251,7 @@ class _PatientHomePageState extends State<PatientHomePage>
     final content = Scaffold(
       appBar: AppBar(title: const Text('Cycle')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _logPeriodStart,
+        onPressed: _privacyCovered ? null : _logPeriodStart,
         icon: const Icon(Icons.add),
         label: const Text('Period started'),
       ),
