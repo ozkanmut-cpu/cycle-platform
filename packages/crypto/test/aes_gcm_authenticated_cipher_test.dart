@@ -36,7 +36,10 @@ void main() {
       algorithm: envelope.algorithm,
       keyEnvelopeId: envelope.keyEnvelopeId,
       nonce: envelope.nonce,
-      ciphertext: <int>[envelope.ciphertext.first ^ 1, ...envelope.ciphertext.skip(1)],
+      ciphertext: <int>[
+        envelope.ciphertext.first ^ 1,
+        ...envelope.ciphertext.skip(1),
+      ],
       authenticationTag: envelope.authenticationTag,
       associatedData: envelope.associatedData,
     );
