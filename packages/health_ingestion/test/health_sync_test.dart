@@ -20,7 +20,9 @@ void main() {
 
     expect(result.usedFullRefresh, isTrue);
     expect(
-        result.upserts.map((record) => record.sourceRecordId), ['initial-1']);
+      result.upserts.map((record) => record.sourceRecordId),
+      ['initial-1'],
+    );
     expect(result.cursor.token, 'token-1');
     expect(adapter.lastInitialFrom, DateTime.utc(2026, 8, 10, 12));
     expect(adapter.lastInitialTo, now);
@@ -88,6 +90,42 @@ void main() {
     expect(result.upserts.single.sourceRecordId, 'replacement');
     expect(result.cursor.token, 'token-1');
   });
+
+  test('no permissions never requests a native changes token', () async {
+    final adapter = _FakeAdapter(granted: const {});
+
+    final result = await const HealthSourceSynchronizer().synchronize(
+      adapter: adapter,
+      now: DateTime.utc(2026, 9, 9, 12),
+    );
+
+    expect(result.upserts, isEmpty);
+    expect(result.cursor.isPermissionless, isTrue);
+    expect(adapter.createTokenCalls, 0);
+  });
+
+  test('granting permissions after permissionless state forces full refresh',
+      () async {
+    final adapter = _FakeAdapter(
+      initialRecords: [_record('fresh-after-grant')],
+    );
+    final previous = HealthSyncCursor(
+      sourcePlatform: HealthSourcePlatform.healthConnect,
+      token: '${HealthSyncCursor.permissionlessTokenPrefix}healthConnect',
+      updatedAt: DateTime.utc(2026, 9, 8),
+    );
+
+    final result = await const HealthSourceSynchronizer().synchronize(
+      adapter: adapter,
+      now: DateTime.utc(2026, 9, 9, 12),
+      previousCursor: previous,
+    );
+
+    expect(result.usedFullRefresh, isTrue);
+    expect(result.upserts.single.sourceRecordId, 'fresh-after-grant');
+    expect(adapter.requestedTokens, isEmpty);
+    expect(adapter.createTokenCalls, 1);
+  });
 }
 
 RawHealthRecord _record(String id) => RawHealthRecord(
@@ -103,23 +141,25 @@ class _FakeAdapter implements HealthSourceSyncAdapter {
   _FakeAdapter({
     this.initialRecords = const [],
     this.changePages = const [],
+    this.granted = const {HealthDataCategory.vitals},
   });
 
   final List<RawHealthRecord> initialRecords;
   final List<HealthSyncPage> changePages;
+  final Set<HealthDataCategory> granted;
   final List<String> requestedTokens = [];
   DateTime? lastInitialFrom;
   DateTime? lastInitialTo;
   var _pageIndex = 0;
   var _tokenCounter = 0;
 
+  int get createTokenCalls => _tokenCounter;
+
   @override
   HealthSourcePlatform get sourcePlatform => HealthSourcePlatform.healthConnect;
 
   @override
-  Future<Set<HealthDataCategory>> grantedCategories() async => {
-        HealthDataCategory.vitals,
-      };
+  Future<Set<HealthDataCategory>> grantedCategories() async => granted;
 
   @override
   Future<List<RawHealthRecord>> readInitial({
