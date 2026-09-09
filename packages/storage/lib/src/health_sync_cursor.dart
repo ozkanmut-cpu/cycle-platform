@@ -3,8 +3,8 @@ enum HealthSyncCursorSource {
   healthKit,
 }
 
-class HealthSyncCursor {
-  const HealthSyncCursor({
+class PersistedHealthSyncCursor {
+  const PersistedHealthSyncCursor({
     required this.subjectId,
     required this.source,
     required this.value,
@@ -18,12 +18,12 @@ class HealthSyncCursor {
 }
 
 abstract interface class HealthSyncCursorRepository {
-  Future<HealthSyncCursor?> load({
+  Future<PersistedHealthSyncCursor?> load({
     required String subjectId,
     required HealthSyncCursorSource source,
   });
 
-  Future<void> save(HealthSyncCursor cursor);
+  Future<void> save(PersistedHealthSyncCursor cursor);
 
   Future<void> clear({
     required String subjectId,
