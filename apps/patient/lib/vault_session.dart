@@ -7,7 +7,7 @@ import 'package:cycle_storage_sqlcipher/cycle_storage_sqlcipher.dart';
 
 class PatientVaultSession {
   PatientVaultSession({FlutterSecureKeyStore? keyStore})
-      : _keyStore = keyStore ?? FlutterSecureKeyStore();
+    : _keyStore = keyStore ?? FlutterSecureKeyStore();
 
   final FlutterSecureKeyStore _keyStore;
 
