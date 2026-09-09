@@ -80,7 +80,9 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
         .map((event) => event.supersedesEventId)
         .whereType<String>()
         .toSet();
-    return events.where((event) => !supersededIds.contains(event.id)).toList();
+    return events
+        .where((event) => !supersededIds.contains(event.id))
+        .toList();
   }
 
   @override
@@ -97,42 +99,42 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
   }
 
   Map<String, Object?> _encode(HealthEvent event) => <String, Object?>{
-        'id': event.id,
-        'subjectId': event.subjectId,
-        'eventType': event.eventType,
-        'episodeId': event.episodeId,
-        'value': event.value,
-        'unit': event.unit,
-        'severity': event.severity,
-        'bodyLocation': event.bodyLocation,
-        'dataState': event.dataState?.name,
-        'cycleContext': event.cycleContext,
-        'pregnancyContext': event.pregnancyContext,
-        'provenance': <String, Object?>{
-          'sourceKind': event.provenance.sourceKind.name,
-          'sourceName': event.provenance.sourceName,
-          'sourceRecordId': event.provenance.sourceRecordId,
-          'deviceName': event.provenance.deviceName,
-          'measurementMethod': event.provenance.measurementMethod,
-        },
-        'verificationStatus': event.verificationStatus.name,
-        'confidence': event.confidence.name,
-        'privacyClass': event.privacyClass,
-        'visibilityPolicyId': event.visibilityPolicyId,
-        'backupPolicyId': event.backupPolicyId,
-        'temporal': <String, Object?>{
-          'observedAt': event.temporal.observedAt.toUtc().toIso8601String(),
-          'recordedAt': event.temporal.recordedAt.toUtc().toIso8601String(),
-          'importedAt': event.temporal.importedAt?.toUtc().toIso8601String(),
-          'verifiedAt': event.temporal.verifiedAt?.toUtc().toIso8601String(),
-          'validFrom': event.temporal.validFrom?.toUtc().toIso8601String(),
-          'validTo': event.temporal.validTo?.toUtc().toIso8601String(),
-          'knownAt': event.temporal.knownAt?.toUtc().toIso8601String(),
-        },
-        'supersedesEventId': event.supersedesEventId,
-        'relatedEventIds': event.relatedEventIds,
-        'schemaVersion': event.schemaVersion,
-      };
+    'id': event.id,
+    'subjectId': event.subjectId,
+    'eventType': event.eventType,
+    'episodeId': event.episodeId,
+    'value': event.value,
+    'unit': event.unit,
+    'severity': event.severity,
+    'bodyLocation': event.bodyLocation,
+    'dataState': event.dataState?.name,
+    'cycleContext': event.cycleContext,
+    'pregnancyContext': event.pregnancyContext,
+    'provenance': <String, Object?>{
+      'sourceKind': event.provenance.sourceKind.name,
+      'sourceName': event.provenance.sourceName,
+      'sourceRecordId': event.provenance.sourceRecordId,
+      'deviceName': event.provenance.deviceName,
+      'measurementMethod': event.provenance.measurementMethod,
+    },
+    'verificationStatus': event.verificationStatus.name,
+    'confidence': event.confidence.name,
+    'privacyClass': event.privacyClass,
+    'visibilityPolicyId': event.visibilityPolicyId,
+    'backupPolicyId': event.backupPolicyId,
+    'temporal': <String, Object?>{
+      'observedAt': event.temporal.observedAt.toUtc().toIso8601String(),
+      'recordedAt': event.temporal.recordedAt.toUtc().toIso8601String(),
+      'importedAt': event.temporal.importedAt?.toUtc().toIso8601String(),
+      'verifiedAt': event.temporal.verifiedAt?.toUtc().toIso8601String(),
+      'validFrom': event.temporal.validFrom?.toUtc().toIso8601String(),
+      'validTo': event.temporal.validTo?.toUtc().toIso8601String(),
+      'knownAt': event.temporal.knownAt?.toUtc().toIso8601String(),
+    },
+    'supersedesEventId': event.supersedesEventId,
+    'relatedEventIds': event.relatedEventIds,
+    'schemaVersion': event.schemaVersion,
+  };
 
   HealthEvent _decode(Object? raw) {
     final map = Map<String, Object?>.from(raw! as Map);
@@ -161,7 +163,10 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
           ? null
           : Map<String, Object?>.from(map['pregnancyContext']! as Map),
       provenance: Provenance(
-        sourceKind: enumByName(SourceKind.values, provenanceMap['sourceKind']! as String),
+        sourceKind: enumByName(
+          SourceKind.values,
+          provenanceMap['sourceKind']! as String,
+        ),
         sourceName: provenanceMap['sourceName'] as String?,
         sourceRecordId: provenanceMap['sourceRecordId'] as String?,
         deviceName: provenanceMap['deviceName'] as String?,
@@ -171,7 +176,10 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
         VerificationStatus.values,
         map['verificationStatus']! as String,
       ),
-      confidence: enumByName(ConfidenceClass.values, map['confidence']! as String),
+      confidence: enumByName(
+        ConfidenceClass.values,
+        map['confidence']! as String,
+      ),
       privacyClass: map['privacyClass']! as String,
       visibilityPolicyId: map['visibilityPolicyId'] as String?,
       backupPolicyId: map['backupPolicyId'] as String?,
@@ -195,8 +203,9 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
             : DateTime.parse(temporalMap['knownAt']! as String),
       ),
       supersedesEventId: map['supersedesEventId'] as String?,
-      relatedEventIds: (map['relatedEventIds'] as List<Object?>? ?? const <Object?>[])
-          .cast<String>(),
+      relatedEventIds:
+          (map['relatedEventIds'] as List<Object?>? ?? const <Object?>[])
+              .cast<String>(),
       schemaVersion: map['schemaVersion']! as int,
     );
   }
