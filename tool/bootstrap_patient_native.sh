@@ -92,14 +92,6 @@ scene_delegate.write_text(
     "}\n",
     encoding="utf-8",
 )
-
-entitlements = {
-    "keychain-access-groups": [],
-}
-for name in ("DebugProfile.entitlements", "Release.entitlements"):
-    path = app / "ios/Runner" / name
-    with path.open("wb") as handle:
-        plistlib.dump(entitlements, handle, fmt=plistlib.FMT_XML, sort_keys=False)
 PY
 
-echo "Patient Android/iOS shell configured for local authentication, API 37, screenshot protection, app-switcher privacy, and Keychain storage."
+echo "Patient Android/iOS shell configured for local authentication, API 37, screenshot protection, app-switcher privacy, and device-local Keychain storage."
