@@ -8,8 +8,8 @@ class AesGcmAuthenticatedCipher implements AuthenticatedCipher {
   AesGcmAuthenticatedCipher({
     required KeyMaterialResolver keyResolver,
     AesGcm? algorithm,
-  }) : _keyResolver = keyResolver,
-       _algorithm = algorithm ?? AesGcm.with256bits();
+  })  : _keyResolver = keyResolver,
+        _algorithm = algorithm ?? AesGcm.with256bits();
 
   final KeyMaterialResolver _keyResolver;
   final AesGcm _algorithm;
