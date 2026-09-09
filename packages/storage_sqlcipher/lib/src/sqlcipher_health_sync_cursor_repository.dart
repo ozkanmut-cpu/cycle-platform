@@ -10,7 +10,7 @@ class SqlCipherHealthSyncCursorRepository
   final SqlCipherDatabase _db;
 
   @override
-  Future<HealthSyncCursor?> load({
+  Future<PersistedHealthSyncCursor?> load({
     required String subjectId,
     required HealthSyncCursorSource source,
   }) async {
@@ -23,7 +23,7 @@ class SqlCipherHealthSyncCursorRepository
     if (rows.isEmpty) return null;
 
     final row = rows.single;
-    return HealthSyncCursor(
+    return PersistedHealthSyncCursor(
       subjectId: row['subject_id']! as String,
       source: HealthSyncCursorSource.values.firstWhere(
         (candidate) => candidate.name == row['source']! as String,
@@ -34,7 +34,7 @@ class SqlCipherHealthSyncCursorRepository
   }
 
   @override
-  Future<void> save(HealthSyncCursor cursor) async {
+  Future<void> save(PersistedHealthSyncCursor cursor) async {
     if (cursor.subjectId.isEmpty) {
       throw ArgumentError.value(cursor.subjectId, 'subjectId', 'must not be empty');
     }
