@@ -10,10 +10,7 @@ import 'vault_session.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    CyclePatientApp(
-      session: PatientVaultSession(),
-      appLock: AppLockService(),
-    ),
+    CyclePatientApp(session: PatientVaultSession(), appLock: AppLockService()),
   );
 }
 
