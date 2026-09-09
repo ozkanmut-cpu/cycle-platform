@@ -1,4 +1,5 @@
 enum KeyPurpose {
+  master,
   database,
   attachment,
   sensorVault,
