@@ -37,5 +37,9 @@ class AuditEvent {
 
 abstract interface class AuditLogRepository {
   Future<void> append(AuditEvent event);
-  Future<List<AuditEvent>> listForSubject(String subjectId);
+
+  Future<List<AuditEvent>> listForSubject(
+    String subjectId, {
+    int limit = 200,
+  });
 }
