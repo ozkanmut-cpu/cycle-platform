@@ -19,7 +19,8 @@ void main() {
     );
 
     expect(result.usedFullRefresh, isTrue);
-    expect(result.upserts.map((record) => record.sourceRecordId), ['initial-1']);
+    expect(
+        result.upserts.map((record) => record.sourceRecordId), ['initial-1']);
     expect(result.cursor.token, 'token-1');
     expect(adapter.lastInitialFrom, DateTime.utc(2026, 8, 10, 12));
     expect(adapter.lastInitialTo, now);
