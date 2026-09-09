@@ -19,21 +19,17 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
     DatabaseExecutor executor,
     HealthEvent event,
   ) async {
-    await executor.insert(
-      'health_events',
-      <String, Object?>{
-        'id': event.id,
-        'subject_id': event.subjectId,
-        'event_type': event.eventType,
-        'episode_id': event.episodeId,
-        'payload_json': jsonEncode(_encode(event)),
-        'observed_at': event.temporal.observedAt.toUtc().toIso8601String(),
-        'recorded_at': event.temporal.recordedAt.toUtc().toIso8601String(),
-        'schema_version': event.schemaVersion,
-        'deleted_at': null,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await executor.insert('health_events', <String, Object?>{
+      'id': event.id,
+      'subject_id': event.subjectId,
+      'event_type': event.eventType,
+      'episode_id': event.episodeId,
+      'payload_json': jsonEncode(_encode(event)),
+      'observed_at': event.temporal.observedAt.toUtc().toIso8601String(),
+      'recorded_at': event.temporal.recordedAt.toUtc().toIso8601String(),
+      'schema_version': event.schemaVersion,
+      'deleted_at': null,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
