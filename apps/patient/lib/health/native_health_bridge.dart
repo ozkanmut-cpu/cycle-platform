@@ -26,6 +26,18 @@ class NativeHealthBridge {
         const <String>[];
     return _decodeCategories(raw);
   }
+
+  Future<bool> isHealthKitAvailable() async =>
+      await _channel.invokeMethod<bool>('healthKit.isAvailable') ?? false;
+
+  Future<bool> requestHealthKitPermissions(
+    Set<HealthDataCategory> categories,
+  ) async =>
+      await _channel.invokeMethod<bool>(
+        'healthKit.requestPermissions',
+        {'categories': _encodeCategories(categories)},
+      ) ??
+      false;
 }
 
 class _MethodChannelHealthConnectGateway implements HealthConnectGateway {
