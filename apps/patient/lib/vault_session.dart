@@ -19,6 +19,7 @@ class PatientVaultSession {
   HealthEventRepository? _repository;
   AuditLogRepository? _auditLog;
   HealthSyncCursorRepository? _healthSyncCursorRepository;
+  SqlCipherHealthImportCommitter? _healthImportCommitter;
   AttachmentVault? _attachmentVault;
   RawSensorVault? _rawSensorVault;
   Future<void> _operation = Future<void>.value();
@@ -41,6 +42,14 @@ class PatientVaultSession {
 
   HealthSyncCursorRepository get healthSyncCursorRepository {
     final value = _healthSyncCursorRepository;
+    if (value == null) {
+      throw StateError('Vault session is locked.');
+    }
+    return value;
+  }
+
+  SqlCipherHealthImportCommitter get healthImportCommitter {
+    final value = _healthImportCommitter;
     if (value == null) {
       throw StateError('Vault session is locked.');
     }
@@ -79,6 +88,7 @@ class PatientVaultSession {
       _repository = null;
       _auditLog = null;
       _healthSyncCursorRepository = null;
+      _healthImportCommitter = null;
       _attachmentVault = null;
       _rawSensorVault = null;
       if (vault != null) {
@@ -182,5 +192,6 @@ class PatientVaultSession {
     _healthSyncCursorRepository = SqlCipherHealthSyncCursorRepository(
       vault.database,
     );
+    _healthImportCommitter = SqlCipherHealthImportCommitter(vault.database);
   }
 }
