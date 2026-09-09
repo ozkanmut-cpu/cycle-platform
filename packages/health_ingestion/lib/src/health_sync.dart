@@ -78,7 +78,8 @@ class HealthSourceSyncResult {
 }
 
 class HealthSourceSynchronizer {
-  const HealthSourceSynchronizer({this.initialLookback = const Duration(days: 30)});
+  const HealthSourceSynchronizer(
+      {this.initialLookback = const Duration(days: 30)});
 
   final Duration initialLookback;
 
