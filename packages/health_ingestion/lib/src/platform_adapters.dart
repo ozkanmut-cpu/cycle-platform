@@ -128,7 +128,8 @@ class HealthKitSyncAdapter implements HealthSourceSyncAdapter {
     return HealthSyncPage(
       changes: [
         for (final record in page.upserts) HealthSyncChange.upsert(record),
-        for (final id in page.deletedSourceRecordIds) HealthSyncChange.delete(id),
+        for (final id in page.deletedSourceRecordIds)
+          HealthSyncChange.delete(id),
       ],
       nextToken: page.nextAnchor,
       hasMore: page.hasMore,
