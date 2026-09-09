@@ -4,8 +4,8 @@ publish_to: none
 version: 0.1.0+1
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
-  flutter: ">=3.35.0"
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.38.0"
 
 dependencies:
   flutter:
@@ -22,6 +22,7 @@ dependencies:
     path: ../../packages/storage_sqlcipher
   cycle_secure_key_store:
     path: ../../packages/secure_key_store
+  local_auth: ^3.0.2
   path_provider: ^2.1.6
 
 flutter:
