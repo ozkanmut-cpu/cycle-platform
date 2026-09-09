@@ -5,7 +5,9 @@ import 'package:cycle_storage/cycle_storage.dart';
 import 'package:flutter/material.dart';
 
 import 'app_lock.dart';
+import 'cycle_timeline.dart';
 import 'quick_log.dart';
+import 'timeline_view.dart';
 import 'vault_session.dart';
 
 class PatientHomePage extends StatefulWidget {
@@ -197,38 +199,6 @@ class _PatientHomePageState extends State<PatientHomePage>
     return Icons.favorite_border;
   }
 
-  Widget _buildActivity() {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_events.isEmpty) {
-      return const Center(
-        child: Text('Nothing logged today. Add something only when useful.'),
-      );
-    }
-
-    return ListView.separated(
-      itemCount: _events.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final event = _events[index];
-        final observed = event.temporal.observedAt.toLocal();
-        return ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(_eventIcon(event)),
-          title: Text(_eventLabel(event)),
-          subtitle: Text(
-            '${observed.day.toString().padLeft(2, '0')}.'
-            '${observed.month.toString().padLeft(2, '0')} · '
-            '${observed.hour.toString().padLeft(2, '0')}:'
-            '${observed.minute.toString().padLeft(2, '0')}',
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildPrivateCover() {
     return ColoredBox(
       color: Colors.white,
@@ -265,6 +235,8 @@ class _PatientHomePageState extends State<PatientHomePage>
     final vaultSummary = _loading
         ? 'Opening…'
         : '${_events.length} local health event(s) · ${_vaultState.name}';
+    final timeline = CycleTimeline(_events);
+    final cycleDay = timeline.cycleDayFor(DateTime.now());
 
     final content = Scaffold(
       appBar: AppBar(title: const Text('Cycle')),
@@ -285,7 +257,21 @@ class _PatientHomePageState extends State<PatientHomePage>
               ),
               const SizedBox(height: 4),
               const Text('Only log what matters. Cycle keeps the rest quiet.'),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.calendar_today_outlined),
+                  title: Text(
+                    cycleDay == null ? 'Cycle day unknown' : 'Cycle day $cycleDay',
+                  ),
+                  subtitle: Text(
+                    cycleDay == null
+                        ? 'Log a period start when it happens.'
+                        : 'Based on your latest logged period start.',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.add_circle_outline),
@@ -305,11 +291,19 @@ class _PatientHomePageState extends State<PatientHomePage>
               ),
               const SizedBox(height: 20),
               const Text(
-                'Recent activity',
+                'Timeline',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
-              Expanded(child: _buildActivity()),
+              Expanded(
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : PatientTimelineView(
+                        events: _events,
+                        labelFor: _eventLabel,
+                        iconFor: _eventIcon,
+                      ),
+              ),
             ],
           ),
         ),
