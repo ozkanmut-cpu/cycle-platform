@@ -11,6 +11,21 @@ class NativeHealthBridge {
   HealthConnectGateway get healthConnect =>
       _MethodChannelHealthConnectGateway(_channel);
   HealthKitGateway get healthKit => _MethodChannelHealthKitGateway(_channel);
+
+  Future<bool> isHealthConnectAvailable() async =>
+      await _channel.invokeMethod<bool>('healthConnect.isAvailable') ?? false;
+
+  Future<Set<HealthDataCategory>> requestHealthConnectPermissions(
+    Set<HealthDataCategory> categories,
+  ) async {
+    final raw =
+        await _channel.invokeListMethod<String>(
+          'healthConnect.requestPermissions',
+          {'categories': _encodeCategories(categories)},
+        ) ??
+        const <String>[];
+    return _decodeCategories(raw);
+  }
 }
 
 class _MethodChannelHealthConnectGateway implements HealthConnectGateway {
@@ -66,8 +81,9 @@ class _MethodChannelHealthConnectGateway implements HealthConnectGateway {
       'healthConnect.readChanges',
       {'token': token, 'categories': _encodeCategories(categories)},
     );
-    if (raw == null)
+    if (raw == null) {
       throw StateError('Health Connect returned no change page.');
+    }
     return _decodeHealthConnectPage(raw);
   }
 }
