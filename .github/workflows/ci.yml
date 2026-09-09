@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Root dependencies
+        run: flutter pub get
+
+      - name: Patient dependencies
+        run: flutter pub get
+        working-directory: apps/patient
+
+      - name: Partner dependencies
+        run: flutter pub get
+        working-directory: apps/partner
+
+      - name: Doctor dependencies
+        run: flutter pub get
+        working-directory: apps/doctor
+
+      - name: Core domain dependencies
+        run: dart pub get
+        working-directory: packages/core_domain
+
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed packages apps
+
+      - name: Analyze core domain
+        run: dart analyze .
+        working-directory: packages/core_domain
+
+      - name: Analyze Patient
+        run: flutter analyze
+        working-directory: apps/patient
+
+      - name: Analyze Partner
+        run: flutter analyze
+        working-directory: apps/partner
+
+      - name: Analyze Doctor
+        run: flutter analyze
+        working-directory: apps/doctor
+
+      - name: Test core domain
+        run: dart test
+        working-directory: packages/core_domain
