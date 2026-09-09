@@ -1,0 +1,11 @@
+name: cycle_core_domain
+description: Canonical health domain models for Cycle Platform.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^5.1.1
