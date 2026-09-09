@@ -58,6 +58,10 @@ jobs:
         run: flutter pub get
         working-directory: packages/storage_sqlcipher
 
+      - name: Encrypted file vault dependencies
+        run: dart pub get
+        working-directory: packages/storage_file_vault
+
       - name: Format check
         run: |
           dart format packages apps
@@ -83,6 +87,10 @@ jobs:
         run: flutter analyze
         working-directory: packages/storage_sqlcipher
 
+      - name: Analyze encrypted file vault
+        run: dart analyze .
+        working-directory: packages/storage_file_vault
+
       - name: Analyze Patient
         run: flutter analyze
         working-directory: apps/patient
@@ -102,3 +110,7 @@ jobs:
       - name: Test crypto
         run: dart test
         working-directory: packages/crypto
+
+      - name: Test encrypted file vault
+        run: dart test
+        working-directory: packages/storage_file_vault
