@@ -2,10 +2,7 @@ import 'permission_evaluator.dart';
 import 'permission_models.dart';
 
 class PrivacySimulationEntry {
-  const PrivacySimulationEntry({
-    required this.request,
-    required this.decision,
-  });
+  const PrivacySimulationEntry({required this.request, required this.decision});
 
   final PermissionRequest request;
   final PermissionDecision decision;
@@ -24,9 +21,7 @@ class PrivacySimulationResult {
 }
 
 class PrivacySimulator {
-  const PrivacySimulator({
-    this.evaluator = const PermissionEvaluator(),
-  });
+  const PrivacySimulator({this.evaluator = const PermissionEvaluator()});
 
   final PermissionEvaluator evaluator;
 
@@ -40,10 +35,7 @@ class PrivacySimulator {
         requests.map(
           (request) => PrivacySimulationEntry(
             request: request,
-            decision: evaluator.evaluate(
-              request: request,
-              grants: grantList,
-            ),
+            decision: evaluator.evaluate(request: request, grants: grantList),
           ),
         ),
       ),
