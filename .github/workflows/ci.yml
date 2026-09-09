@@ -39,7 +39,9 @@ jobs:
         working-directory: packages/core_domain
 
       - name: Format check
-        run: dart format --output=none --set-exit-if-changed packages apps
+        run: |
+          dart format packages apps
+          git diff --exit-code
 
       - name: Analyze core domain
         run: dart analyze .
