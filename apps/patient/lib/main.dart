@@ -16,14 +16,25 @@ Future<void> main() async {
     password: base64UrlEncode(databaseKey.wrappedKey),
   );
   final repository = SqlCipherHealthEventRepository(database);
+  final auditLog = SqlCipherAuditLogRepository(database);
 
-  runApp(CyclePatientApp(repository: repository));
+  runApp(
+    CyclePatientApp(
+      repository: repository,
+      auditLog: auditLog,
+    ),
+  );
 }
 
 class CyclePatientApp extends StatelessWidget {
-  const CyclePatientApp({required this.repository, super.key});
+  const CyclePatientApp({
+    required this.repository,
+    required this.auditLog,
+    super.key,
+  });
 
   final HealthEventRepository repository;
+  final AuditLogRepository auditLog;
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +42,23 @@ class CyclePatientApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Cycle',
       theme: ThemeData(useMaterial3: true),
-      home: PatientHomePage(repository: repository),
+      home: PatientHomePage(
+        repository: repository,
+        auditLog: auditLog,
+      ),
     );
   }
 }
 
 class PatientHomePage extends StatefulWidget {
-  const PatientHomePage({required this.repository, super.key});
+  const PatientHomePage({
+    required this.repository,
+    required this.auditLog,
+    super.key,
+  });
 
   final HealthEventRepository repository;
+  final AuditLogRepository auditLog;
 
   @override
   State<PatientHomePage> createState() => _PatientHomePageState();
@@ -47,6 +66,8 @@ class PatientHomePage extends StatefulWidget {
 
 class _PatientHomePageState extends State<PatientHomePage> {
   static const _subjectId = 'local-owner';
+  static const _actorId = 'patient:self';
+
   bool _loading = true;
   List<HealthEvent> _events = const <HealthEvent>[];
 
@@ -85,6 +106,19 @@ class _PatientHomePageState extends State<PatientHomePage> {
     );
 
     await widget.repository.upsert(event);
+    await widget.auditLog.append(
+      AuditEvent.now(
+        action: AuditAction.created,
+        actorId: _actorId,
+        subjectType: 'health_event',
+        subjectId: event.id,
+        metadata: <String, Object?>{
+          'ownerSubjectId': _subjectId,
+          'eventType': event.eventType,
+          'source': event.provenance.sourceKind.name,
+        },
+      ),
+    );
     await _reload();
   }
 
