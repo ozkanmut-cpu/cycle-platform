@@ -98,43 +98,45 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
     );
   }
 
-  Map<String, Object?> _encode(HealthEvent event) => <String, Object?>{
-    'id': event.id,
-    'subjectId': event.subjectId,
-    'eventType': event.eventType,
-    'episodeId': event.episodeId,
-    'value': event.value,
-    'unit': event.unit,
-    'severity': event.severity,
-    'bodyLocation': event.bodyLocation,
-    'dataState': event.dataState?.name,
-    'cycleContext': event.cycleContext,
-    'pregnancyContext': event.pregnancyContext,
-    'provenance': <String, Object?>{
-      'sourceKind': event.provenance.sourceKind.name,
-      'sourceName': event.provenance.sourceName,
-      'sourceRecordId': event.provenance.sourceRecordId,
-      'deviceName': event.provenance.deviceName,
-      'measurementMethod': event.provenance.measurementMethod,
-    },
-    'verificationStatus': event.verificationStatus.name,
-    'confidence': event.confidence.name,
-    'privacyClass': event.privacyClass,
-    'visibilityPolicyId': event.visibilityPolicyId,
-    'backupPolicyId': event.backupPolicyId,
-    'temporal': <String, Object?>{
-      'observedAt': event.temporal.observedAt.toUtc().toIso8601String(),
-      'recordedAt': event.temporal.recordedAt.toUtc().toIso8601String(),
-      'importedAt': event.temporal.importedAt?.toUtc().toIso8601String(),
-      'verifiedAt': event.temporal.verifiedAt?.toUtc().toIso8601String(),
-      'validFrom': event.temporal.validFrom?.toUtc().toIso8601String(),
-      'validTo': event.temporal.validTo?.toUtc().toIso8601String(),
-      'knownAt': event.temporal.knownAt?.toUtc().toIso8601String(),
-    },
-    'supersedesEventId': event.supersedesEventId,
-    'relatedEventIds': event.relatedEventIds,
-    'schemaVersion': event.schemaVersion,
-  };
+  Map<String, Object?> _encode(HealthEvent event) {
+    return <String, Object?>{
+      'id': event.id,
+      'subjectId': event.subjectId,
+      'eventType': event.eventType,
+      'episodeId': event.episodeId,
+      'value': event.value,
+      'unit': event.unit,
+      'severity': event.severity,
+      'bodyLocation': event.bodyLocation,
+      'dataState': event.dataState?.name,
+      'cycleContext': event.cycleContext,
+      'pregnancyContext': event.pregnancyContext,
+      'provenance': <String, Object?>{
+        'sourceKind': event.provenance.sourceKind.name,
+        'sourceName': event.provenance.sourceName,
+        'sourceRecordId': event.provenance.sourceRecordId,
+        'deviceName': event.provenance.deviceName,
+        'measurementMethod': event.provenance.measurementMethod,
+      },
+      'verificationStatus': event.verificationStatus.name,
+      'confidence': event.confidence.name,
+      'privacyClass': event.privacyClass,
+      'visibilityPolicyId': event.visibilityPolicyId,
+      'backupPolicyId': event.backupPolicyId,
+      'temporal': <String, Object?>{
+        'observedAt': event.temporal.observedAt.toUtc().toIso8601String(),
+        'recordedAt': event.temporal.recordedAt.toUtc().toIso8601String(),
+        'importedAt': event.temporal.importedAt?.toUtc().toIso8601String(),
+        'verifiedAt': event.temporal.verifiedAt?.toUtc().toIso8601String(),
+        'validFrom': event.temporal.validFrom?.toUtc().toIso8601String(),
+        'validTo': event.temporal.validTo?.toUtc().toIso8601String(),
+        'knownAt': event.temporal.knownAt?.toUtc().toIso8601String(),
+      },
+      'supersedesEventId': event.supersedesEventId,
+      'relatedEventIds': event.relatedEventIds,
+      'schemaVersion': event.schemaVersion,
+    };
+  }
 
   HealthEvent _decode(Object? raw) {
     final map = Map<String, Object?>.from(raw! as Map);
