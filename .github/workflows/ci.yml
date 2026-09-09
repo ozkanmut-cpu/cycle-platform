@@ -42,6 +42,22 @@ jobs:
         run: dart pub get
         working-directory: packages/core_domain
 
+      - name: Crypto dependencies
+        run: dart pub get
+        working-directory: packages/crypto
+
+      - name: Storage dependencies
+        run: dart pub get
+        working-directory: packages/storage
+
+      - name: Secure key store dependencies
+        run: flutter pub get
+        working-directory: packages/secure_key_store
+
+      - name: SQLCipher storage dependencies
+        run: flutter pub get
+        working-directory: packages/storage_sqlcipher
+
       - name: Format check
         run: |
           dart format packages apps
@@ -50,6 +66,22 @@ jobs:
       - name: Analyze core domain
         run: dart analyze .
         working-directory: packages/core_domain
+
+      - name: Analyze crypto
+        run: dart analyze .
+        working-directory: packages/crypto
+
+      - name: Analyze storage
+        run: dart analyze .
+        working-directory: packages/storage
+
+      - name: Analyze secure key store
+        run: flutter analyze
+        working-directory: packages/secure_key_store
+
+      - name: Analyze SQLCipher storage
+        run: flutter analyze
+        working-directory: packages/storage_sqlcipher
 
       - name: Analyze Patient
         run: flutter analyze
@@ -66,3 +98,7 @@ jobs:
       - name: Test core domain
         run: dart test
         working-directory: packages/core_domain
+
+      - name: Test crypto
+        run: dart test
+        working-directory: packages/crypto
