@@ -88,6 +88,10 @@ jobs:
         run: dart pub get
         working-directory: packages/health_ingestion
 
+      - name: Fertility domain dependencies
+        run: dart pub get
+        working-directory: packages/fertility_domain
+
       - name: Secure key store dependencies
         run: flutter pub get
         working-directory: packages/secure_key_store
@@ -148,6 +152,10 @@ jobs:
       - name: Analyze health ingestion
         run: dart analyze .
         working-directory: packages/health_ingestion
+
+      - name: Analyze fertility domain
+        run: dart analyze .
+        working-directory: packages/fertility_domain
 
       - name: Analyze secure key store
         run: flutter analyze
@@ -216,6 +224,10 @@ jobs:
       - name: Test health ingestion
         run: dart test
         working-directory: packages/health_ingestion
+
+      - name: Test fertility domain
+        run: dart test
+        working-directory: packages/fertility_domain
 
       - name: Test secure key store
         run: flutter test
