@@ -107,8 +107,8 @@ class HealthKitAnchorPage {
 }
 
 abstract interface class HealthKitGateway {
-  /// Legacy API retained for compatibility. Current native implementations
-  /// return HealthKit request-status hints here, not definitive read grants.
+  /// Legacy query-candidate API. HealthKit cannot expose definitive read-grant
+  /// state, so implementations must not infer denial from an empty query.
   Future<Set<HealthDataCategory>> grantedCategories();
 
   Future<List<RawHealthRecord>> readRecords({
@@ -138,7 +138,7 @@ class HealthKitSyncAdapter implements HealthSourceSyncAdapter {
   Future<HealthKitReadAccessScope> readAccessScope() async {
     final current = gateway;
     if (current is HealthKitReadAccessGateway) {
-      return current.readAccessScope();
+      return (current as HealthKitReadAccessGateway).readAccessScope();
     }
 
     // Backward compatibility for the current native bridge. Its legacy
