@@ -171,7 +171,8 @@ class TemporalEngine {
     BaselineSummary current,
   ) {
     if (previous.eventType != current.eventType) {
-      throw ArgumentError('Cannot compare baselines for different event types.');
+      throw ArgumentError(
+          'Cannot compare baselines for different event types.');
     }
     if (previous.subjectId != null &&
         current.subjectId != null &&
