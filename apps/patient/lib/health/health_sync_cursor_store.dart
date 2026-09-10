@@ -52,4 +52,7 @@ storage.HealthSyncCursorSource _toStorageSource(
     storage.HealthSyncCursorSource.healthConnect,
   ingestion.HealthSourcePlatform.healthKit =>
     storage.HealthSyncCursorSource.healthKit,
+  ingestion.HealthSourcePlatform.other => throw UnsupportedError(
+    'Unsupported persistent health sync source.',
+  ),
 };
