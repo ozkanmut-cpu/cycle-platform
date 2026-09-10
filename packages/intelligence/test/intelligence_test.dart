@@ -48,7 +48,8 @@ void main() {
       expect(assessment.states, {IntelligenceState.unknown});
     });
 
-    test('can represent estimated stale incomplete low-confidence conflict', () {
+    test('can represent estimated stale incomplete low-confidence conflict',
+        () {
       const engine = UncertaintyEngine(staleAfter: Duration(days: 7));
       final assessment = engine.assess(
         event: _event(
