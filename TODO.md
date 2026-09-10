@@ -115,7 +115,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🟠 Clinical Reasoning Workspace
 - [x] 🔴 Clinical Question Protocol
 - [x] 🔴 Treatment Trial
-- [ ] 🔴 result matching
+- [x] 🔴 result matching
 
 ## 12 — Partner
 - [x] 🔴 Partner shell
@@ -125,14 +125,14 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [ ] 🟠 support cards and Partner Signals
 
 ## 13 — Experience and validation
-- [ ] 🔴 Tone Governor for serious clinical contexts
+- [x] 🔴 Tone Governor for serious clinical contexts
 - [ ] 🟠 Playful Engine
 - [ ] 🔴 localization TR/EN
-- [ ] 🔴 app switcher privacy
-- [ ] 🔴 biometrics/PIN
+- [x] 🔴 app switcher privacy
+- [x] 🔴 biometrics/PIN
 - [ ] 🔴 security/crypto review
 - [ ] 🔴 clinical rule validation
 - [ ] 🔴 AI red-team/evals
 - [ ] 🔴 backup/recovery torture tests
-- [ ] 🔴 sync conflict tests
+- [x] 🔴 sync conflict tests
 - [ ] 🔴 patient and doctor usability testing
