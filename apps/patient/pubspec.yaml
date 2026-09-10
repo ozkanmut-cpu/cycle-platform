@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cycle_core_domain:
     path: ../../packages/core_domain
   cycle_crypto:
