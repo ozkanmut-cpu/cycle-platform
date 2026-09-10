@@ -33,8 +33,14 @@ class SqlCipherHealthEventRepository implements HealthEventRepository {
   }
 
   @override
-  Future<HealthEvent?> getById(String id) async {
-    final rows = await _db.database.query(
+  Future<HealthEvent?> getById(String id) =>
+      getByIdWithExecutor(_db.database, id);
+
+  Future<HealthEvent?> getByIdWithExecutor(
+    DatabaseExecutor executor,
+    String id,
+  ) async {
+    final rows = await executor.query(
       'health_events',
       where: 'id = ? AND deleted_at IS NULL',
       whereArgs: <Object?>[id],
