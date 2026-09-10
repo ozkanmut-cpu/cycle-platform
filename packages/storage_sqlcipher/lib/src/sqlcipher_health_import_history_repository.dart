@@ -33,7 +33,8 @@ class SqlCipherHealthImportHistoryRepository
       'used_full_refresh': entry.usedFullRefresh ? 1 : 0,
       'limited_history_json': jsonEncode(
         entry.limitedHistoryFrom.map(
-          (category, date) => MapEntry(category, date.toUtc().toIso8601String()),
+          (category, date) =>
+              MapEntry(category, date.toUtc().toIso8601String()),
         ),
       ),
     }, conflictAlgorithm: ConflictAlgorithm.abort);
@@ -94,7 +95,9 @@ class SqlCipherHealthImportHistoryRepository
       unmapped: row['unmapped']! as int,
       deleted: row['deleted']! as int,
       usedFullRefresh: (row['used_full_refresh']! as int) != 0,
-      limitedHistoryFrom: Map<String, DateTime>.unmodifiable(limitedHistoryFrom),
+      limitedHistoryFrom: Map<String, DateTime>.unmodifiable(
+        limitedHistoryFrom,
+      ),
     );
   }
 }
