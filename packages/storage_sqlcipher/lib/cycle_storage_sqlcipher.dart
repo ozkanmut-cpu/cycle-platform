@@ -1,5 +1,6 @@
 library cycle_storage_sqlcipher;
 
+export 'src/imported_health_event_revision.dart';
 export 'src/sqlcipher_audit_log_repository.dart';
 export 'src/sqlcipher_database.dart';
 export 'src/sqlcipher_health_event_repository.dart';
