@@ -3,11 +3,11 @@
 Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 
 ## 0 — Bootstrap
-- [ ] 🔴 Flutter monorepo/workspace
-- [ ] 🔴 CI: format, analyze, test
-- [ ] 🔴 Architecture Decision Records
-- [ ] 🔴 Threat model
-- [ ] 🔴 Clinical/regulatory feature classification
+- [x] 🔴 Flutter monorepo/workspace
+- [x] 🔴 CI: format, analyze, test
+- [x] 🔴 Architecture Decision Records
+- [x] 🔴 Threat model
+- [x] 🔴 Clinical/regulatory feature classification
 
 ## 1 — Canonical domain
 - [ ] 🔴 HealthEvent
