@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_lock.dart';
 import 'patient_home.dart';
+import 'patient_localizations.dart';
 import 'vault_session.dart';
 
 Future<void> main() async {
@@ -26,6 +27,12 @@ class CyclePatientApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Cycle',
+      supportedLocales: PatientLocalizations.supportedLocales,
+      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+        PatientLocalizations.delegate,
+      ],
+      localeResolutionCallback: (locale, supportedLocales) =>
+          PatientLocalizations.resolve(locale),
       theme: ThemeData(useMaterial3: true),
       home: PatientHomePage(session: session, appLock: appLock),
     );
