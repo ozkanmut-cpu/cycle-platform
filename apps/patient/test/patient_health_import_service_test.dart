@@ -70,25 +70,26 @@ void main() {
     expect(commitSink.auditEvents.single.action, storage.AuditAction.deleted);
   });
 
-  test('HealthKit import persists positive limited-history lower bounds', () async {
-    final cursorRepository = _MemoryCursorRepository();
-    final commitSink = _FakeCommitter();
-    final service = _service(cursorRepository, commitSink);
-    final lowerBound = DateTime.utc(2026, 8, 15);
+  test(
+    'HealthKit import persists positive limited-history lower bounds',
+    () async {
+      final cursorRepository = _MemoryCursorRepository();
+      final commitSink = _FakeCommitter();
+      final service = _service(cursorRepository, commitSink);
+      final lowerBound = DateTime.utc(2026, 8, 15);
 
-    await service.importSource(
-      subjectId: 'local-owner',
-      adapter: ingestion.HealthKitSyncAdapter(
-        _ScopedHealthKitGateway(lowerBound),
-      ),
-      now: DateTime.utc(2026, 9, 9, 20),
-    );
+      await service.importSource(
+        subjectId: 'local-owner',
+        adapter: ingestion.HealthKitSyncAdapter(
+          _ScopedHealthKitGateway(lowerBound),
+        ),
+        now: DateTime.utc(2026, 9, 9, 20),
+      );
 
-    expect(commitSink.history?.source, storage.HealthImportSource.healthKit);
-    expect(commitSink.history?.limitedHistoryFrom, {
-      'body': lowerBound,
-    });
-  });
+      expect(commitSink.history?.source, storage.HealthImportSource.healthKit);
+      expect(commitSink.history?.limitedHistoryFrom, {'body': lowerBound});
+    },
+  );
 }
 
 PatientHealthImportService _service(
@@ -171,7 +172,9 @@ class _FakeAdapter implements ingestion.HealthSourceSyncAdapter {
 }
 
 class _ScopedHealthKitGateway
-    implements ingestion.HealthKitGateway, ingestion.HealthKitReadAccessGateway {
+    implements
+        ingestion.HealthKitGateway,
+        ingestion.HealthKitReadAccessGateway {
   _ScopedHealthKitGateway(this.lowerBound);
 
   final DateTime lowerBound;
@@ -182,9 +185,7 @@ class _ScopedHealthKitGateway
         availableCategories: const {ingestion.HealthDataCategory.body},
         requestStatusUnnecessaryCategories: const {},
         queryVisibleCategories: const {},
-        earliestAuthorizedAt: {
-          ingestion.HealthDataCategory.body: lowerBound,
-        },
+        earliestAuthorizedAt: {ingestion.HealthDataCategory.body: lowerBound},
       );
 
   @override
