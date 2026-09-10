@@ -100,9 +100,9 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 Evidence Graph
 - [x] 🔴 Clinical Compression
 - [x] 🔴 Clinical Snapshot
-- [ ] 🔴 AI Orchestrator
-- [ ] 🔴 AI Context Firewall
-- [ ] 🔴 Evidence/Safety validators
+- [x] 🔴 AI Orchestrator
+- [x] 🔴 AI Context Firewall
+- [x] 🔴 Evidence/Safety validators
 - [x] 🔴 AI audit
 - [ ] 🟠 AI Learned About Me
 - [ ] 🟠 Portable Clinical Package
