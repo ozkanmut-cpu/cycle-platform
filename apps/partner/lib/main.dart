@@ -69,7 +69,8 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
                   FilledButton.icon(
                     onPressed: () => setState(() => _paired = !_paired),
                     icon: const Icon(Icons.qr_code_scanner),
-                    label: Text(_paired ? 'Disconnect demo' : 'Scan pairing QR'),
+                    label:
+                        Text(_paired ? 'Disconnect demo' : 'Scan pairing QR'),
                   ),
                 ],
               ),
