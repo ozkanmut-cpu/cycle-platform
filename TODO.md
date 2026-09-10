@@ -78,14 +78,14 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [ ] 🟠 bleeding intelligence
 
 ## 8 — Fertility, pregnancy and postpartum
-- [ ] 🔴 sexual activity model
-- [ ] 🔴 ConceptionExposureEvent
-- [ ] 🔴 BBT/LH/mucus support
-- [ ] 🔴 fertility confidence model
-- [ ] 🔴 PregnancyEpisode + dating
-- [ ] 🔴 pregnancy vitals/symptoms
-- [ ] 🔴 Pregnancy Safety Kernel
-- [ ] 🔴 outcomes and postpartum
+- [x] 🔴 sexual activity model
+- [x] 🔴 ConceptionExposureEvent
+- [x] 🔴 BBT/LH/mucus support
+- [x] 🔴 fertility confidence model
+- [x] 🔴 PregnancyEpisode + dating
+- [x] 🔴 pregnancy vitals/symptoms
+- [x] 🔴 Pregnancy Safety Kernel
+- [x] 🔴 outcomes and postpartum
 - [ ] 🟠 kick counter and contraction timer
 
 ## 9 — Documents and interoperability
