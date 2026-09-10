@@ -46,11 +46,13 @@ class BaselineEngine {
     required DateTime to,
   }) {
     final values = events
-        .where((event) =>
-            event.eventType == eventType &&
-            event.value != null &&
-            !event.temporal.observedAt.isBefore(from) &&
-            event.temporal.observedAt.isBefore(to))
+        .where(
+          (event) =>
+              event.eventType == eventType &&
+              event.value != null &&
+              !event.temporal.observedAt.isBefore(from) &&
+              event.temporal.observedAt.isBefore(to),
+        )
         .map((event) => event.value!.toDouble())
         .toList()
       ..sort();
@@ -103,11 +105,13 @@ class TemporalEngine {
 
   final double epsilon;
 
-  TemporalComparison compare(BaselineSummary previous, BaselineSummary current) {
+  TemporalComparison compare(
+    BaselineSummary previous,
+    BaselineSummary current,
+  ) {
     final delta = current.mean - previous.mean;
-    final relative = previous.mean.abs() <= epsilon
-        ? null
-        : delta / previous.mean.abs();
+    final relative =
+        previous.mean.abs() <= epsilon ? null : delta / previous.mean.abs();
     final direction = delta.abs() <= epsilon
         ? ChangeDirection.unchanged
         : delta > 0
@@ -129,7 +133,8 @@ class UncertaintyAssessment {
   final Set<IntelligenceState> states;
   final List<String> reasons;
 
-  bool get isKnownOnly => states.length == 1 && states.contains(IntelligenceState.known);
+  bool get isKnownOnly =>
+      states.length == 1 && states.contains(IntelligenceState.known);
 }
 
 class UncertaintyEngine {
@@ -179,12 +184,19 @@ class UncertaintyEngine {
       reasons.add('State is unknown or not recorded.');
     }
     if (states.isEmpty) states.add(IntelligenceState.known);
-    return UncertaintyAssessment(Set.unmodifiable(states), reasons: List.unmodifiable(reasons));
+    return UncertaintyAssessment(
+      Set.unmodifiable(states),
+      reasons: List.unmodifiable(reasons),
+    );
   }
 }
 
 class Contradiction {
-  const Contradiction({required this.left, required this.right, required this.reason});
+  const Contradiction({
+    required this.left,
+    required this.right,
+    required this.reason,
+  });
 
   final HealthEvent left;
   final HealthEvent right;
@@ -208,18 +220,23 @@ class ContradictionEngine {
         if (a.temporal.observedAt != b.temporal.observedAt) continue;
         final numericConflict = a.value != null &&
             b.value != null &&
-            (a.value!.toDouble() - b.value!.toDouble()).abs() > numericTolerance;
+            (a.value!.toDouble() - b.value!.toDouble()).abs() >
+                numericTolerance;
         final stateConflict = a.dataState != null &&
             b.dataState != null &&
             a.dataState != b.dataState &&
             {a.dataState, b.dataState}.contains(DataState.yes) &&
             {a.dataState, b.dataState}.contains(DataState.no);
         if (numericConflict || stateConflict) {
-          output.add(Contradiction(
-            left: a,
-            right: b,
-            reason: numericConflict ? 'Conflicting numeric values.' : 'Conflicting yes/no states.',
-          ));
+          output.add(
+            Contradiction(
+              left: a,
+              right: b,
+              reason: numericConflict
+                  ? 'Conflicting numeric values.'
+                  : 'Conflicting yes/no states.',
+            ),
+          );
         }
       }
     }
@@ -284,7 +301,10 @@ class ZeroLogDayEngine {
     required InformationValueResult informationValue,
   }) {
     if (userLoggedToday) {
-      return const ZeroLogDecision(shouldPrompt: false, reason: 'User already logged today.');
+      return const ZeroLogDecision(
+        shouldPrompt: false,
+        reason: 'User already logged today.',
+      );
     }
     if (passiveDataPresent && !informationValue.shouldAsk) {
       return const ZeroLogDecision(
@@ -330,9 +350,11 @@ class HealthDataTimeMachine {
     required String eventType,
   }) {
     final candidates = events
-        .where((event) =>
-            event.eventType == eventType &&
-            !event.temporal.observedAt.isAfter(at))
+        .where(
+          (event) =>
+              event.eventType == eventType &&
+              !event.temporal.observedAt.isAfter(at),
+        )
         .toList()
       ..sort((a, b) => b.temporal.observedAt.compareTo(a.temporal.observedAt));
     return candidates.isEmpty ? null : candidates.first;
