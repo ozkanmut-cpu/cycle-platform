@@ -120,6 +120,7 @@ class PatientHealthImportService {
         ),
     ];
     final ingestionHistory = result.ingestion.history;
+    final limitedHistoryFrom = await _limitedHistoryFrom(adapter);
     final persistedHistory = storage.PersistedHealthImportHistory(
       id: 'health-import:${adapter.sourcePlatform.name}:${timestamp.microsecondsSinceEpoch}',
       subjectId: subjectId,
@@ -132,6 +133,7 @@ class PatientHealthImportService {
       unmapped: ingestionHistory.unmapped,
       deleted: deletedEventIds.length,
       usedFullRefresh: result.usedFullRefresh,
+      limitedHistoryFrom: limitedHistoryFrom,
     );
 
     await committer.commit(
@@ -150,6 +152,20 @@ class PatientHealthImportService {
 
     return result;
   }
+}
+
+Future<Map<String, DateTime>> _limitedHistoryFrom(
+  ingestion.HealthSourceSyncAdapter adapter,
+) async {
+  if (adapter is! ingestion.HealthKitSyncAdapter) {
+    return const <String, DateTime>{};
+  }
+  final scope = await adapter.readAccessScope();
+  return Map<String, DateTime>.unmodifiable(
+    scope.earliestAuthorizedAt.map(
+      (category, date) => MapEntry(category.name, date.toUtc()),
+    ),
+  );
 }
 
 storage.HealthSyncCursorSource _storageSource(
