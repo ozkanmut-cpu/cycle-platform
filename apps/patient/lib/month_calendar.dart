@@ -2,6 +2,7 @@ import 'package:cycle_core_domain/cycle_core_domain.dart';
 import 'package:flutter/material.dart';
 
 import 'cycle_timeline.dart';
+import 'patient_localizations.dart';
 
 class MonthCalendar extends StatefulWidget {
   const MonthCalendar({required this.events, this.initialMonth, super.key});
@@ -33,6 +34,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = PatientLocalizations.of(context);
     final timeline = CycleTimeline(widget.events);
     final firstDay = DateTime(_month.year, _month.month, 1);
     final daysInMonth = DateTime(_month.year, _month.month + 1, 0).day;
@@ -46,7 +48,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
         Row(
           children: [
             IconButton(
-              tooltip: 'Previous month',
+              tooltip: strings.previousMonth,
               onPressed: () => _moveMonth(-1),
               icon: const Icon(Icons.chevron_left),
             ),
@@ -58,7 +60,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
               ),
             ),
             IconButton(
-              tooltip: 'Next month',
+              tooltip: strings.nextMonth,
               onPressed: () => _moveMonth(1),
               icon: const Icon(Icons.chevron_right),
             ),
@@ -67,7 +69,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
         const SizedBox(height: 8),
         Row(
           children: [
-            for (final label in <String>['M', 'T', 'W', 'T', 'F', 'S', 'S'])
+            for (final label in strings.weekdayLabels)
               Expanded(
                 child: Text(
                   label,
@@ -86,6 +88,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
                   child: _buildCell(
                     context,
                     timeline,
+                    strings,
                     row * 7 + column - leading + 1,
                     daysInMonth,
                   ),
@@ -103,6 +106,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
   Widget _buildCell(
     BuildContext context,
     CycleTimeline timeline,
+    PatientLocalizations strings,
     int dayNumber,
     int daysInMonth,
   ) {
@@ -120,7 +124,8 @@ class _MonthCalendarState extends State<MonthCalendar> {
 
     return Semantics(
       button: true,
-      label: '${date.year}-${date.month}-${date.day}, ${events.length} events',
+      label:
+          '${date.year}-${date.month}-${date.day}, ${strings.eventsCount(events.length)}',
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () => setState(() => _selectedDay = date),
@@ -163,11 +168,12 @@ class _SelectedDaySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = PatientLocalizations.of(context);
     final events = timeline.eventsForDay(day);
     final cycleDay = timeline.cycleDayFor(day);
     final cycleText = cycleDay == null
-        ? 'Cycle day unknown'
-        : 'Cycle day $cycleDay';
+        ? strings.cycleDayUnknown
+        : strings.cycleDay(cycleDay);
 
     return Card(
       child: Padding(
@@ -182,7 +188,7 @@ class _SelectedDaySummary extends StatelessWidget {
             const SizedBox(height: 4),
             Text(cycleText),
             const SizedBox(height: 8),
-            Text('${events.length} logged event(s)'),
+            Text(strings.loggedEventsCount(events.length)),
           ],
         ),
       ),
