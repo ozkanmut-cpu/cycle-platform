@@ -7,7 +7,6 @@ import plistlib
 import re
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -25,9 +24,29 @@ def _load_plist(path: Path) -> dict[str, Any]:
     return value
 
 
+def _extract_plist_bytes(value: bytes, label: str) -> bytes:
+    payload = value.strip()
+    if payload.startswith(b"bplist00"):
+        return payload
+
+    xml_start = payload.find(b"<?xml")
+    plist_start = payload.find(b"<plist")
+    starts = [index for index in (xml_start, plist_start) if index >= 0]
+    if not starts:
+        raise SystemExit(f"Unable to locate {label} plist payload.")
+
+    start = min(starts)
+    end_marker = b"</plist>"
+    end = payload.find(end_marker, start)
+    if end < 0:
+        raise SystemExit(f"Unable to locate end of {label} plist payload.")
+    return payload[start : end + len(end_marker)]
+
+
 def _load_plist_bytes(value: bytes, label: str) -> dict[str, Any]:
+    payload = _extract_plist_bytes(value, label)
     try:
-        parsed = plistlib.loads(value)
+        parsed = plistlib.loads(payload)
     except Exception as exc:  # pragma: no cover - platform command diagnostics
         raise SystemExit(f"Unable to parse {label} plist: {exc}") from exc
     if not isinstance(parsed, dict):
@@ -52,8 +71,9 @@ def _project_bundle_ids(project_text: str) -> set[str]:
     # Flutter's generated RunnerTests target has its own bundle identifier. It is
     # not the signed application target and must not make the app identity
     # ambiguous for this signing gate.
-    app_bundle_ids = {bundle_id for bundle_id in bundle_ids if not bundle_id.endswith(".RunnerTests")}
-    return app_bundle_ids
+    return {
+        bundle_id for bundle_id in bundle_ids if not bundle_id.endswith(".RunnerTests")
+    }
 
 
 def verify_project(app_dir: Path) -> str:
@@ -156,8 +176,22 @@ def verify_signed_app(app_path: Path, expected_bundle_id: str) -> None:
     if result.returncode != 0:
         message = result.stderr.decode("utf-8", errors="replace").strip()
         raise SystemExit(f"Unable to read signed app entitlements: {message}")
-    payload = result.stdout.strip() or result.stderr
-    entitlements = _load_plist_bytes(payload, "signed app entitlements")
+
+    candidates = [result.stdout, result.stderr, result.stdout + b"\n" + result.stderr]
+    entitlements: dict[str, Any] | None = None
+    errors: list[str] = []
+    for candidate in candidates:
+        if not candidate.strip():
+            continue
+        try:
+            entitlements = _load_plist_bytes(candidate, "signed app entitlements")
+            break
+        except SystemExit as exc:
+            errors.append(str(exc))
+    if entitlements is None:
+        detail = "; ".join(errors) or "no entitlement payload returned"
+        raise SystemExit(f"Unable to parse signed app entitlements: {detail}")
+
     if not _healthkit_enabled(entitlements.get(HEALTHKIT_ENTITLEMENT)):
         raise SystemExit("Signed app does not include the HealthKit entitlement.")
 
