@@ -103,8 +103,10 @@ void main() {
         maxSupportedSchemaVersion: 2,
       );
 
-      await expectLater(restorer.restore(validBytes(schemaVersion: 99)),
-          throwsStateError);
+      await expectLater(
+        restorer.restore(validBytes(schemaVersion: 99)),
+        throwsStateError,
+      );
       expect(decryptAttempts, 0);
     });
 
@@ -177,7 +179,7 @@ void main() {
       final key = List<int>.filled(32, 5);
       final cipher = AesGcmAuthenticatedCipher(keyResolver: (_) async => key);
       final goodEnvelope = await cipher.encrypt(
-        const <int>[1, 2, 3],
+        plaintext: const <int>[1, 2, 3],
         keyEnvelopeId: 'backup-key-v1',
         associatedData: utf8.encode(
           'cyclevault/v1|snapshot-atomic|database|database.snapshot',
@@ -303,8 +305,8 @@ class _CountingCipher implements AuthenticatedCipher {
   final void Function() onDecrypt;
 
   @override
-  Future<CiphertextEnvelope> encrypt(
-    List<int> plaintext, {
+  Future<CiphertextEnvelope> encrypt({
+    required List<int> plaintext,
     required String keyEnvelopeId,
     List<int>? associatedData,
   }) {
