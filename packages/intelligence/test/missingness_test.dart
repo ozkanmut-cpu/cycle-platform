@@ -5,7 +5,8 @@ import 'package:test/test.dart';
 void main() {
   const engine = MissingnessEngine();
 
-  test('missingness keeps absent unknown not-recorded and explicit no distinct', () {
+  test('missingness keeps absent unknown not-recorded and explicit no distinct',
+      () {
     expect(engine.classify(null), MissingnessKind.absent);
     expect(engine.classify(_event(DataState.unknown)), MissingnessKind.unknown);
     expect(
