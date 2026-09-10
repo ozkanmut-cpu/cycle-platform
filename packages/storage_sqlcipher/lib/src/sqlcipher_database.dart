@@ -6,7 +6,7 @@ class SqlCipherDatabase {
 
   final Database database;
 
-  static const int schemaVersion = 4;
+  static const int schemaVersion = 5;
 
   static Future<SqlCipherDatabase> openDefault({
     String fileName = 'cycle.db',
@@ -48,6 +48,11 @@ class SqlCipherDatabase {
         }
         if (oldVersion < 4) {
           await _createHealthImportHistorySchema(db);
+        }
+        if (oldVersion < 5) {
+          await db.execute(
+            "ALTER TABLE health_import_history ADD COLUMN limited_history_json TEXT NOT NULL DEFAULT '{}'",
+          );
         }
       },
     );
@@ -118,7 +123,8 @@ class SqlCipherDatabase {
         skipped_duplicate INTEGER NOT NULL,
         unmapped INTEGER NOT NULL,
         deleted INTEGER NOT NULL,
-        used_full_refresh INTEGER NOT NULL
+        used_full_refresh INTEGER NOT NULL,
+        limited_history_json TEXT NOT NULL DEFAULT '{}'
       )
     ''');
     await db.execute(
