@@ -173,6 +173,10 @@ jobs:
         run: flutter test
         working-directory: packages/secure_key_store
 
+      - name: Test SQLCipher storage
+        run: flutter test
+        working-directory: packages/storage_sqlcipher
+
       - name: Test encrypted file vault
         run: dart test
         working-directory: packages/storage_file_vault
