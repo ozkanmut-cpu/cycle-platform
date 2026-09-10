@@ -30,17 +30,17 @@ void main() {
       HealthDataCategory.vitals,
       HealthDataCategory.sleep,
     });
-    expect(scope?.requestStatusUnnecessaryCategories, {
+    expect(scope.requestStatusUnnecessaryCategories, {
       HealthDataCategory.vitals,
     });
-    expect(scope?.queryVisibleCategories, isEmpty);
-    expect(scope?.unknownCategories, {
+    expect(scope.queryVisibleCategories, isEmpty);
+    expect(scope.unknownCategories, {
       HealthDataCategory.vitals,
       HealthDataCategory.sleep,
     });
-    expect(scope?.hasLimitedHistory(HealthDataCategory.vitals), isTrue);
+    expect(scope.hasLimitedHistory(HealthDataCategory.vitals), isTrue);
     expect(
-      scope?.earliestAuthorizedAt[HealthDataCategory.vitals],
+      scope.earliestAuthorizedAt[HealthDataCategory.vitals],
       DateTime.utc(2026, 8, 11),
     );
   });
