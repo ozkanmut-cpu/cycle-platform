@@ -70,9 +70,9 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [ ] 🟠 Recovery Drill
 
 ## 7 — Clinical domain
-- [ ] 🔴 Condition Pack framework
-- [ ] 🔴 guideline/rule versioning
-- [ ] 🔴 symptom-first routing
+- [x] 🔴 Condition Pack framework
+- [x] 🔴 guideline/rule versioning
+- [x] 🔴 symptom-first routing
 - [ ] 🟠 78-condition catalog definitions
 - [ ] 🟠 body/pelvic pain map
 - [ ] 🟠 bleeding intelligence
