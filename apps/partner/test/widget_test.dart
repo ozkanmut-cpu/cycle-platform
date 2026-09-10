@@ -2,7 +2,8 @@ import 'package:cycle_partner/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Partner shell is read-only and exposes secure sharing controls', (
+  testWidgets('Partner shell is read-only and exposes secure sharing controls',
+      (
     tester,
   ) async {
     await tester.pumpWidget(const CyclePartnerApp());
