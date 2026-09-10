@@ -54,18 +54,9 @@ const quickLogSelections = <QuickLogSelection>[
     unit: 'ordinal',
     severity: 3,
   ),
-  QuickLogSelection(
-    kind: QuickLogKind.cramps,
-    eventType: 'symptom.cramps',
-  ),
-  QuickLogSelection(
-    kind: QuickLogKind.headache,
-    eventType: 'symptom.headache',
-  ),
-  QuickLogSelection(
-    kind: QuickLogKind.moodLow,
-    eventType: 'symptom.mood_low',
-  ),
+  QuickLogSelection(kind: QuickLogKind.cramps, eventType: 'symptom.cramps'),
+  QuickLogSelection(kind: QuickLogKind.headache, eventType: 'symptom.headache'),
+  QuickLogSelection(kind: QuickLogKind.moodLow, eventType: 'symptom.mood_low'),
 ];
 
 String quickLogLabel(PatientLocalizations strings, QuickLogKind kind) {
