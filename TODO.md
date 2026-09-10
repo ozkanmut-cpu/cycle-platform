@@ -29,12 +29,12 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 cryptographic erase path
 
 ## 3 — Patient core
-- [ ] 🔴 Patient app shell
-- [ ] 🔴 Today
-- [ ] 🔴 Quick Log
-- [ ] 🔴 Timeline/calendar
-- [ ] 🔴 simple-first progressive disclosure
-- [ ] 🔴 accessibility foundations
+- [x] 🔴 Patient app shell
+- [x] 🔴 Today
+- [x] 🔴 Quick Log
+- [x] 🔴 Timeline/calendar
+- [x] 🔴 simple-first progressive disclosure
+- [x] 🔴 accessibility foundations
 
 ## 4 — Connected Health
 - [ ] 🔴 Health Connect adapter
