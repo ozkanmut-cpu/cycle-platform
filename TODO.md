@@ -37,12 +37,12 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 accessibility foundations
 
 ## 4 — Connected Health
-- [ ] 🔴 Health Connect adapter
-- [ ] 🔴 HealthKit adapter
-- [ ] 🔴 reproductive/vitals/sleep/activity/body/nutrition mappings
-- [ ] 🔴 normalization + unit conversion
-- [ ] 🔴 source provenance
-- [ ] 🔴 deduplication
+- [x] 🔴 Health Connect adapter
+- [x] 🔴 HealthKit adapter
+- [x] 🔴 reproductive/vitals/sleep/activity/body/nutrition mappings
+- [x] 🔴 normalization + unit conversion
+- [x] 🔴 source provenance
+- [x] 🔴 deduplication
 - [ ] 🟠 sensor aggregation
 - [ ] 🟠 Connected Health screen
 
