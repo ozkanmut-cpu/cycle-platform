@@ -14,7 +14,12 @@ void main() {
     title: 'Pelvic pain',
     guideline: guideline,
     symptomKeys: const {'pelvic pain', 'fever', 'abnormal bleeding'},
-    evidence: const [ClinicalEvidenceRef(sourceId: 'demo', summary: 'Representative fixture')],
+    evidence: const [
+      ClinicalEvidenceRef(
+        sourceId: 'demo',
+        summary: 'Representative fixture',
+      ),
+    ],
   );
 
   final migraine = ConditionPack(
@@ -30,7 +35,10 @@ void main() {
 
     test('returns insufficient information for empty known symptoms', () {
       final result = router.route(
-        report: const SymptomReport(symptomKeys: {}, unknownKeys: {'fever'}),
+        report: const SymptomReport(
+          symptomKeys: {},
+          unknownKeys: {'fever'},
+        ),
         packs: [pelvicPain, migraine],
       );
 
@@ -41,13 +49,18 @@ void main() {
 
     test('ranks matching packs deterministically without diagnosing', () {
       final result = router.route(
-        report: const SymptomReport(symptomKeys: {'Pelvic Pain', 'FEVER'}),
+        report: const SymptomReport(
+          symptomKeys: {'Pelvic Pain', 'FEVER'},
+        ),
         packs: [migraine, pelvicPain],
       );
 
       expect(result.matches, hasLength(1));
       expect(result.matches.first.pack.id, 'pelvic-pain');
-      expect(result.matches.first.matchedSymptoms, {'pelvic pain', 'fever'});
+      expect(
+        result.matches.first.matchedSymptoms,
+        {'pelvic pain', 'fever'},
+      );
       expect(result.confidence, RoutingConfidence.medium);
     });
 
@@ -72,7 +85,10 @@ void main() {
         packs: [b, a],
       );
 
-      expect(result.matches.map((e) => e.pack.id), ['a-pack', 'b-pack']);
+      expect(
+        result.matches.map((e) => e.pack.id),
+        ['a-pack', 'b-pack'],
+      );
       expect(result.confidence, RoutingConfidence.high);
     });
 
