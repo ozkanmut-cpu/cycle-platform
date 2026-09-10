@@ -19,14 +19,14 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 immutable identifiers and schema versioning
 
 ## 2 — Local security
-- [ ] 🔴 encrypted SQLite
-- [ ] 🔴 attachment vault
-- [ ] 🔴 raw sensor vault
-- [ ] 🔴 Android Keystore
-- [ ] 🔴 iOS Keychain
-- [ ] 🔴 key hierarchy and envelopes
-- [ ] 🔴 append-only audit log
-- [ ] 🔴 cryptographic erase path
+- [x] 🔴 encrypted SQLite
+- [x] 🔴 attachment vault
+- [x] 🔴 raw sensor vault
+- [x] 🔴 Android Keystore
+- [x] 🔴 iOS Keychain
+- [x] 🔴 key hierarchy and envelopes
+- [x] 🔴 append-only audit log
+- [x] 🔴 cryptographic erase path
 
 ## 3 — Patient core
 - [ ] 🔴 Patient app shell
