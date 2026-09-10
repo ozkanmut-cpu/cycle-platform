@@ -23,8 +23,10 @@ class BaselineSummary {
     required this.standardDeviation,
     required this.windowStart,
     required this.windowEnd,
+    this.subjectId,
   });
 
+  final String? subjectId;
   final String eventType;
   final int count;
   final double mean;
@@ -44,11 +46,21 @@ class BaselineEngine {
     required String eventType,
     required DateTime from,
     required DateTime to,
+    String? subjectId,
   }) {
+    if (!from.isBefore(to)) {
+      throw ArgumentError.value(
+        <DateTime>[from, to],
+        'window',
+        'Baseline window must have from < to.',
+      );
+    }
+
     final values = events
         .where(
           (event) =>
               event.eventType == eventType &&
+              (subjectId == null || event.subjectId == subjectId) &&
               event.value != null &&
               !event.temporal.observedAt.isBefore(from) &&
               event.temporal.observedAt.isBefore(to),
@@ -69,6 +81,7 @@ class BaselineEngine {
         : (values[midpoint - 1] + values[midpoint]) / 2;
 
     return BaselineSummary(
+      subjectId: subjectId,
       eventType: eventType,
       count: values.length,
       mean: mean,
@@ -80,6 +93,21 @@ class BaselineEngine {
       windowEnd: to,
     );
   }
+
+  BaselineSummary? calculatePersonal({
+    required Iterable<HealthEvent> events,
+    required String subjectId,
+    required String eventType,
+    required DateTime from,
+    required DateTime to,
+  }) =>
+      calculate(
+        events: events,
+        subjectId: subjectId,
+        eventType: eventType,
+        from: from,
+        to: to,
+      );
 }
 
 enum ChangeDirection { increased, decreased, unchanged }
@@ -100,6 +128,39 @@ class TemporalComparison {
   final ChangeDirection direction;
 }
 
+class ChangeDetectionPolicy {
+  const ChangeDetectionPolicy({
+    this.minimumAbsoluteChange = 0,
+    this.minimumRelativeChange = 0,
+  });
+
+  final double minimumAbsoluteChange;
+  final double minimumRelativeChange;
+
+  bool isMeaningful(TemporalComparison comparison) {
+    final absolutePass =
+        comparison.absoluteChange.abs() >= minimumAbsoluteChange;
+    final relative = comparison.relativeChange;
+    final relativePass =
+        relative != null && relative.abs() >= minimumRelativeChange;
+    return absolutePass && relativePass;
+  }
+}
+
+class ChangeSignal {
+  const ChangeSignal({
+    required this.comparison,
+    required this.meaningful,
+    required this.reasons,
+  });
+
+  final TemporalComparison comparison;
+  final bool meaningful;
+  final List<String> reasons;
+}
+
+typedef ChangeDetectionHook = void Function(ChangeSignal signal);
+
 class TemporalEngine {
   const TemporalEngine({this.epsilon = 1e-9});
 
@@ -109,6 +170,15 @@ class TemporalEngine {
     BaselineSummary previous,
     BaselineSummary current,
   ) {
+    if (previous.eventType != current.eventType) {
+      throw ArgumentError('Cannot compare baselines for different event types.');
+    }
+    if (previous.subjectId != null &&
+        current.subjectId != null &&
+        previous.subjectId != current.subjectId) {
+      throw ArgumentError('Cannot compare baselines for different subjects.');
+    }
+
     final delta = current.mean - previous.mean;
     final relative =
         previous.mean.abs() <= epsilon ? null : delta / previous.mean.abs();
@@ -124,6 +194,31 @@ class TemporalEngine {
       relativeChange: relative,
       direction: direction,
     );
+  }
+
+  ChangeSignal detectChange(
+    BaselineSummary previous,
+    BaselineSummary current, {
+    ChangeDetectionPolicy policy = const ChangeDetectionPolicy(),
+    Iterable<ChangeDetectionHook> hooks = const <ChangeDetectionHook>[],
+  }) {
+    final comparison = compare(previous, current);
+    final meaningful = policy.isMeaningful(comparison);
+    final reasons = <String>[
+      'direction=${comparison.direction.name}',
+      'absolute=${comparison.absoluteChange.toStringAsFixed(6)}',
+      'relative=${comparison.relativeChange?.toStringAsFixed(6) ?? 'undefined'}',
+      'meaningful=$meaningful',
+    ];
+    final signal = ChangeSignal(
+      comparison: comparison,
+      meaningful: meaningful,
+      reasons: List.unmodifiable(reasons),
+    );
+    for (final hook in hooks) {
+      hook(signal);
+    }
+    return signal;
   }
 }
 
@@ -148,29 +243,35 @@ class UncertaintyEngine {
     bool incompleteHistory = false,
     bool conflicting = false,
   }) {
-    if (event == null) {
-      return const UncertaintyAssessment(
-        {IntelligenceState.unknown},
-        reasons: ['No canonical event is available.'],
-      );
-    }
-
     final states = <IntelligenceState>{};
     final reasons = <String>[];
-    if (event.verificationStatus == VerificationStatus.estimated) {
-      states.add(IntelligenceState.estimated);
-      reasons.add('Value is estimated.');
+
+    if (event == null) {
+      states.add(IntelligenceState.unknown);
+      reasons.add('No canonical event is available.');
+    } else {
+      if (event.verificationStatus == VerificationStatus.estimated) {
+        states.add(IntelligenceState.estimated);
+        reasons.add('Value is estimated.');
+      }
+      if (event.confidence == ConfidenceClass.low ||
+          event.confidence == ConfidenceClass.unknown) {
+        states.add(IntelligenceState.lowConfidence);
+        reasons.add('Confidence is low or unknown.');
+      }
+      final age = now.toUtc().difference(event.temporal.observedAt.toUtc());
+      if (!age.isNegative && age > staleAfter) {
+        states.add(IntelligenceState.stale);
+        reasons.add('Latest observation is stale.');
+      }
+      if (event.dataState == DataState.unknown ||
+          event.dataState == DataState.notRecorded ||
+          (event.value == null && event.dataState == null)) {
+        states.add(IntelligenceState.unknown);
+        reasons.add('State is unknown or not recorded.');
+      }
     }
-    if (event.confidence == ConfidenceClass.low ||
-        event.confidence == ConfidenceClass.unknown) {
-      states.add(IntelligenceState.lowConfidence);
-      reasons.add('Confidence is low or unknown.');
-    }
-    if (now.toUtc().difference(event.temporal.observedAt.toUtc()) >
-        staleAfter) {
-      states.add(IntelligenceState.stale);
-      reasons.add('Latest observation is stale.');
-    }
+
     if (incompleteHistory) {
       states.add(IntelligenceState.incomplete);
       reasons.add('Available history is incomplete.');
@@ -179,13 +280,8 @@ class UncertaintyEngine {
       states.add(IntelligenceState.conflicting);
       reasons.add('Canonical evidence conflicts.');
     }
-    if (event.dataState == DataState.unknown ||
-        event.dataState == DataState.notRecorded ||
-        (event.value == null && event.dataState == null)) {
-      states.add(IntelligenceState.unknown);
-      reasons.add('State is unknown or not recorded.');
-    }
     if (states.isEmpty) states.add(IntelligenceState.known);
+
     return UncertaintyAssessment(
       Set.unmodifiable(states),
       reasons: List.unmodifiable(reasons),
@@ -214,39 +310,48 @@ class ContradictionEngine {
   final double numericTolerance;
   final Duration sameMomentTolerance;
 
+  bool contradicts(HealthEvent a, HealthEvent b) {
+    if (a.subjectId != b.subjectId || a.eventType != b.eventType) return false;
+    if (a.temporal.observedAt.difference(b.temporal.observedAt).abs() >
+        sameMomentTolerance) {
+      return false;
+    }
+
+    final numericConflict = a.value != null &&
+        b.value != null &&
+        (a.value!.toDouble() - b.value!.toDouble()).abs() > numericTolerance;
+    final states = {a.dataState, b.dataState};
+    final stateConflict =
+        states.contains(DataState.yes) && states.contains(DataState.no);
+    return numericConflict || stateConflict;
+  }
+
   List<Contradiction> detect(Iterable<HealthEvent> events) {
     final sorted = events.toList()
-      ..sort((a, b) => a.temporal.observedAt.compareTo(b.temporal.observedAt));
+      ..sort((a, b) {
+        final byTime = a.temporal.observedAt.compareTo(b.temporal.observedAt);
+        return byTime != 0 ? byTime : a.id.compareTo(b.id);
+      });
     final output = <Contradiction>[];
     for (var i = 0; i < sorted.length; i++) {
       for (var j = i + 1; j < sorted.length; j++) {
         final a = sorted[i];
         final b = sorted[j];
-        if (a.subjectId != b.subjectId || a.eventType != b.eventType) continue;
-        if (a.temporal.observedAt.difference(b.temporal.observedAt).abs() >
-            sameMomentTolerance) {
-          continue;
-        }
+        if (!contradicts(a, b)) continue;
+
         final numericConflict = a.value != null &&
             b.value != null &&
             (a.value!.toDouble() - b.value!.toDouble()).abs() >
                 numericTolerance;
-        final stateConflict = a.dataState != null &&
-            b.dataState != null &&
-            a.dataState != b.dataState &&
-            {a.dataState, b.dataState}.contains(DataState.yes) &&
-            {a.dataState, b.dataState}.contains(DataState.no);
-        if (numericConflict || stateConflict) {
-          output.add(
-            Contradiction(
-              left: a,
-              right: b,
-              reason: numericConflict
-                  ? 'Conflicting numeric values.'
-                  : 'Conflicting yes/no states.',
-            ),
-          );
-        }
+        output.add(
+          Contradiction(
+            left: a,
+            right: b,
+            reason: numericConflict
+                ? 'Conflicting numeric values.'
+                : 'Conflicting yes/no states.',
+          ),
+        );
       }
     }
     return List.unmodifiable(output);
@@ -278,18 +383,19 @@ class InformationValueEngine {
     final uncertaintyWeight = uncertainty.isKnownOnly
         ? 0.0
         : math.min(1.0, uncertainty.states.length / 3);
-    final impact = decisionImpact.clamp(0.0, 1.0);
-    final burden = userBurden.clamp(0.0, 1.0);
-    final score = (uncertaintyWeight * 0.5) + (impact * 0.5) - (burden * 0.4);
-    final normalized = score.clamp(0.0, 1.0).toDouble();
+    final impact = decisionImpact.clamp(0.0, 1.0).toDouble();
+    final burden = userBurden.clamp(0.0, 1.0).toDouble();
+    final rawScore =
+        (uncertaintyWeight * 0.5) + (impact * 0.5) - (burden * 0.4);
+    final score = rawScore.clamp(0.0, 1.0).toDouble();
     return InformationValueResult(
-      score: normalized,
-      shouldAsk: normalized >= askThreshold,
-      reasons: [
+      score: score,
+      shouldAsk: score >= askThreshold,
+      reasons: List.unmodifiable([
         'uncertainty=${uncertaintyWeight.toStringAsFixed(2)}',
         'impact=${impact.toStringAsFixed(2)}',
         'burden=${burden.toStringAsFixed(2)}',
-      ],
+      ]),
     );
   }
 }
@@ -342,14 +448,23 @@ class HealthDataTimeMachine {
     required DateTime from,
     required DateTime to,
     String? eventType,
+    String? subjectId,
   }) {
+    if (!from.isBefore(to)) {
+      throw ArgumentError.value(
+        <DateTime>[from, to],
+        'window',
+        'Query window must have from < to.',
+      );
+    }
     final result = events.where((event) {
       final observedAt = event.temporal.observedAt;
       return !observedAt.isBefore(from) &&
           observedAt.isBefore(to) &&
-          (eventType == null || event.eventType == eventType);
+          (eventType == null || event.eventType == eventType) &&
+          (subjectId == null || event.subjectId == subjectId);
     }).toList()
-      ..sort((a, b) => a.temporal.observedAt.compareTo(b.temporal.observedAt));
+      ..sort(_eventOrder);
     return List.unmodifiable(result);
   }
 
@@ -357,13 +472,31 @@ class HealthDataTimeMachine {
     Iterable<HealthEvent> events, {
     required DateTime asOf,
     String? eventType,
+    String? subjectId,
   }) {
     final result = events.where((event) {
       final knownAt = event.temporal.knownAt ?? event.temporal.recordedAt;
       return !knownAt.isAfter(asOf) &&
-          (eventType == null || event.eventType == eventType);
+          (eventType == null || event.eventType == eventType) &&
+          (subjectId == null || event.subjectId == subjectId);
     }).toList()
-      ..sort((a, b) => a.temporal.observedAt.compareTo(b.temporal.observedAt));
+      ..sort(_eventOrder);
+    return List.unmodifiable(result);
+  }
+
+  List<HealthEvent> snapshotAsOf(
+    Iterable<HealthEvent> events, {
+    required DateTime asOf,
+    String? eventType,
+    String? subjectId,
+  }) {
+    final result = knownAsOf(
+      events,
+      asOf: asOf,
+      eventType: eventType,
+      subjectId: subjectId,
+    ).where((event) => !event.temporal.observedAt.isAfter(asOf)).toList()
+      ..sort(_eventOrder);
     return List.unmodifiable(result);
   }
 
@@ -371,15 +504,25 @@ class HealthDataTimeMachine {
     Iterable<HealthEvent> events, {
     required DateTime at,
     required String eventType,
+    String? subjectId,
   }) {
     final candidates = events
         .where(
           (event) =>
               event.eventType == eventType &&
+              (subjectId == null || event.subjectId == subjectId) &&
               !event.temporal.observedAt.isAfter(at),
         )
         .toList()
-      ..sort((a, b) => b.temporal.observedAt.compareTo(a.temporal.observedAt));
+      ..sort((a, b) {
+        final byTime = b.temporal.observedAt.compareTo(a.temporal.observedAt);
+        return byTime != 0 ? byTime : a.id.compareTo(b.id);
+      });
     return candidates.isEmpty ? null : candidates.first;
+  }
+
+  static int _eventOrder(HealthEvent a, HealthEvent b) {
+    final byTime = a.temporal.observedAt.compareTo(b.temporal.observedAt);
+    return byTime != 0 ? byTime : a.id.compareTo(b.id);
   }
 }
