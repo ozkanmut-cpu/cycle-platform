@@ -28,6 +28,17 @@ enum CervicalMucusQuality {
   unknown,
 }
 
+enum SexualActivityPrivacy {
+  private,
+  sharedWithCareTeam,
+}
+
+enum DataSharingConsent {
+  notRecorded,
+  allowed,
+  withdrawn,
+}
+
 class DomainProvenance {
   const DomainProvenance({
     required this.sourceId,
@@ -47,6 +58,8 @@ class SexualActivityEvent {
     required this.provenance,
     this.contraceptionUsed,
     this.userMarkedConceptionRelevant = false,
+    this.privacy = SexualActivityPrivacy.private,
+    this.dataSharingConsent = DataSharingConsent.notRecorded,
   });
 
   final String id;
@@ -54,6 +67,18 @@ class SexualActivityEvent {
   final DomainProvenance provenance;
   final bool? contraceptionUsed;
   final bool userMarkedConceptionRelevant;
+
+  /// Controls visibility of this health-data record. It does not represent
+  /// consent to the sexual activity itself.
+  final SexualActivityPrivacy privacy;
+
+  /// Explicit consent state for sharing this record only. Missing consent is
+  /// never inferred as permission to share.
+  final DataSharingConsent dataSharingConsent;
+
+  bool get mayShareWithCareTeam =>
+      privacy == SexualActivityPrivacy.sharedWithCareTeam &&
+      dataSharingConsent == DataSharingConsent.allowed;
 }
 
 class ConceptionExposureEvent {
@@ -130,6 +155,8 @@ class FertilityAssessment {
   final Set<String> missingInformation;
 }
 
+/// Confidence describes observation completeness, not the probability of
+/// ovulation, conception or pregnancy.
 class FertilityConfidenceModel {
   const FertilityConfidenceModel();
 
@@ -204,7 +231,7 @@ class PregnancyEpisode {
     required this.dating,
     this.endedAt,
     this.outcome,
-  });
+  }) : assert(endedAt == null || !endedAt.isBefore(startedAt));
 
   final String id;
   final DateTime startedAt;
@@ -285,7 +312,7 @@ class PostpartumEpisode {
     required this.pregnancyEpisodeId,
     required this.startedAt,
     this.endedAt,
-  });
+  }) : assert(endedAt == null || !endedAt.isBefore(startedAt));
 
   final String id;
   final String pregnancyEpisodeId;
