@@ -18,13 +18,20 @@ spec.loader.exec_module(healthkit_signing)
 class HealthKitSigningVerifierTest(unittest.TestCase):
     bundle_id = "com.cyclehealth.cyclePatient"
 
-    def _profile(self, *, healthkit: object = True, bundle_id: str | None = None, expires_days: int = 30):
+    def _profile(
+        self,
+        *,
+        healthkit: object = True,
+        bundle_id: str | None = None,
+        expires_days: int = 30,
+    ):
         return {
             "Entitlements": {
                 healthkit_signing.HEALTHKIT_ENTITLEMENT: healthkit,
                 "application-identifier": f"TEAM123.{bundle_id or self.bundle_id}",
             },
-            "ExpirationDate": dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=expires_days),
+            "ExpirationDate": dt.datetime.now(dt.timezone.utc)
+            + dt.timedelta(days=expires_days),
         }
 
     def test_runner_tests_bundle_id_is_ignored(self):
@@ -32,14 +39,18 @@ class HealthKitSigningVerifierTest(unittest.TestCase):
         PRODUCT_BUNDLE_IDENTIFIER = {self.bundle_id};
         PRODUCT_BUNDLE_IDENTIFIER = {self.bundle_id}.RunnerTests;
         """
-        self.assertEqual(healthkit_signing._project_bundle_ids(project), {self.bundle_id})
+        self.assertEqual(
+            healthkit_signing._project_bundle_ids(project), {self.bundle_id}
+        )
 
     def test_valid_profile_passes(self):
         healthkit_signing.verify_profile(self._profile(), self.bundle_id)
 
     def test_profile_without_healthkit_fails(self):
         with self.assertRaisesRegex(SystemExit, "HealthKit capability"):
-            healthkit_signing.verify_profile(self._profile(healthkit=False), self.bundle_id)
+            healthkit_signing.verify_profile(
+                self._profile(healthkit=False), self.bundle_id
+            )
 
     def test_profile_bundle_id_mismatch_fails(self):
         with self.assertRaisesRegex(SystemExit, "does not match"):
@@ -49,7 +60,48 @@ class HealthKitSigningVerifierTest(unittest.TestCase):
 
     def test_expired_profile_fails(self):
         with self.assertRaisesRegex(SystemExit, "expired"):
-            healthkit_signing.verify_profile(self._profile(expires_days=-1), self.bundle_id)
+            healthkit_signing.verify_profile(
+                self._profile(expires_days=-1), self.bundle_id
+            )
+
+    def test_extracts_xml_plist_after_codesign_diagnostic_prefix(self):
+        payload = plistlib.dumps(
+            {healthkit_signing.HEALTHKIT_ENTITLEMENT: True},
+            fmt=plistlib.FMT_XML,
+        )
+        noisy = b"Executable=/tmp/Runner.app/Runner\n" + payload + b"\nwarning text"
+        parsed = healthkit_signing._load_plist_bytes(
+            noisy, "signed app entitlements"
+        )
+        self.assertTrue(parsed[healthkit_signing.HEALTHKIT_ENTITLEMENT])
+
+    def test_extracts_xml_plist_without_xml_declaration(self):
+        payload = plistlib.dumps(
+            {healthkit_signing.HEALTHKIT_ENTITLEMENT: True},
+            fmt=plistlib.FMT_XML,
+        )
+        payload = payload[payload.index(b"<plist") :]
+        parsed = healthkit_signing._load_plist_bytes(
+            b"diagnostic\n" + payload + b"\ntrailing diagnostic",
+            "signed app entitlements",
+        )
+        self.assertTrue(parsed[healthkit_signing.HEALTHKIT_ENTITLEMENT])
+
+    def test_extracts_binary_plist(self):
+        payload = plistlib.dumps(
+            {healthkit_signing.HEALTHKIT_ENTITLEMENT: True},
+            fmt=plistlib.FMT_BINARY,
+        )
+        parsed = healthkit_signing._load_plist_bytes(
+            payload, "signed app entitlements"
+        )
+        self.assertTrue(parsed[healthkit_signing.HEALTHKIT_ENTITLEMENT])
+
+    def test_missing_plist_payload_fails_closed(self):
+        with self.assertRaisesRegex(SystemExit, "Unable to locate"):
+            healthkit_signing._load_plist_bytes(
+                b"codesign diagnostic only", "signed app entitlements"
+            )
 
     def test_project_contract_passes_with_runner_and_runner_tests(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -60,9 +112,13 @@ class HealthKitSigningVerifierTest(unittest.TestCase):
             project.mkdir(parents=True)
 
             with (runner / "Runner.entitlements").open("wb") as handle:
-                plistlib.dump({healthkit_signing.HEALTHKIT_ENTITLEMENT: True}, handle)
+                plistlib.dump(
+                    {healthkit_signing.HEALTHKIT_ENTITLEMENT: True}, handle
+                )
             with (runner / "Info.plist").open("wb") as handle:
-                plistlib.dump({"NSHealthShareUsageDescription": "Read health data."}, handle)
+                plistlib.dump(
+                    {"NSHealthShareUsageDescription": "Read health data."}, handle
+                )
             (project / "project.pbxproj").write_text(
                 "\n".join(
                     [
@@ -74,7 +130,9 @@ class HealthKitSigningVerifierTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            self.assertEqual(healthkit_signing.verify_project(app_dir), self.bundle_id)
+            self.assertEqual(
+                healthkit_signing.verify_project(app_dir), self.bundle_id
+            )
 
     def test_project_without_healthkit_entitlement_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -87,9 +145,12 @@ class HealthKitSigningVerifierTest(unittest.TestCase):
             with (runner / "Runner.entitlements").open("wb") as handle:
                 plistlib.dump({}, handle)
             with (runner / "Info.plist").open("wb") as handle:
-                plistlib.dump({"NSHealthShareUsageDescription": "Read health data."}, handle)
+                plistlib.dump(
+                    {"NSHealthShareUsageDescription": "Read health data."}, handle
+                )
             (project / "project.pbxproj").write_text(
-                f"{healthkit_signing.CODE_SIGN_LINE}\nPRODUCT_BUNDLE_IDENTIFIER = {self.bundle_id};\n",
+                f"{healthkit_signing.CODE_SIGN_LINE}\n"
+                f"PRODUCT_BUNDLE_IDENTIFIER = {self.bundle_id};\n",
                 encoding="utf-8",
             )
 
