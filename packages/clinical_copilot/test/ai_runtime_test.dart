@@ -53,7 +53,9 @@ void main() {
       final unknown = validator.validate(
         output: AiCandidateOutput(
           text: 'claim',
-          claims: [AiClaim(text: 'unknown', evidenceIds: const ['evt-2'])],
+          claims: [
+            AiClaim(text: 'unknown', evidenceIds: const ['evt-2'])
+          ],
         ),
         availableEvidenceIds: const {'evt-1'},
       );
