@@ -7,6 +7,7 @@ enum SourceKind {
   healthConnect,
   wearableVendor,
   document,
+  importedDocument,
   ai,
   algorithm,
   unknown,
@@ -19,6 +20,8 @@ class Provenance {
     this.sourceRecordId,
     this.deviceName,
     this.measurementMethod,
+    this.sourceId,
+    this.metadata,
   });
 
   final SourceKind sourceKind;
@@ -26,4 +29,6 @@ class Provenance {
   final String? sourceRecordId;
   final String? deviceName;
   final String? measurementMethod;
+  final String? sourceId;
+  final Map<String, Object?>? metadata;
 }
