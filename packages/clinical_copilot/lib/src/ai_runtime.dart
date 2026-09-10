@@ -263,7 +263,8 @@ class AiOrchestrator {
   }) {
     final audit = <AiOrchestrationAuditEntry>[];
     final timestamp = request.requestedAt.toUtc();
-    final filtered = firewall.filter(context: request.context, policy: contextPolicy);
+    final filtered =
+        firewall.filter(context: request.context, policy: contextPolicy);
     audit.add(
       AiOrchestrationAuditEntry(
         stage: AiOrchestrationStage.contextFirewall,
