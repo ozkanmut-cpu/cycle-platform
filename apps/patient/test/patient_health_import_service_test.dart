@@ -34,6 +34,7 @@ void main() {
       expect(commitSink.history?.imported, 1);
       expect(commitSink.history?.deleted, 0);
       expect(commitSink.history?.usedFullRefresh, isTrue);
+      expect(commitSink.history?.limitedHistoryFrom, isEmpty);
       expect(
         commitSink.auditEvents.single.action,
         storage.AuditAction.imported,
@@ -67,6 +68,26 @@ void main() {
     expect(commitSink.history?.deleted, 1);
     expect(commitSink.history?.usedFullRefresh, isFalse);
     expect(commitSink.auditEvents.single.action, storage.AuditAction.deleted);
+  });
+
+  test('HealthKit import persists positive limited-history lower bounds', () async {
+    final cursorRepository = _MemoryCursorRepository();
+    final commitSink = _FakeCommitter();
+    final service = _service(cursorRepository, commitSink);
+    final lowerBound = DateTime.utc(2026, 8, 15);
+
+    await service.importSource(
+      subjectId: 'local-owner',
+      adapter: ingestion.HealthKitSyncAdapter(
+        _ScopedHealthKitGateway(lowerBound),
+      ),
+      now: DateTime.utc(2026, 9, 9, 20),
+    );
+
+    expect(commitSink.history?.source, storage.HealthImportSource.healthKit);
+    expect(commitSink.history?.limitedHistoryFrom, {
+      'body': lowerBound,
+    });
   });
 }
 
@@ -147,6 +168,61 @@ class _FakeAdapter implements ingestion.HealthSourceSyncAdapter {
     required Set<ingestion.HealthDataCategory> categories,
   }) async =>
       changePage ?? (throw StateError('No incremental page configured.'));
+}
+
+class _ScopedHealthKitGateway
+    implements ingestion.HealthKitGateway, ingestion.HealthKitReadAccessGateway {
+  _ScopedHealthKitGateway(this.lowerBound);
+
+  final DateTime lowerBound;
+
+  @override
+  Future<ingestion.HealthKitReadAccessScope> readAccessScope() async =>
+      ingestion.HealthKitReadAccessScope(
+        availableCategories: const {ingestion.HealthDataCategory.body},
+        requestStatusUnnecessaryCategories: const {},
+        queryVisibleCategories: const {},
+        earliestAuthorizedAt: {
+          ingestion.HealthDataCategory.body: lowerBound,
+        },
+      );
+
+  @override
+  Future<Set<ingestion.HealthDataCategory>> grantedCategories() async =>
+      throw StateError('Scoped gateway must not infer read grants.');
+
+  @override
+  Future<List<ingestion.RawHealthRecord>> readRecords({
+    required DateTime from,
+    required DateTime to,
+    required Set<ingestion.HealthDataCategory> categories,
+  }) async => [
+    ingestion.RawHealthRecord(
+      sourcePlatform: ingestion.HealthSourcePlatform.healthKit,
+      sourceType: 'weight',
+      sourceRecordId: 'hk-weight-1',
+      observedAt: DateTime.utc(2026, 9, 9, 19, 50),
+      value: 70,
+      unit: 'kg',
+      sourceName: 'HealthKit',
+    ),
+  ];
+
+  @override
+  Future<String> createAnchor({
+    required Set<ingestion.HealthDataCategory> categories,
+  }) async => 'hk-anchor-1';
+
+  @override
+  Future<ingestion.HealthKitAnchorPage> readAnchoredChanges({
+    required String anchor,
+    required Set<ingestion.HealthDataCategory> categories,
+  }) async => const ingestion.HealthKitAnchorPage(
+    upserts: [],
+    deletedSourceRecordIds: [],
+    nextAnchor: 'hk-anchor-2',
+    hasMore: false,
+  );
 }
 
 class _MemoryCursorRepository implements storage.HealthSyncCursorRepository {
