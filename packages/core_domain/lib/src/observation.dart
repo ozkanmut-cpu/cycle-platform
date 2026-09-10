@@ -17,6 +17,7 @@ class Observation {
     this.referenceRangeHigh,
     this.referenceRangeText,
     this.sourceRecordId,
+    this.schemaVersion = 1,
   });
 
   final String id;
@@ -32,4 +33,5 @@ class Observation {
   final Provenance provenance;
   final ConfidenceClass confidence;
   final String? sourceRecordId;
+  final int schemaVersion;
 }
