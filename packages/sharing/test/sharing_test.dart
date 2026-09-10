@@ -52,7 +52,9 @@ void main() {
     expect(second.version, 2);
     expect(other.version, 1);
     expect(
-      registry.activeFor(ownerId: 'owner-1', recipientId: 'partner-1')!.keyEnvelopeId,
+      registry
+          .activeFor(ownerId: 'owner-1', recipientId: 'partner-1')!
+          .keyEnvelopeId,
       'k2',
     );
   });
