@@ -12,6 +12,7 @@ abstract interface class PatientHealthImportCommitter {
     required Iterable<HealthEvent> upserts,
     required Iterable<String> deletedEventIds,
     required Iterable<storage.AuditEvent> auditEvents,
+    required storage.PersistedHealthImportHistory history,
     required storage.PersistedHealthSyncCursor cursor,
     required DateTime deletedAt,
   });
@@ -28,12 +29,14 @@ class SqlCipherPatientHealthImportCommitter
     required Iterable<HealthEvent> upserts,
     required Iterable<String> deletedEventIds,
     required Iterable<storage.AuditEvent> auditEvents,
+    required storage.PersistedHealthImportHistory history,
     required storage.PersistedHealthSyncCursor cursor,
     required DateTime deletedAt,
   }) => delegate.commit(
     upserts: upserts,
     deletedEventIds: deletedEventIds,
     auditEvents: auditEvents,
+    history: history,
     cursor: cursor,
     deletedAt: deletedAt,
   );
@@ -116,11 +119,26 @@ class PatientHealthImportService {
           },
         ),
     ];
+    final ingestionHistory = result.ingestion.history;
+    final persistedHistory = storage.PersistedHealthImportHistory(
+      id: 'health-import:${adapter.sourcePlatform.name}:${timestamp.microsecondsSinceEpoch}',
+      subjectId: subjectId,
+      source: _historySource(adapter.sourcePlatform),
+      startedAt: ingestionHistory.startedAt,
+      finishedAt: ingestionHistory.finishedAt,
+      imported: ingestionHistory.imported,
+      skippedPermission: ingestionHistory.skippedPermission,
+      skippedDuplicate: ingestionHistory.skippedDuplicate,
+      unmapped: ingestionHistory.unmapped,
+      deleted: deletedEventIds.length,
+      usedFullRefresh: result.usedFullRefresh,
+    );
 
     await committer.commit(
       upserts: upserts,
       deletedEventIds: deletedEventIds,
       auditEvents: auditEvents,
+      history: persistedHistory,
       cursor: storage.PersistedHealthSyncCursor(
         subjectId: subjectId,
         source: _storageSource(adapter.sourcePlatform),
@@ -143,5 +161,16 @@ storage.HealthSyncCursorSource _storageSource(
     storage.HealthSyncCursorSource.healthKit,
   ingestion.HealthSourcePlatform.other => throw UnsupportedError(
     'Unsupported persistent health sync source.',
+  ),
+};
+
+storage.HealthImportSource _historySource(
+  ingestion.HealthSourcePlatform sourcePlatform,
+) => switch (sourcePlatform) {
+  ingestion.HealthSourcePlatform.healthConnect =>
+    storage.HealthImportSource.healthConnect,
+  ingestion.HealthSourcePlatform.healthKit => storage.HealthImportSource.healthKit,
+  ingestion.HealthSourcePlatform.other => throw UnsupportedError(
+    'Unsupported persistent health import source.',
   ),
 };
