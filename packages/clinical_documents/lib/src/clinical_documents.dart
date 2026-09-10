@@ -2,9 +2,25 @@ import 'dart:convert';
 
 import 'package:cycle_core_domain/cycle_core_domain.dart';
 
-enum ClinicalDocumentKind { lab, imaging, pathology, medication, procedure, referral, note, unknown }
+enum ClinicalDocumentKind {
+  lab,
+  imaging,
+  pathology,
+  medication,
+  procedure,
+  referral,
+  note,
+  unknown
+}
 
-enum ClinicalEntityKind { observation, condition, diagnosticReport, serviceRequest, medication, procedure }
+enum ClinicalEntityKind {
+  observation,
+  condition,
+  diagnosticReport,
+  serviceRequest,
+  medication,
+  procedure
+}
 
 enum ExtractionMethod { direct, ocr }
 
@@ -140,18 +156,26 @@ class ClinicalDocumentClassifier {
 
   ClinicalDocumentKind classify(String text) {
     final value = text.toLowerCase();
-    if (value.contains('pathology') || value.contains('histopathology') || value.contains('biopsy')) {
+    if (value.contains('pathology') ||
+        value.contains('histopathology') ||
+        value.contains('biopsy')) {
       return ClinicalDocumentKind.pathology;
     }
-    if (value.contains('radiology') || value.contains('imaging') || value.contains('mri') || value.contains('ct ')) {
+    if (value.contains('radiology') ||
+        value.contains('imaging') ||
+        value.contains('mri') ||
+        value.contains('ct ')) {
       return ClinicalDocumentKind.imaging;
     }
-    if (value.contains('laboratory') || value.contains('lab result') || value.contains('reference range')) {
+    if (value.contains('laboratory') ||
+        value.contains('lab result') ||
+        value.contains('reference range')) {
       return ClinicalDocumentKind.lab;
     }
     if (value.contains('medication')) return ClinicalDocumentKind.medication;
     if (value.contains('procedure')) return ClinicalDocumentKind.procedure;
-    if (value.contains('referral') || value.contains('service request')) return ClinicalDocumentKind.referral;
+    if (value.contains('referral') || value.contains('service request'))
+      return ClinicalDocumentKind.referral;
     if (value.trim().isNotEmpty) return ClinicalDocumentKind.note;
     return ClinicalDocumentKind.unknown;
   }
@@ -320,11 +344,14 @@ class ClinicalDocumentIngestionPipeline {
 class FhirMapper {
   const FhirMapper();
 
-  Map<String, Object?> documentReference(ClinicalDocumentResult result) => <String, Object?>{
+  Map<String, Object?> documentReference(ClinicalDocumentResult result) =>
+      <String, Object?>{
         'resourceType': 'DocumentReference',
         'id': result.source.id,
         'status': 'current',
-        'subject': <String, Object?>{'reference': 'Patient/${result.source.subjectId}'},
+        'subject': <String, Object?>{
+          'reference': 'Patient/${result.source.subjectId}'
+        },
         'content': <Object?>[
           <String, Object?>{
             'attachment': <String, Object?>{
@@ -336,7 +363,8 @@ class FhirMapper {
         ],
       };
 
-  Map<String, Object?> mapEntity(ClinicalEntity entity, {required String subjectId}) {
+  Map<String, Object?> mapEntity(ClinicalEntity entity,
+      {required String subjectId}) {
     switch (entity.kind) {
       case ClinicalEntityKind.observation:
         return _observation(entity, subjectId);
@@ -353,7 +381,8 @@ class FhirMapper {
     }
   }
 
-  List<Map<String, Object?>> mapAll(ClinicalDocumentResult result) => List.unmodifiable(
+  List<Map<String, Object?>> mapAll(ClinicalDocumentResult result) =>
+      List.unmodifiable(
         <Map<String, Object?>>[
           documentReference(result),
           ...result.entities.map(
@@ -362,7 +391,8 @@ class FhirMapper {
         ],
       );
 
-  Map<String, Object?> _observation(ClinicalEntity entity, String subjectId) => <String, Object?>{
+  Map<String, Object?> _observation(ClinicalEntity entity, String subjectId) =>
+      <String, Object?>{
         'resourceType': 'Observation',
         'id': entity.id,
         'status': 'final',
@@ -377,24 +407,36 @@ class FhirMapper {
           'referenceRange': <Object?>[
             <String, Object?>{
               if (entity.referenceLow != null)
-                'low': <String, Object?>{'value': entity.referenceLow, if (entity.unit != null) 'unit': entity.unit},
+                'low': <String, Object?>{
+                  'value': entity.referenceLow,
+                  if (entity.unit != null) 'unit': entity.unit
+                },
               if (entity.referenceHigh != null)
-                'high': <String, Object?>{'value': entity.referenceHigh, if (entity.unit != null) 'unit': entity.unit},
+                'high': <String, Object?>{
+                  'value': entity.referenceHigh,
+                  if (entity.unit != null) 'unit': entity.unit
+                },
             },
           ],
         'extension': _provenanceExtensions(entity),
       };
 
-  Map<String, Object?> _coded(String resourceType, ClinicalEntity entity, String subjectId) => <String, Object?>{
+  Map<String, Object?> _coded(
+          String resourceType, ClinicalEntity entity, String subjectId) =>
+      <String, Object?>{
         'resourceType': resourceType,
         'id': entity.id,
-        if (resourceType != 'Medication') 'subject': <String, Object?>{'reference': 'Patient/$subjectId'},
+        if (resourceType != 'Medication')
+          'subject': <String, Object?>{'reference': 'Patient/$subjectId'},
         if (resourceType == 'DiagnosticReport') 'status': 'final',
         if (resourceType == 'ServiceRequest') 'status': 'active',
         if (resourceType == 'ServiceRequest') 'intent': 'order',
         if (resourceType == 'Procedure') 'status': 'completed',
         'code': _code(entity),
-        if (entity.note != null) 'note': <Object?>[<String, Object?>{'text': entity.note}],
+        if (entity.note != null)
+          'note': <Object?>[
+            <String, Object?>{'text': entity.note}
+          ],
         'extension': _provenanceExtensions(entity),
       };
 
@@ -414,15 +456,18 @@ class FhirMapper {
 
   List<Object?> _provenanceExtensions(ClinicalEntity entity) => <Object?>[
         <String, Object?>{
-          'url': 'https://cycle.health/fhir/StructureDefinition/source-document',
+          'url':
+              'https://cycle.health/fhir/StructureDefinition/source-document',
           'valueString': entity.provenance.sourceId,
         },
         <String, Object?>{
-          'url': 'https://cycle.health/fhir/StructureDefinition/extraction-confidence',
+          'url':
+              'https://cycle.health/fhir/StructureDefinition/extraction-confidence',
           'valueDecimal': entity.confidence,
         },
         <String, Object?>{
-          'url': 'https://cycle.health/fhir/StructureDefinition/human-confirmation-required',
+          'url':
+              'https://cycle.health/fhir/StructureDefinition/human-confirmation-required',
           'valueBoolean': entity.requiresHumanConfirmation,
         },
       ];
