@@ -65,7 +65,8 @@ void main() {
       manifestTampered['manifest'] = manifest;
 
       final entryTampered = Map<String, Object?>.from(base);
-      final entries = Map<String, Object?>.from(entryTampered['entries']! as Map);
+      final entries =
+          Map<String, Object?>.from(entryTampered['entries']! as Map);
       final database = Map<String, Object?>.from(
         entries['database.snapshot']! as Map,
       );
