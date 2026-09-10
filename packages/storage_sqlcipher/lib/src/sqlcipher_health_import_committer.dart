@@ -1,6 +1,7 @@
 import 'package:cycle_core_domain/cycle_core_domain.dart';
 import 'package:cycle_storage/cycle_storage.dart';
 
+import 'imported_health_event_revision.dart';
 import 'sqlcipher_audit_log_repository.dart';
 import 'sqlcipher_database.dart';
 import 'sqlcipher_health_event_repository.dart';
@@ -32,16 +33,18 @@ class SqlCipherHealthImportCommitter {
         );
         var eventToWrite = event;
 
-        if (existing != null && !_sameImportedObservation(existing, event)) {
-          final revisionId = _revisionId(existing);
-          await _healthEvents.upsertWithExecutor(
-            transaction,
-            _copyHealthEvent(existing, id: revisionId),
+        if (existing != null) {
+          final revision = ImportedHealthEventRevision.plan(
+            existing: existing,
+            incoming: event,
           );
-          eventToWrite = _copyHealthEvent(
-            event,
-            supersedesEventId: revisionId,
-          );
+          if (revision != null) {
+            await _healthEvents.upsertWithExecutor(
+              transaction,
+              revision.snapshot,
+            );
+            eventToWrite = revision.current;
+          }
         }
 
         await _healthEvents.upsertWithExecutor(transaction, eventToWrite);
@@ -62,59 +65,4 @@ class SqlCipherHealthImportCommitter {
       await _cursors.saveWithExecutor(transaction, cursor);
     });
   }
-}
-
-String _revisionId(HealthEvent event) =>
-    '${event.id}:revision:${event.temporal.recordedAt.toUtc().microsecondsSinceEpoch}';
-
-bool _sameImportedObservation(HealthEvent left, HealthEvent right) {
-  return left.subjectId == right.subjectId &&
-      left.eventType == right.eventType &&
-      left.episodeId == right.episodeId &&
-      left.value == right.value &&
-      left.unit == right.unit &&
-      left.severity == right.severity &&
-      left.bodyLocation == right.bodyLocation &&
-      left.dataState == right.dataState &&
-      left.temporal.observedAt.toUtc() == right.temporal.observedAt.toUtc() &&
-      left.provenance.sourceKind == right.provenance.sourceKind &&
-      left.provenance.sourceName == right.provenance.sourceName &&
-      left.provenance.sourceRecordId == right.provenance.sourceRecordId &&
-      left.provenance.deviceName == right.provenance.deviceName &&
-      left.provenance.measurementMethod ==
-          right.provenance.measurementMethod &&
-      left.verificationStatus == right.verificationStatus &&
-      left.confidence == right.confidence &&
-      left.privacyClass == right.privacyClass &&
-      left.schemaVersion == right.schemaVersion;
-}
-
-HealthEvent _copyHealthEvent(
-  HealthEvent event, {
-  String? id,
-  String? supersedesEventId,
-}) {
-  return HealthEvent(
-    id: id ?? event.id,
-    subjectId: event.subjectId,
-    eventType: event.eventType,
-    temporal: event.temporal,
-    provenance: event.provenance,
-    verificationStatus: event.verificationStatus,
-    confidence: event.confidence,
-    privacyClass: event.privacyClass,
-    schemaVersion: event.schemaVersion,
-    episodeId: event.episodeId,
-    value: event.value,
-    unit: event.unit,
-    severity: event.severity,
-    bodyLocation: event.bodyLocation,
-    dataState: event.dataState,
-    cycleContext: event.cycleContext,
-    pregnancyContext: event.pregnancyContext,
-    visibilityPolicyId: event.visibilityPolicyId,
-    backupPolicyId: event.backupPolicyId,
-    supersedesEventId: supersedesEventId ?? event.supersedesEventId,
-    relatedEventIds: event.relatedEventIds,
-  );
 }
