@@ -164,8 +164,28 @@ class HealthKitSyncAdapter implements HealthSourceSyncAdapter {
     required DateTime from,
     required DateTime to,
     required Set<HealthDataCategory> categories,
-  }) =>
-      gateway.readRecords(from: from, to: to, categories: categories);
+  }) async {
+    final scope = await readAccessScope();
+    final output = <RawHealthRecord>[];
+
+    for (final category in categories) {
+      final boundary = scope.earliestAuthorizedAt[category];
+      final effectiveFrom = boundary != null && boundary.isAfter(from)
+          ? boundary
+          : from;
+      if (!effectiveFrom.isBefore(to)) continue;
+
+      output.addAll(
+        await gateway.readRecords(
+          from: effectiveFrom,
+          to: to,
+          categories: {category},
+        ),
+      );
+    }
+
+    return List<RawHealthRecord>.unmodifiable(output);
+  }
 
   @override
   Future<String> createChangeToken({
