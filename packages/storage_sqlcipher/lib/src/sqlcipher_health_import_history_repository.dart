@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cycle_storage/cycle_storage.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
@@ -29,6 +31,11 @@ class SqlCipherHealthImportHistoryRepository
       'unmapped': entry.unmapped,
       'deleted': entry.deleted,
       'used_full_refresh': entry.usedFullRefresh ? 1 : 0,
+      'limited_history_json': jsonEncode(
+        entry.limitedHistoryFrom.map(
+          (category, date) => MapEntry(category, date.toUtc().toIso8601String()),
+        ),
+      ),
     }, conflictAlgorithm: ConflictAlgorithm.abort);
   }
 
@@ -60,6 +67,19 @@ class SqlCipherHealthImportHistoryRepository
   }
 
   PersistedHealthImportHistory _decode(Map<String, Object?> row) {
+    final rawLimitedHistory = jsonDecode(
+      (row['limited_history_json'] as String?) ?? '{}',
+    );
+    final limitedHistoryFrom = <String, DateTime>{};
+    if (rawLimitedHistory is Map<String, dynamic>) {
+      for (final entry in rawLimitedHistory.entries) {
+        final value = entry.value;
+        if (value is String) {
+          limitedHistoryFrom[entry.key] = DateTime.parse(value).toUtc();
+        }
+      }
+    }
+
     return PersistedHealthImportHistory(
       id: row['id']! as String,
       subjectId: row['subject_id']! as String,
@@ -74,6 +94,7 @@ class SqlCipherHealthImportHistoryRepository
       unmapped: row['unmapped']! as int,
       deleted: row['deleted']! as int,
       usedFullRefresh: (row['used_full_refresh']! as int) != 0,
+      limitedHistoryFrom: Map<String, DateTime>.unmodifiable(limitedHistoryFrom),
     );
   }
 }
