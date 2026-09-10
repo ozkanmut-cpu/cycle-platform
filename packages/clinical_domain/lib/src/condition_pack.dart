@@ -1,7 +1,11 @@
 enum RoutingConfidence { insufficientInformation, low, medium, high }
 
 class GuidelineVersion {
-  const GuidelineVersion({required this.identifier, required this.version, required this.effectiveFrom});
+  const GuidelineVersion({
+    required this.identifier,
+    required this.version,
+    required this.effectiveFrom,
+  });
 
   final String identifier;
   final String version;
@@ -9,7 +13,10 @@ class GuidelineVersion {
 }
 
 class ClinicalEvidenceRef {
-  const ClinicalEvidenceRef({required this.sourceId, required this.summary});
+  const ClinicalEvidenceRef({
+    required this.sourceId,
+    required this.summary,
+  });
 
   final String sourceId;
   final String summary;
@@ -34,14 +41,21 @@ class ConditionPack {
 }
 
 class SymptomReport {
-  const SymptomReport({required this.symptomKeys, this.unknownKeys = const {}});
+  const SymptomReport({
+    required this.symptomKeys,
+    this.unknownKeys = const {},
+  });
 
   final Set<String> symptomKeys;
   final Set<String> unknownKeys;
 }
 
 class ConditionPackMatch {
-  const ConditionPackMatch({required this.pack, required this.score, required this.matchedSymptoms});
+  const ConditionPackMatch({
+    required this.pack,
+    required this.score,
+    required this.matchedSymptoms,
+  });
 
   final ConditionPack pack;
   final double score;
@@ -65,24 +79,42 @@ class SymptomRoutingResult {
 class SymptomFirstRouter {
   const SymptomFirstRouter();
 
-  SymptomRoutingResult route({required SymptomReport report, required List<ConditionPack> packs}) {
-    final known = report.symptomKeys.map(_normalize).where((e) => e.isNotEmpty).toSet();
+  SymptomRoutingResult route({
+    required SymptomReport report,
+    required List<ConditionPack> packs,
+  }) {
+    final known = report.symptomKeys
+        .map(_normalize)
+        .where((e) => e.isNotEmpty)
+        .toSet();
     if (known.isEmpty) {
       return SymptomRoutingResult(
         confidence: RoutingConfidence.insufficientInformation,
         matches: const [],
-        missingInformation: report.unknownKeys.map(_normalize).where((e) => e.isNotEmpty).toSet(),
+        missingInformation: report.unknownKeys
+            .map(_normalize)
+            .where((e) => e.isNotEmpty)
+            .toSet(),
       );
     }
 
     final matches = <ConditionPackMatch>[];
     for (final pack in packs) {
-      final normalizedPackSymptoms = pack.symptomKeys.map(_normalize).where((e) => e.isNotEmpty).toSet();
+      final normalizedPackSymptoms = pack.symptomKeys
+          .map(_normalize)
+          .where((e) => e.isNotEmpty)
+          .toSet();
       if (normalizedPackSymptoms.isEmpty) continue;
       final overlap = known.intersection(normalizedPackSymptoms);
       if (overlap.isEmpty) continue;
       final score = overlap.length / normalizedPackSymptoms.length;
-      matches.add(ConditionPackMatch(pack: pack, score: score, matchedSymptoms: overlap));
+      matches.add(
+        ConditionPackMatch(
+          pack: pack,
+          score: score,
+          matchedSymptoms: overlap,
+        ),
+      );
     }
     matches.sort((a, b) {
       final byScore = b.score.compareTo(a.score);
@@ -101,7 +133,10 @@ class SymptomFirstRouter {
     return SymptomRoutingResult(
       confidence: confidence,
       matches: List.unmodifiable(matches),
-      missingInformation: report.unknownKeys.map(_normalize).where((e) => e.isNotEmpty).toSet(),
+      missingInformation: report.unknownKeys
+          .map(_normalize)
+          .where((e) => e.isNotEmpty)
+          .toSet(),
     );
   }
 
