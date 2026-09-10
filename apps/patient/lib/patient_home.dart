@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'app_lock.dart';
 import 'cycle_timeline.dart';
 import 'month_calendar.dart';
+import 'patient_localizations.dart';
 import 'quick_log.dart';
 import 'timeline_view.dart';
 import 'vault_session.dart';
@@ -190,23 +191,23 @@ class _PatientHomePageState extends State<PatientHomePage>
     await _reload();
   }
 
-  String _eventLabel(HealthEvent event) {
+  String _eventLabel(PatientLocalizations strings, HealthEvent event) {
     switch (event.eventType) {
       case 'menstruation.period_start':
-        return 'Period started';
+        return strings.periodStarted;
       case 'menstruation.flow':
         return switch (event.severity) {
-          1 => 'Light flow',
-          2 => 'Medium flow',
-          3 => 'Heavy flow',
-          _ => 'Flow',
+          1 => strings.lightFlow,
+          2 => strings.mediumFlow,
+          3 => strings.heavyFlow,
+          _ => strings.flow,
         };
       case 'symptom.cramps':
-        return 'Cramps';
+        return strings.cramps;
       case 'symptom.headache':
-        return 'Headache';
+        return strings.headache;
       case 'symptom.mood_low':
-        return 'Low mood';
+        return strings.lowMood;
       default:
         return event.eventType;
     }
@@ -219,7 +220,7 @@ class _PatientHomePageState extends State<PatientHomePage>
     return Icons.favorite_border;
   }
 
-  Widget _buildPrivateCover() {
+  Widget _buildPrivateCover(PatientLocalizations strings) {
     return ColoredBox(
       color: Colors.white,
       child: Center(
@@ -228,12 +229,12 @@ class _PatientHomePageState extends State<PatientHomePage>
           children: [
             const Icon(Icons.lock_outline, size: 42),
             const SizedBox(height: 12),
-            const Text('Cycle', style: TextStyle(fontSize: 24)),
+            Text(strings.appTitle, style: const TextStyle(fontSize: 24)),
             const SizedBox(height: 6),
             Text(
               _unlockFailed
-                  ? 'Authentication is required to open private health data.'
-                  : 'Private health data is locked.',
+                  ? strings.authenticationRequired
+                  : strings.privateDataLocked,
               textAlign: TextAlign.center,
             ),
             if (_unlockFailed) ...[
@@ -241,7 +242,7 @@ class _PatientHomePageState extends State<PatientHomePage>
               FilledButton.icon(
                 onPressed: _authenticateAndOpen,
                 icon: const Icon(Icons.fingerprint),
-                label: const Text('Unlock'),
+                label: Text(strings.unlock),
               ),
             ],
           ],
@@ -252,18 +253,19 @@ class _PatientHomePageState extends State<PatientHomePage>
 
   @override
   Widget build(BuildContext context) {
+    final strings = PatientLocalizations.of(context);
     final vaultSummary = _loading
-        ? 'Opening…'
-        : '${_events.length} local health event(s) · ${_vaultState.name}';
+        ? strings.opening
+        : strings.vaultSummary(_events.length, _vaultState.name);
     final timeline = CycleTimeline(_events);
     final cycleDay = timeline.cycleDayFor(DateTime.now());
 
     final content = Scaffold(
       appBar: AppBar(
-        title: const Text('Cycle'),
+        title: Text(strings.appTitle),
         actions: [
           IconButton(
-            tooltip: 'Calendar',
+            tooltip: strings.calendar,
             onPressed: _privacyCovered ? null : _openCalendar,
             icon: const Icon(Icons.calendar_month_outlined),
           ),
@@ -272,7 +274,7 @@ class _PatientHomePageState extends State<PatientHomePage>
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _privacyCovered ? null : _openQuickLog,
         icon: const Icon(Icons.add),
-        label: const Text('Log'),
+        label: Text(strings.log),
       ),
       body: SafeArea(
         child: Padding(
@@ -280,25 +282,28 @@ class _PatientHomePageState extends State<PatientHomePage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Today',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
+              Text(
+                strings.today,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 4),
-              const Text('Only log what matters. Cycle keeps the rest quiet.'),
+              Text(strings.todayHint),
               const SizedBox(height: 16),
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.calendar_today_outlined),
                   title: Text(
                     cycleDay == null
-                        ? 'Cycle day unknown'
-                        : 'Cycle day $cycleDay',
+                        ? strings.cycleDayUnknown
+                        : strings.cycleDay(cycleDay),
                   ),
                   subtitle: Text(
                     cycleDay == null
-                        ? 'Log a period start when it happens.'
-                        : 'Based on your latest logged period start.',
+                        ? strings.logPeriodStartHint
+                        : strings.latestPeriodStartHint,
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: _privacyCovered ? null : _openCalendar,
@@ -308,8 +313,8 @@ class _PatientHomePageState extends State<PatientHomePage>
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.add_circle_outline),
-                  title: const Text('Quick Log'),
-                  subtitle: const Text('Period, flow or a symptom in one tap'),
+                  title: Text(strings.quickLog),
+                  subtitle: Text(strings.quickLogCardHint),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: _privacyCovered ? null : _openQuickLog,
                 ),
@@ -318,14 +323,17 @@ class _PatientHomePageState extends State<PatientHomePage>
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.lock_outline),
-                  title: const Text('Encrypted local vault'),
+                  title: Text(strings.encryptedLocalVault),
                   subtitle: Text(vaultSummary),
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Timeline',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              Text(
+                strings.timeline,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 8),
               Expanded(
@@ -333,7 +341,7 @@ class _PatientHomePageState extends State<PatientHomePage>
                     ? const Center(child: CircularProgressIndicator())
                     : PatientTimelineView(
                         events: _events,
-                        labelFor: _eventLabel,
+                        labelFor: (event) => _eventLabel(strings, event),
                         iconFor: _eventIcon,
                       ),
               ),
@@ -345,7 +353,10 @@ class _PatientHomePageState extends State<PatientHomePage>
 
     return Stack(
       fit: StackFit.expand,
-      children: [content, if (_privacyCovered) _buildPrivateCover()],
+      children: [
+        content,
+        if (_privacyCovered) _buildPrivateCover(strings),
+      ],
     );
   }
 }
