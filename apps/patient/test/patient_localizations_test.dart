@@ -54,6 +54,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Aç'));
     await tester.pumpAndSettle();
