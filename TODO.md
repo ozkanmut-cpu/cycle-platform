@@ -127,7 +127,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 ## 13 — Experience and validation
 - [x] 🔴 Tone Governor for serious clinical contexts
 - [ ] 🟠 Playful Engine
-- [ ] 🔴 localization TR/EN
+- [x] 🔴 localization TR/EN
 - [x] 🔴 app switcher privacy
 - [x] 🔴 biometrics/PIN
 - [ ] 🔴 security/crypto review
