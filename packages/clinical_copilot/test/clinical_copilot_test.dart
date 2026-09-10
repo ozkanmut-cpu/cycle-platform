@@ -7,7 +7,8 @@ void main() {
   const patient = DoctorPatient(id: 'p1', displayName: 'Patient One');
 
   test('Clinical Snapshot exposes all six workflow sections', () {
-    final previous = _event('hr-old', 70, now.subtract(const Duration(days: 2)));
+    final previous =
+        _event('hr-old', 70, now.subtract(const Duration(days: 2)));
     final latest = _event('hr-new', 85, now.subtract(const Duration(days: 1)));
     final conflicting = _event(
       'hr-conflict',
@@ -54,11 +55,12 @@ void main() {
     );
 
     expect(result.summary, 'First · Second');
-    expect(result.evidenceIds, <String>['e1', 'e2']);
+    expect(result.evidenceIds, orderedEquals(<String>['e1', 'e2']));
     expect(result.graph.evidenceFor('summary-a').single.sourceId, 'e1');
   });
 
-  test('natural-language search routes only to structured query primitives', () {
+  test('natural-language search routes only to structured query primitives',
+      () {
     const router = SafeRecordQueryRouter();
     expect(
       router
@@ -98,7 +100,8 @@ void main() {
         createdAt: now.subtract(const Duration(hours: 1)),
       ),
     );
-    expect(workspace.forPatient('p1').map((note) => note.id), ['early', 'late']);
+    expect(workspace.forPatient('p1').map((note) => note.id),
+        orderedEquals(<String>['early', 'late']));
   });
 
   test('Doctor Review Gate prevents autonomous clinical writes', () {
@@ -137,7 +140,8 @@ void main() {
     expect(approved.disposition, ClinicalWriteDisposition.approved);
   });
 
-  test('trial, question and AI audit hooks preserve evidence and review state', () {
+  test('trial, question and AI audit hooks preserve evidence and review state',
+      () {
     final trial = TreatmentTrialHook(
       id: 'trial-1',
       patientId: 'p1',
@@ -165,7 +169,7 @@ void main() {
 
     expect(trial.outcomeEventTypes, contains('symptom.score'));
     expect(question.requiredEvidenceTypes, contains('vitals.heart_rate'));
-    expect(audit.evidenceIds, <String>['e1', 'e2']);
+    expect(audit.evidenceIds, orderedEquals(<String>['e1', 'e2']));
     expect(audit.requiresDoctorReview, isTrue);
   });
 }
