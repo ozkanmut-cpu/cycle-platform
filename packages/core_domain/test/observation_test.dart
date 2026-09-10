@@ -24,11 +24,29 @@ void main() {
       confidence: ConfidenceClass.high,
     );
 
+    expect(observation.id, 'obs-ferritin-1');
+    expect(observation.schemaVersion, 1);
     expect(observation.value, 24);
     expect(observation.unit, 'ng/mL');
     expect(observation.referenceRangeLow, 15);
     expect(observation.referenceRangeHigh, 150);
     expect(observation.temporal.knownAt, now);
+  });
+
+  test('Observation accepts explicit schema versions', () {
+    final now = DateTime.utc(2026, 9, 9, 15);
+    final observation = Observation(
+      id: 'obs-versioned-1',
+      subjectId: 'patient-1',
+      code: 'vital.heart_rate',
+      temporal: TemporalMetadata(observedAt: now, recordedAt: now),
+      provenance: const Provenance(sourceKind: SourceKind.device),
+      confidence: ConfidenceClass.high,
+      schemaVersion: 2,
+    );
+
+    expect(observation.id, 'obs-versioned-1');
+    expect(observation.schemaVersion, 2);
   });
 
   test('notRecorded remains distinct from a negative observation', () {
