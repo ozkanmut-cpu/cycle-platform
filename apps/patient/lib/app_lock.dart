@@ -1,5 +1,8 @@
 import 'package:cycle_security/cycle_security.dart';
+import 'package:flutter/widgets.dart';
 import 'package:local_auth/local_auth.dart';
+
+import 'patient_localizations.dart';
 
 class AppLockService {
   AppLockService({
@@ -32,10 +35,13 @@ class AppLockService {
     if (_authInProgress) return false;
     if (!await canAuthenticate()) return false;
 
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    final localizedReason = PatientLocalizations.forLocale(locale).unlockReason;
+
     _authInProgress = true;
     try {
       final authenticated = await _authentication.authenticate(
-        localizedReason: 'Unlock Cycle to view your private health data.',
+        localizedReason: localizedReason,
         biometricOnly: false,
         sensitiveTransaction: true,
         persistAcrossBackgrounding: true,
