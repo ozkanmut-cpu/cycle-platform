@@ -83,10 +83,8 @@ class SymptomFirstRouter {
     required SymptomReport report,
     required List<ConditionPack> packs,
   }) {
-    final known = report.symptomKeys
-        .map(_normalize)
-        .where((e) => e.isNotEmpty)
-        .toSet();
+    final known =
+        report.symptomKeys.map(_normalize).where((e) => e.isNotEmpty).toSet();
     if (known.isEmpty) {
       return SymptomRoutingResult(
         confidence: RoutingConfidence.insufficientInformation,
@@ -100,10 +98,8 @@ class SymptomFirstRouter {
 
     final matches = <ConditionPackMatch>[];
     for (final pack in packs) {
-      final normalizedPackSymptoms = pack.symptomKeys
-          .map(_normalize)
-          .where((e) => e.isNotEmpty)
-          .toSet();
+      final normalizedPackSymptoms =
+          pack.symptomKeys.map(_normalize).where((e) => e.isNotEmpty).toSet();
       if (normalizedPackSymptoms.isEmpty) continue;
       final overlap = known.intersection(normalizedPackSymptoms);
       if (overlap.isEmpty) continue;
@@ -133,10 +129,8 @@ class SymptomFirstRouter {
     return SymptomRoutingResult(
       confidence: confidence,
       matches: List.unmodifiable(matches),
-      missingInformation: report.unknownKeys
-          .map(_normalize)
-          .where((e) => e.isNotEmpty)
-          .toSet(),
+      missingInformation:
+          report.unknownKeys.map(_normalize).where((e) => e.isNotEmpty).toSet(),
     );
   }
 
