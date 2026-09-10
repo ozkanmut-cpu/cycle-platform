@@ -88,9 +88,8 @@ class PatientLocalizations {
 
   String eventsCount(int count) =>
       isTurkish ? '$count kayıt' : '$count event${count == 1 ? '' : 's'}';
-  String loggedEventsCount(int count) => isTurkish
-      ? '$count kayıtlı olay'
-      : '$count logged event${count == 1 ? '' : 's'}';
+  String loggedEventsCount(int count) =>
+      isTurkish ? '$count kayıtlı olay' : '$count logged event(s)';
 }
 
 class PatientLocalizationsDelegate
