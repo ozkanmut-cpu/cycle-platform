@@ -5,23 +5,27 @@ import 'imported_health_event_revision.dart';
 import 'sqlcipher_audit_log_repository.dart';
 import 'sqlcipher_database.dart';
 import 'sqlcipher_health_event_repository.dart';
+import 'sqlcipher_health_import_history_repository.dart';
 import 'sqlcipher_health_sync_cursor_repository.dart';
 
 class SqlCipherHealthImportCommitter {
   SqlCipherHealthImportCommitter(this._db)
     : _healthEvents = SqlCipherHealthEventRepository(_db),
       _auditLog = SqlCipherAuditLogRepository(_db),
+      _history = SqlCipherHealthImportHistoryRepository(_db),
       _cursors = SqlCipherHealthSyncCursorRepository(_db);
 
   final SqlCipherDatabase _db;
   final SqlCipherHealthEventRepository _healthEvents;
   final SqlCipherAuditLogRepository _auditLog;
+  final SqlCipherHealthImportHistoryRepository _history;
   final SqlCipherHealthSyncCursorRepository _cursors;
 
   Future<void> commit({
     required Iterable<HealthEvent> upserts,
     required Iterable<String> deletedEventIds,
     required Iterable<AuditEvent> auditEvents,
+    required PersistedHealthImportHistory history,
     required PersistedHealthSyncCursor cursor,
     required DateTime deletedAt,
   }) async {
@@ -59,9 +63,10 @@ class SqlCipherHealthImportCommitter {
       for (final auditEvent in auditEvents) {
         await _auditLog.appendWithExecutor(transaction, auditEvent);
       }
+      await _history.appendWithExecutor(transaction, history);
 
-      // Advance the source cursor only after every event/audit mutation has
-      // succeeded. A failure above rolls the whole SQLCipher transaction back.
+      // Advance the source cursor only after every event/audit/history mutation
+      // has succeeded. A failure above rolls the whole SQLCipher transaction back.
       await _cursors.saveWithExecutor(transaction, cursor);
     });
   }
