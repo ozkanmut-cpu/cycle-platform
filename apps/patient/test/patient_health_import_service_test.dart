@@ -27,7 +27,10 @@ void main() {
       expect(commitSink.upserts.single.id, 'import:healthConnect:weight-1');
       expect(commitSink.upserts.single.eventType, 'body.weight');
       expect(commitSink.cursor?.value, 'token-1');
-      expect(commitSink.history?.source, storage.HealthImportSource.healthConnect);
+      expect(
+        commitSink.history?.source,
+        storage.HealthImportSource.healthConnect,
+      );
       expect(commitSink.history?.imported, 1);
       expect(commitSink.history?.deleted, 0);
       expect(commitSink.history?.usedFullRefresh, isTrue);
