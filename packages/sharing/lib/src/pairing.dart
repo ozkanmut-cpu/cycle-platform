@@ -30,12 +30,15 @@ class PairingQrCodec {
       'nonce': invitation.nonce,
       'expiresAt': invitation.expiresAt.toUtc().toIso8601String(),
     };
-    return base64Url.encode(utf8.encode(jsonEncode(payload))).replaceAll('=', '');
+    return base64Url
+        .encode(utf8.encode(jsonEncode(payload)))
+        .replaceAll('=', '');
   }
 
   PairingInvitation decode(String encoded, {required DateTime now}) {
     final padding = '=' * ((4 - encoded.length % 4) % 4);
-    final decoded = jsonDecode(utf8.decode(base64Url.decode('$encoded$padding')));
+    final decoded =
+        jsonDecode(utf8.decode(base64Url.decode('$encoded$padding')));
     if (decoded is! Map) {
       throw const FormatException('Invalid pairing payload.');
     }
