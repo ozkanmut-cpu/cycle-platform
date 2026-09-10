@@ -107,8 +107,8 @@ class HealthKitAnchorPage {
 }
 
 abstract interface class HealthKitGateway {
-  /// Legacy query-candidate API. HealthKit cannot expose definitive read-grant
-  /// state, so implementations must not infer denial from an empty query.
+  /// Legacy API retained for compatibility. Current native implementations
+  /// return HealthKit request-status hints here, not definitive read grants.
   Future<Set<HealthDataCategory>> grantedCategories();
 
   Future<List<RawHealthRecord>> readRecords({
@@ -135,20 +135,29 @@ class HealthKitSyncAdapter implements HealthSourceSyncAdapter {
   @override
   HealthSourcePlatform get sourcePlatform => HealthSourcePlatform.healthKit;
 
-  Future<HealthKitReadAccessScope?> readAccessScope() async {
+  Future<HealthKitReadAccessScope> readAccessScope() async {
     final current = gateway;
     if (current is HealthKitReadAccessGateway) {
       return current.readAccessScope();
     }
-    return null;
+
+    // Backward compatibility for the current native bridge. Its legacy
+    // `grantedCategories` method is backed by HealthKit request-status and
+    // therefore cannot prove read authorization. Reinterpret those values as
+    // request-status hints while keeping every supported category queryable.
+    final requestStatusHints = await gateway.grantedCategories();
+    return HealthKitReadAccessScope(
+      availableCategories: Set<HealthDataCategory>.unmodifiable(
+        HealthDataCategory.values,
+      ),
+      requestStatusUnnecessaryCategories: Set.unmodifiable(requestStatusHints),
+      queryVisibleCategories: const <HealthDataCategory>{},
+    );
   }
 
   @override
-  Future<Set<HealthDataCategory>> grantedCategories() async {
-    final scope = await readAccessScope();
-    if (scope != null) return scope.queryCandidateCategories;
-    return gateway.grantedCategories();
-  }
+  Future<Set<HealthDataCategory>> grantedCategories() async =>
+      (await readAccessScope()).queryCandidateCategories;
 
   @override
   Future<List<RawHealthRecord>> readInitial({
