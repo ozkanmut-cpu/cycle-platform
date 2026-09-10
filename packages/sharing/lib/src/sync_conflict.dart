@@ -22,7 +22,8 @@ class SyncConflictResolver {
     final revision = left.revision.compareTo(right.revision);
     if (revision != 0) return revision > 0 ? left : right;
 
-    final modified = left.modifiedAt.toUtc().compareTo(right.modifiedAt.toUtc());
+    final modified =
+        left.modifiedAt.toUtc().compareTo(right.modifiedAt.toUtc());
     if (modified != 0) return modified > 0 ? left : right;
 
     return left.deviceId.compareTo(right.deviceId) <= 0 ? left : right;
