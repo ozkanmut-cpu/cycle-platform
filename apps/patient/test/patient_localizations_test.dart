@@ -1,6 +1,7 @@
 import 'package:cycle_patient/patient_localizations.dart';
 import 'package:cycle_patient/quick_log.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -39,6 +40,9 @@ void main() {
         supportedLocales: PatientLocalizations.supportedLocales,
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
           PatientLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
         ],
         home: Builder(
           builder: (context) => Scaffold(
