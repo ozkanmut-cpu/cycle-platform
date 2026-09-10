@@ -170,9 +170,8 @@ class HealthKitSyncAdapter implements HealthSourceSyncAdapter {
 
     for (final category in categories) {
       final boundary = scope.earliestAuthorizedAt[category];
-      final effectiveFrom = boundary != null && boundary.isAfter(from)
-          ? boundary
-          : from;
+      final effectiveFrom =
+          boundary != null && boundary.isAfter(from) ? boundary : from;
       if (!effectiveFrom.isBefore(to)) continue;
 
       output.addAll(
