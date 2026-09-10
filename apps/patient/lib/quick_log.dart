@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'patient_localizations.dart';
+
 enum QuickLogKind {
   periodStart,
   flowLight,
@@ -13,7 +15,6 @@ enum QuickLogKind {
 class QuickLogSelection {
   const QuickLogSelection({
     required this.kind,
-    required this.label,
     required this.eventType,
     this.value,
     this.unit,
@@ -21,7 +22,6 @@ class QuickLogSelection {
   });
 
   final QuickLogKind kind;
-  final String label;
   final String eventType;
   final num? value;
   final String? unit;
@@ -31,12 +31,10 @@ class QuickLogSelection {
 const quickLogSelections = <QuickLogSelection>[
   QuickLogSelection(
     kind: QuickLogKind.periodStart,
-    label: 'Period started',
     eventType: 'menstruation.period_start',
   ),
   QuickLogSelection(
     kind: QuickLogKind.flowLight,
-    label: 'Light flow',
     eventType: 'menstruation.flow',
     value: 1,
     unit: 'ordinal',
@@ -44,7 +42,6 @@ const quickLogSelections = <QuickLogSelection>[
   ),
   QuickLogSelection(
     kind: QuickLogKind.flowMedium,
-    label: 'Medium flow',
     eventType: 'menstruation.flow',
     value: 2,
     unit: 'ordinal',
@@ -52,7 +49,6 @@ const quickLogSelections = <QuickLogSelection>[
   ),
   QuickLogSelection(
     kind: QuickLogKind.flowHeavy,
-    label: 'Heavy flow',
     eventType: 'menstruation.flow',
     value: 3,
     unit: 'ordinal',
@@ -60,20 +56,29 @@ const quickLogSelections = <QuickLogSelection>[
   ),
   QuickLogSelection(
     kind: QuickLogKind.cramps,
-    label: 'Cramps',
     eventType: 'symptom.cramps',
   ),
   QuickLogSelection(
     kind: QuickLogKind.headache,
-    label: 'Headache',
     eventType: 'symptom.headache',
   ),
   QuickLogSelection(
     kind: QuickLogKind.moodLow,
-    label: 'Low mood',
     eventType: 'symptom.mood_low',
   ),
 ];
+
+String quickLogLabel(PatientLocalizations strings, QuickLogKind kind) {
+  return switch (kind) {
+    QuickLogKind.periodStart => strings.periodStarted,
+    QuickLogKind.flowLight => strings.lightFlow,
+    QuickLogKind.flowMedium => strings.mediumFlow,
+    QuickLogKind.flowHeavy => strings.heavyFlow,
+    QuickLogKind.cramps => strings.cramps,
+    QuickLogKind.headache => strings.headache,
+    QuickLogKind.moodLow => strings.lowMood,
+  };
+}
 
 Future<QuickLogSelection?> showQuickLogSheet(BuildContext context) {
   return showModalBottomSheet<QuickLogSelection>(
@@ -81,18 +86,19 @@ Future<QuickLogSelection?> showQuickLogSheet(BuildContext context) {
     showDragHandle: true,
     useSafeArea: true,
     builder: (context) {
+      final strings = PatientLocalizations.of(context);
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Quick Log',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+            Text(
+              strings.quickLog,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
-            const Text('Tap once. You can add details later if you want.'),
+            Text(strings.quickLogHint),
             const SizedBox(height: 16),
             Wrap(
               spacing: 8,
@@ -100,7 +106,7 @@ Future<QuickLogSelection?> showQuickLogSheet(BuildContext context) {
               children: quickLogSelections
                   .map((selection) {
                     return ActionChip(
-                      label: Text(selection.label),
+                      label: Text(quickLogLabel(strings, selection.kind)),
                       onPressed: () => Navigator.of(context).pop(selection),
                     );
                   })
