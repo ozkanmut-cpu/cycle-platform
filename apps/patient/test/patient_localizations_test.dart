@@ -5,9 +5,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('resolves Turkish variants and falls back to English', () {
-    expect(PatientLocalizations.resolve(const Locale('tr', 'TR')), const Locale('tr'));
-    expect(PatientLocalizations.resolve(const Locale('en', 'GB')), const Locale('en'));
-    expect(PatientLocalizations.resolve(const Locale('de', 'DE')), const Locale('en'));
+    expect(
+      PatientLocalizations.resolve(const Locale('tr', 'TR')),
+      const Locale('tr'),
+    );
+    expect(
+      PatientLocalizations.resolve(const Locale('en', 'GB')),
+      const Locale('en'),
+    );
+    expect(
+      PatientLocalizations.resolve(const Locale('de', 'DE')),
+      const Locale('en'),
+    );
     expect(PatientLocalizations.resolve(null), const Locale('en'));
   });
 
@@ -21,8 +30,9 @@ void main() {
     expect(tr.loggedEventsCount(2), '2 kayıtlı olay');
   });
 
-  testWidgets('Quick Log renders Turkish labels for Turkish locale',
-      (tester) async {
+  testWidgets('Quick Log renders Turkish labels for Turkish locale', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('tr'),
