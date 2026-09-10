@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cycle_crypto/cycle_crypto.dart';
+import 'package:cycle_health_ingestion/cycle_health_ingestion.dart';
 import 'package:cycle_secure_key_store/cycle_secure_key_store.dart';
 import 'package:cycle_storage/cycle_storage.dart';
 import 'package:cycle_storage_file_vault/cycle_storage_file_vault.dart';
 import 'package:cycle_storage_sqlcipher/cycle_storage_sqlcipher.dart';
 import 'package:path_provider/path_provider.dart';
+
+import 'health/encrypted_raw_sensor_payload_sink.dart';
 
 class PatientVaultSession {
   PatientVaultSession({FlutterSecureKeyStore? keyStore})
@@ -19,6 +22,7 @@ class PatientVaultSession {
   HealthEventRepository? _repository;
   AuditLogRepository? _auditLog;
   HealthSyncCursorRepository? _healthSyncCursorRepository;
+  HealthImportHistoryRepository? _healthImportHistoryRepository;
   SqlCipherHealthImportCommitter? _healthImportCommitter;
   AttachmentVault? _attachmentVault;
   RawSensorVault? _rawSensorVault;
@@ -42,6 +46,14 @@ class PatientVaultSession {
 
   HealthSyncCursorRepository get healthSyncCursorRepository {
     final value = _healthSyncCursorRepository;
+    if (value == null) {
+      throw StateError('Vault session is locked.');
+    }
+    return value;
+  }
+
+  HealthImportHistoryRepository get healthImportHistoryRepository {
+    final value = _healthImportHistoryRepository;
     if (value == null) {
       throw StateError('Vault session is locked.');
     }
@@ -72,6 +84,9 @@ class PatientVaultSession {
     return value;
   }
 
+  RawSensorPayloadSink get rawSensorPayloadSink =>
+      EncryptedRawSensorPayloadSink(rawSensorVault);
+
   Future<VaultState> state() async {
     final vault = _vault;
     if (vault == null) return VaultState.uninitialized;
@@ -88,6 +103,7 @@ class PatientVaultSession {
       _repository = null;
       _auditLog = null;
       _healthSyncCursorRepository = null;
+      _healthImportHistoryRepository = null;
       _healthImportCommitter = null;
       _attachmentVault = null;
       _rawSensorVault = null;
@@ -190,6 +206,9 @@ class PatientVaultSession {
     _repository = SqlCipherHealthEventRepository(vault.database);
     _auditLog = SqlCipherAuditLogRepository(vault.database);
     _healthSyncCursorRepository = SqlCipherHealthSyncCursorRepository(
+      vault.database,
+    );
+    _healthImportHistoryRepository = SqlCipherHealthImportHistoryRepository(
       vault.database,
     );
     _healthImportCommitter = SqlCipherHealthImportCommitter(vault.database);
