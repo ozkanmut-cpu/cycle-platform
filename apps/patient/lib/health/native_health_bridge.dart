@@ -99,7 +99,8 @@ class _MethodChannelHealthConnectGateway implements HealthConnectGateway {
   }
 }
 
-class _MethodChannelHealthKitGateway implements HealthKitGateway {
+class _MethodChannelHealthKitGateway
+    implements HealthKitGateway, HealthKitReadAccessGateway {
   const _MethodChannelHealthKitGateway(this.channel);
 
   final MethodChannel channel;
@@ -110,6 +111,43 @@ class _MethodChannelHealthKitGateway implements HealthKitGateway {
         await channel.invokeListMethod<String>('healthKit.grantedCategories') ??
         const <String>[];
     return _decodeCategories(raw);
+  }
+
+  @override
+  Future<HealthKitReadAccessScope> readAccessScope() async {
+    final raw = await channel.invokeMapMethod<String, Object?>(
+      'healthKit.readAccessScope',
+    );
+    if (raw == null) {
+      throw StateError('HealthKit returned no read-access scope.');
+    }
+
+    final earliest = <HealthDataCategory, DateTime>{};
+    final earliestRaw = raw['earliestAuthorizedAtEpochMillis'];
+    if (earliestRaw is Map<Object?, Object?>) {
+      for (final entry in earliestRaw.entries) {
+        if (entry.key is! String || entry.value is! num) continue;
+        final matches = HealthDataCategory.values.where(
+          (category) => category.name == entry.key,
+        );
+        if (matches.isEmpty) continue;
+        earliest[matches.first] = DateTime.fromMillisecondsSinceEpoch(
+          (entry.value as num).toInt(),
+          isUtc: true,
+        );
+      }
+    }
+
+    return HealthKitReadAccessScope(
+      availableCategories: _decodeCategoryObjects(raw['availableCategories']),
+      requestStatusUnnecessaryCategories: _decodeCategoryObjects(
+        raw['requestStatusUnnecessaryCategories'],
+      ),
+      queryVisibleCategories: _decodeCategoryObjects(
+        raw['queryVisibleCategories'],
+      ),
+      earliestAuthorizedAt: Map.unmodifiable(earliest),
+    );
   }
 
   @override
@@ -185,6 +223,11 @@ Map<String, Object?> _rangeArgs(
 
 List<String> _encodeCategories(Set<HealthDataCategory> categories) =>
     categories.map((category) => category.name).toList(growable: false);
+
+Set<HealthDataCategory> _decodeCategoryObjects(Object? raw) {
+  if (raw is! List<Object?>) return const <HealthDataCategory>{};
+  return _decodeCategories(raw.whereType<String>());
+}
 
 Set<HealthDataCategory> _decodeCategories(Iterable<String> values) => values
     .map(
