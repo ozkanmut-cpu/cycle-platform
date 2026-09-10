@@ -17,4 +17,8 @@ dependencies:
   sqflite_sqlcipher: ^3.4.1
   path: ^1.9.1
 
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
 flutter:
