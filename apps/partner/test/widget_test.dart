@@ -15,6 +15,13 @@ void main() {
     expect(find.text('NOTIFY'), findsOneWidget);
     expect(find.text('BACKUP'), findsOneWidget);
     expect(find.text('Encrypted transport'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Private notifications'),
+      200,
+    );
+    await tester.pumpAndSettle();
+
     expect(find.text('Private notifications'), findsOneWidget);
     expect(find.textContaining('Edit'), findsNothing);
   });
