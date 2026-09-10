@@ -71,7 +71,9 @@ void main() {
 
     final result = matcher.matchTreatmentTrial(
       trial: trial,
-      events: [event('too-old', 'p1', 'lab.a', start.subtract(const Duration(days: 1)))],
+      events: [
+        event('too-old', 'p1', 'lab.a', start.subtract(const Duration(days: 1)))
+      ],
     );
 
     expect(result.results[0].status, ResultMatchStatus.outOfWindow);
@@ -80,7 +82,8 @@ void main() {
     expect(result.results[1].eventIds, isEmpty);
   });
 
-  test('clinical question matching is patient-isolated and reports missing', () {
+  test('clinical question matching is patient-isolated and reports missing',
+      () {
     final protocol = ClinicalQuestionProtocolHook(
       id: 'question-1',
       patientId: 'p1',
@@ -112,8 +115,10 @@ void main() {
       endAt: end,
       outcomeEventTypes: const ['z.result', 'a.result', 'z.result'],
     );
-    final first = event('b', 'p1', 'a.result', start.add(const Duration(days: 2)));
-    final second = event('a', 'p1', 'a.result', start.add(const Duration(days: 1)));
+    final first =
+        event('b', 'p1', 'a.result', start.add(const Duration(days: 2)));
+    final second =
+        event('a', 'p1', 'a.result', start.add(const Duration(days: 1)));
 
     final left = matcher.matchTreatmentTrial(
       trial: trial,
@@ -124,7 +129,8 @@ void main() {
       events: [second, first],
     );
 
-    expect(left.results.map((item) => item.requirement), ['a.result', 'z.result']);
+    expect(
+        left.results.map((item) => item.requirement), ['a.result', 'z.result']);
     expect(left.results.first.eventIds, ['a', 'b']);
     expect(right.results.first.eventIds, left.results.first.eventIds);
   });
