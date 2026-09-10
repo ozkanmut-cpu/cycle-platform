@@ -166,7 +166,7 @@ class UncertaintyEngine {
       states.add(IntelligenceState.lowConfidence);
       reasons.add('Confidence is low or unknown.');
     }
-    if (now.difference(event.temporal.observedAt) > staleAfter) {
+    if (now.toUtc().difference(event.temporal.observedAt.toUtc()) > staleAfter) {
       states.add(IntelligenceState.stale);
       reasons.add('Latest observation is stale.');
     }
@@ -179,7 +179,8 @@ class UncertaintyEngine {
       reasons.add('Canonical evidence conflicts.');
     }
     if (event.dataState == DataState.unknown ||
-        event.dataState == DataState.notRecorded) {
+        event.dataState == DataState.notRecorded ||
+        (event.value == null && event.dataState == null)) {
       states.add(IntelligenceState.unknown);
       reasons.add('State is unknown or not recorded.');
     }
@@ -204,9 +205,13 @@ class Contradiction {
 }
 
 class ContradictionEngine {
-  const ContradictionEngine({this.numericTolerance = 0});
+  const ContradictionEngine({
+    this.numericTolerance = 0,
+    this.sameMomentTolerance = Duration.zero,
+  });
 
   final double numericTolerance;
+  final Duration sameMomentTolerance;
 
   List<Contradiction> detect(Iterable<HealthEvent> events) {
     final sorted = events.toList()
@@ -217,7 +222,10 @@ class ContradictionEngine {
         final a = sorted[i];
         final b = sorted[j];
         if (a.subjectId != b.subjectId || a.eventType != b.eventType) continue;
-        if (a.temporal.observedAt != b.temporal.observedAt) continue;
+        if (a.temporal.observedAt.difference(b.temporal.observedAt).abs() >
+            sameMomentTolerance) {
+          continue;
+        }
         final numericConflict = a.value != null &&
             b.value != null &&
             (a.value!.toDouble() - b.value!.toDouble()).abs() >
@@ -338,6 +346,20 @@ class HealthDataTimeMachine {
       final observedAt = event.temporal.observedAt;
       return !observedAt.isBefore(from) &&
           observedAt.isBefore(to) &&
+          (eventType == null || event.eventType == eventType);
+    }).toList()
+      ..sort((a, b) => a.temporal.observedAt.compareTo(b.temporal.observedAt));
+    return List.unmodifiable(result);
+  }
+
+  List<HealthEvent> knownAsOf(
+    Iterable<HealthEvent> events, {
+    required DateTime asOf,
+    String? eventType,
+  }) {
+    final result = events.where((event) {
+      final knownAt = event.temporal.knownAt ?? event.temporal.recordedAt;
+      return !knownAt.isAfter(asOf) &&
           (eventType == null || event.eventType == eventType);
     }).toList()
       ..sort((a, b) => a.temporal.observedAt.compareTo(b.temporal.observedAt));
