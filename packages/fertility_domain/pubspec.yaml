@@ -1,0 +1,10 @@
+name: cycle_fertility_domain
+description: Fertility, pregnancy and postpartum domain foundations.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+dev_dependencies:
+  test: ^1.25.0
