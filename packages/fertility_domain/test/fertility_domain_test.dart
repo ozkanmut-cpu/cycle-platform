@@ -19,23 +19,33 @@ void main() {
       expect(event.userMarkedConceptionRelevant, isFalse);
     });
 
-    test('conception exposure references activity without asserting conception', () {
-      final exposure = ConceptionExposureEvent(
-        id: 'exp-1',
-        sexualActivityEventId: 'sex-1',
-        occurredAt: DateTime.utc(2026, 9, 1),
-        provenance: provenance,
-      );
+    test(
+      'conception exposure references activity without asserting conception',
+      () {
+        final exposure = ConceptionExposureEvent(
+          id: 'exp-1',
+          sexualActivityEventId: 'sex-1',
+          occurredAt: DateTime.utc(2026, 9, 1),
+          provenance: provenance,
+        );
 
-      expect(exposure.sexualActivityEventId, 'sex-1');
-      expect(exposure.id, isNotEmpty);
-    });
+        expect(exposure.sexualActivityEventId, 'sex-1');
+        expect(exposure.id, isNotEmpty);
+      },
+    );
 
     test('fertility confidence is insufficient with no evidence', () {
       const model = FertilityConfidenceModel();
-      final assessment = model.assess(bbt: const [], lh: const [], mucus: const []);
+      final assessment = model.assess(
+        bbt: const [],
+        lh: const [],
+        mucus: const [],
+      );
 
-      expect(assessment.confidence, FertilityConfidence.insufficientInformation);
+      expect(
+        assessment.confidence,
+        FertilityConfidence.insufficientInformation,
+      );
       expect(assessment.evidence, isEmpty);
       expect(assessment.missingInformation, {'bbt', 'lh', 'mucus'});
     });
@@ -68,22 +78,25 @@ void main() {
       expect(high.missingInformation, isEmpty);
     });
 
-    test('pregnancy episode keeps dating provenance and active state explicit', () {
-      final dating = PregnancyDating(
-        estimatedStartDate: DateTime.utc(2026, 8, 1),
-        basis: 'lmp',
-        provenance: provenance,
-      );
-      final episode = PregnancyEpisode(
-        id: 'preg-1',
-        startedAt: DateTime.utc(2026, 8, 1),
-        dating: dating,
-      );
+    test(
+      'pregnancy episode keeps dating provenance and active state explicit',
+      () {
+        final dating = PregnancyDating(
+          estimatedStartDate: DateTime.utc(2026, 8, 1),
+          basis: 'lmp',
+          provenance: provenance,
+        );
+        final episode = PregnancyEpisode(
+          id: 'preg-1',
+          startedAt: DateTime.utc(2026, 8, 1),
+          dating: dating,
+        );
 
-      expect(episode.isActive, isTrue);
-      expect(episode.dating.basis, 'lmp');
-      expect(episode.dating.provenance.sourceId, 'manual');
-    });
+        expect(episode.isActive, isTrue);
+        expect(episode.dating.basis, 'lmp');
+        expect(episode.dating.provenance.sourceId, 'manual');
+      },
+    );
 
     test('postpartum episode links to pregnancy episode explicitly', () {
       final postpartum = PostpartumEpisode(
