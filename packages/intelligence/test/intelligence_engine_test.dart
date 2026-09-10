@@ -117,7 +117,8 @@ void main() {
       expect(engine.classify(null), MissingnessKind.absent);
       expect(engine.isUnknownLike(null), isTrue);
       expect(
-        engine.isExplicitlyAnswered(_event('answered', dataState: DataState.no)),
+        engine
+            .isExplicitlyAnswered(_event('answered', dataState: DataState.no)),
         isTrue,
       );
     });
@@ -235,7 +236,8 @@ void main() {
       expect(highValue.score, inInclusiveRange(0, 1));
     });
 
-    test('ZeroLogDay suppresses needless prompts and asks for high-value gaps', () {
+    test('ZeroLogDay suppresses needless prompts and asks for high-value gaps',
+        () {
       const engine = ZeroLogDayEngine();
       const high = InformationValueResult(
         score: 0.9,
