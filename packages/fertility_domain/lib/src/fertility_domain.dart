@@ -225,7 +225,7 @@ class PregnancyDating {
 }
 
 class PregnancyEpisode {
-  const PregnancyEpisode({
+  PregnancyEpisode({
     required this.id,
     required this.startedAt,
     required this.dating,
@@ -307,7 +307,7 @@ class PregnancyOutcome {
 }
 
 class PostpartumEpisode {
-  const PostpartumEpisode({
+  PostpartumEpisode({
     required this.id,
     required this.pregnancyEpisodeId,
     required this.startedAt,
