@@ -19,6 +19,32 @@ void main() {
     expect(page.changes.last.deletedSourceRecordId, 'hk-old');
   });
 
+  test('HealthKit access scope preserves unknown and limited history',
+      () async {
+    final adapter = HealthKitSyncAdapter(_ScopedHealthKitGateway());
+
+    final scope = await adapter.readAccessScope();
+    final candidates = await adapter.grantedCategories();
+
+    expect(candidates, {
+      HealthDataCategory.vitals,
+      HealthDataCategory.sleep,
+    });
+    expect(scope?.requestStatusUnnecessaryCategories, {
+      HealthDataCategory.vitals,
+    });
+    expect(scope?.queryVisibleCategories, isEmpty);
+    expect(scope?.unknownCategories, {
+      HealthDataCategory.vitals,
+      HealthDataCategory.sleep,
+    });
+    expect(scope?.hasLimitedHistory(HealthDataCategory.vitals), isTrue);
+    expect(
+      scope?.earliestAuthorizedAt[HealthDataCategory.vitals],
+      DateTime.utc(2026, 8, 11),
+    );
+  });
+
   test('Health Connect adapter delegates token sync to gateway', () async {
     final gateway = _FakeHealthConnectGateway();
     final adapter = HealthConnectSyncAdapter(gateway);
@@ -67,6 +93,54 @@ class _FakeHealthKitGateway implements HealthKitGateway {
         upserts: [_record(HealthSourcePlatform.healthKit, 'hk-new')],
         deletedSourceRecordIds: const ['hk-old'],
         nextAnchor: 'anchor-2',
+        hasMore: false,
+      );
+
+  @override
+  Future<List<RawHealthRecord>> readRecords({
+    required DateTime from,
+    required DateTime to,
+    required Set<HealthDataCategory> categories,
+  }) async =>
+      const [];
+}
+
+class _ScopedHealthKitGateway
+    implements HealthKitGateway, HealthKitReadAccessGateway {
+  @override
+  Future<HealthKitReadAccessScope> readAccessScope() async =>
+      HealthKitReadAccessScope(
+        availableCategories: {
+          HealthDataCategory.vitals,
+          HealthDataCategory.sleep,
+        },
+        requestStatusUnnecessaryCategories: {
+          HealthDataCategory.vitals,
+        },
+        queryVisibleCategories: const {},
+        earliestAuthorizedAt: {
+          HealthDataCategory.vitals: DateTime.utc(2026, 8, 11),
+        },
+      );
+
+  @override
+  Future<String> createAnchor(
+          {required Set<HealthDataCategory> categories}) async =>
+      'anchor-scoped';
+
+  @override
+  Future<Set<HealthDataCategory>> grantedCategories() async =>
+      throw StateError('Scoped gateway should not use legacy grant semantics.');
+
+  @override
+  Future<HealthKitAnchorPage> readAnchoredChanges({
+    required String anchor,
+    required Set<HealthDataCategory> categories,
+  }) async =>
+      const HealthKitAnchorPage(
+        upserts: [],
+        deletedSourceRecordIds: [],
+        nextAnchor: 'anchor-scoped',
         hasMore: false,
       );
 
