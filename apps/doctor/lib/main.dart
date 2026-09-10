@@ -85,7 +85,8 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
                             (section) => ChoiceChip(
                               label: Text(_label(section)),
                               selected: _section == section,
-                              onSelected: (_) => setState(() => _section = section),
+                              onSelected: (_) =>
+                                  setState(() => _section = section),
                             ),
                           )
                           .toList(),
