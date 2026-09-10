@@ -166,7 +166,8 @@ class UncertaintyEngine {
       states.add(IntelligenceState.lowConfidence);
       reasons.add('Confidence is low or unknown.');
     }
-    if (now.toUtc().difference(event.temporal.observedAt.toUtc()) > staleAfter) {
+    if (now.toUtc().difference(event.temporal.observedAt.toUtc()) >
+        staleAfter) {
       states.add(IntelligenceState.stale);
       reasons.add('Latest observation is stale.');
     }
