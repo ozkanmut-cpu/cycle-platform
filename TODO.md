@@ -47,14 +47,14 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [ ] 🟠 Connected Health screen
 
 ## 5 — Intelligence foundations
-- [ ] 🔴 Personal Baseline Engine
-- [ ] 🔴 Temporal Query Engine
-- [ ] 🔴 Missingness Intelligence
-- [ ] 🔴 Information Value Engine
-- [ ] 🔴 Uncertainty Graph
-- [ ] 🟠 Contradiction Engine
-- [ ] 🟠 Zero-Log Days
-- [ ] 🟠 Health Data Time Machine
+- [x] 🔴 Personal Baseline Engine
+- [x] 🔴 Temporal Query Engine
+- [x] 🔴 Missingness Intelligence
+- [x] 🔴 Information Value Engine
+- [x] 🔴 Uncertainty Graph
+- [x] 🟠 Contradiction Engine
+- [x] 🟠 Zero-Log Days
+- [x] 🟠 Health Data Time Machine
 
 ## 6 — Permissions, backup and sync
 - [ ] 🔴 Permission Graph
