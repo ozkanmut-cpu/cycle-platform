@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'full refresh commits normalized event and new cursor together',
+    'full refresh commits normalized event, history and cursor together',
     () async {
       final cursorRepository = _MemoryCursorRepository();
       final commitSink = _FakeCommitter();
@@ -27,6 +27,10 @@ void main() {
       expect(commitSink.upserts.single.id, 'import:healthConnect:weight-1');
       expect(commitSink.upserts.single.eventType, 'body.weight');
       expect(commitSink.cursor?.value, 'token-1');
+      expect(commitSink.history?.source, storage.HealthImportSource.healthConnect);
+      expect(commitSink.history?.imported, 1);
+      expect(commitSink.history?.deleted, 0);
+      expect(commitSink.history?.usedFullRefresh, isTrue);
       expect(
         commitSink.auditEvents.single.action,
         storage.AuditAction.imported,
@@ -34,7 +38,7 @@ void main() {
     },
   );
 
-  test('incremental deletion maps tombstone and advances cursor', () async {
+  test('incremental deletion maps tombstone, history and cursor', () async {
     final cursorRepository = _MemoryCursorRepository();
     await cursorRepository.save(
       storage.PersistedHealthSyncCursor(
@@ -56,6 +60,9 @@ void main() {
     expect(result.usedFullRefresh, isFalse);
     expect(commitSink.deletedEventIds, ['import:healthConnect:weight-1']);
     expect(commitSink.cursor?.value, 'token-2');
+    expect(commitSink.history?.imported, 0);
+    expect(commitSink.history?.deleted, 1);
+    expect(commitSink.history?.usedFullRefresh, isFalse);
     expect(commitSink.auditEvents.single.action, storage.AuditAction.deleted);
   });
 }
@@ -169,6 +176,7 @@ class _FakeCommitter implements PatientHealthImportCommitter {
   List<HealthEvent> upserts = const [];
   List<String> deletedEventIds = const [];
   List<storage.AuditEvent> auditEvents = const [];
+  storage.PersistedHealthImportHistory? history;
   storage.PersistedHealthSyncCursor? cursor;
 
   @override
@@ -176,12 +184,14 @@ class _FakeCommitter implements PatientHealthImportCommitter {
     required Iterable<HealthEvent> upserts,
     required Iterable<String> deletedEventIds,
     required Iterable<storage.AuditEvent> auditEvents,
+    required storage.PersistedHealthImportHistory history,
     required storage.PersistedHealthSyncCursor cursor,
     required DateTime deletedAt,
   }) async {
     this.upserts = List<HealthEvent>.from(upserts);
     this.deletedEventIds = List<String>.from(deletedEventIds);
     this.auditEvents = List<storage.AuditEvent>.from(auditEvents);
+    this.history = history;
     this.cursor = cursor;
   }
 }
