@@ -241,6 +241,9 @@ jobs:
         run: flutter test
         working-directory: apps/doctor
 
+      - name: Test Patient HealthKit signing verifier
+        run: python3 -m unittest tool/test_verify_patient_healthkit_signing.py
+
       - name: Bootstrap native Patient shell
         run: bash tool/bootstrap_patient_native.sh
 
