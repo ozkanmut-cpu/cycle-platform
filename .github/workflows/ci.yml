@@ -250,6 +250,10 @@ jobs:
           python3 ../../tool/patch_patient_healthkit_read_scope.py
         working-directory: apps/patient
 
+      - name: Verify Patient HealthKit signing contract
+        run: python3 ../../tool/verify_patient_healthkit_signing.py --app-dir .
+        working-directory: apps/patient
+
       - name: Enforce Patient Android minimum SDK
         run: bash tool/ensure_patient_android_sdk.sh
 
@@ -296,6 +300,10 @@ jobs:
         run: |
           python3 ../../tool/configure_patient_healthkit.py
           python3 ../../tool/patch_patient_healthkit_read_scope.py
+        working-directory: apps/patient
+
+      - name: Verify Patient HealthKit signing contract
+        run: python3 ../../tool/verify_patient_healthkit_signing.py --app-dir .
         working-directory: apps/patient
 
       - name: Verify native Patient security
