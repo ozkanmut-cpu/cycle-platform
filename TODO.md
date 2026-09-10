@@ -59,14 +59,14 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 ## 6 — Permissions, backup and sync
 - [ ] 🔴 Permission Graph
 - [ ] 🔴 field-level permissions
-- [ ] 🔴 VIEW/NOTIFY/BACKUP/EXPORT separation
+- [x] 🔴 VIEW/NOTIFY/BACKUP/EXPORT separation
 - [ ] 🔴 purpose, date range and expiry
 - [ ] 🟠 Privacy Simulator
 - [ ] 🔴 .cyclevault backup
 - [ ] 🔴 recovery material
-- [ ] 🔴 QR pairing and per-recipient keys
-- [ ] 🔴 opaque E2EE relay envelope
-- [ ] 🔴 blind backup
+- [x] 🔴 QR pairing and per-recipient keys
+- [x] 🔴 opaque E2EE relay envelope
+- [x] 🔴 blind backup
 - [ ] 🟠 Recovery Drill
 
 ## 7 — Clinical domain
@@ -89,39 +89,39 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [ ] 🟠 kick counter and contraction timer
 
 ## 9 — Documents and interoperability
-- [ ] 🔴 document ingestion
-- [ ] 🔴 PDF parser / OCR fallback
-- [ ] 🔴 lab/imaging/pathology extraction
-- [ ] 🔴 human confirmation flow
-- [ ] 🔴 FHIR mappings
+- [x] 🔴 document ingestion
+- [x] 🔴 PDF parser / OCR fallback
+- [x] 🔴 lab/imaging/pathology extraction
+- [x] 🔴 human confirmation flow
+- [x] 🔴 FHIR mappings
 - [ ] 🟠 FHIR export bundle
 
 ## 10 — Clinical compression and AI
-- [ ] 🔴 Evidence Graph
-- [ ] 🔴 Clinical Compression
-- [ ] 🔴 Clinical Snapshot
+- [x] 🔴 Evidence Graph
+- [x] 🔴 Clinical Compression
+- [x] 🔴 Clinical Snapshot
 - [ ] 🔴 AI Orchestrator
 - [ ] 🔴 AI Context Firewall
 - [ ] 🔴 Evidence/Safety validators
-- [ ] 🔴 AI audit
+- [x] 🔴 AI audit
 - [ ] 🟠 AI Learned About Me
 - [ ] 🟠 Portable Clinical Package
 
 ## 11 — Doctor
-- [ ] 🔴 multi-patient Doctor shell
-- [ ] 🔴 What Changed/Matters/Missing/Uncertain/Conflicts/Open Loops
-- [ ] 🔴 natural-language structured record search
-- [ ] 🔴 Doctor Review Gate
-- [ ] 🟠 Clinical Reasoning Workspace
-- [ ] 🔴 Clinical Question Protocol
-- [ ] 🔴 Treatment Trial
+- [x] 🔴 multi-patient Doctor shell
+- [x] 🔴 What Changed/Matters/Missing/Uncertain/Conflicts/Open Loops
+- [x] 🔴 natural-language structured record search
+- [x] 🔴 Doctor Review Gate
+- [x] 🟠 Clinical Reasoning Workspace
+- [x] 🔴 Clinical Question Protocol
+- [x] 🔴 Treatment Trial
 - [ ] 🔴 result matching
 
 ## 12 — Partner
-- [ ] 🔴 Partner shell
-- [ ] 🔴 permission-aware read-only views
-- [ ] 🔴 private notification modes
-- [ ] 🔴 blind backup
+- [x] 🔴 Partner shell
+- [x] 🔴 permission-aware read-only views
+- [x] 🔴 private notification modes
+- [x] 🔴 blind backup
 - [ ] 🟠 support cards and Partner Signals
 
 ## 13 — Experience and validation
