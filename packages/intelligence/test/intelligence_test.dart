@@ -48,8 +48,7 @@ void main() {
       expect(assessment.states, {IntelligenceState.unknown});
     });
 
-    test('can represent estimated stale incomplete low-confidence conflict',
-        () {
+    test('can represent estimated stale incomplete low-confidence conflict', () {
       const engine = UncertaintyEngine(staleAfter: Duration(days: 7));
       final assessment = engine.assess(
         event: _event(
@@ -171,6 +170,30 @@ void main() {
       expect(slice.map((event) => event.id), ['feb']);
       expect(latest?.id, 'feb');
     });
+
+    test('knownAsOf excludes observations learned later', () {
+      const machine = HealthDataTimeMachine();
+      final events = [
+        _event(
+          'known-early',
+          60,
+          DateTime.utc(2026, 8, 1),
+          knownAt: DateTime.utc(2026, 8, 1),
+        ),
+        _event(
+          'learned-later',
+          80,
+          DateTime.utc(2026, 8, 2),
+          knownAt: DateTime.utc(2026, 9, 5),
+        ),
+      ];
+
+      final result = machine.knownAsOf(
+        events,
+        asOf: DateTime.utc(2026, 9, 1),
+      );
+      expect(result.map((event) => event.id), ['known-early']);
+    });
   });
 }
 
@@ -178,6 +201,7 @@ HealthEvent _event(
   String id,
   num value,
   DateTime observedAt, {
+  DateTime? knownAt,
   VerificationStatus verificationStatus = VerificationStatus.deviceMeasured,
   ConfidenceClass confidence = ConfidenceClass.high,
   DataState? dataState,
@@ -189,7 +213,11 @@ HealthEvent _event(
     value: value,
     unit: 'bpm',
     dataState: dataState,
-    temporal: TemporalMetadata(observedAt: observedAt, recordedAt: observedAt),
+    temporal: TemporalMetadata(
+      observedAt: observedAt,
+      recordedAt: observedAt,
+      knownAt: knownAt,
+    ),
     provenance: const Provenance(sourceKind: SourceKind.device),
     verificationStatus: verificationStatus,
     confidence: confidence,
