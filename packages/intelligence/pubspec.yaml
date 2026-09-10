@@ -1,0 +1,14 @@
+name: cycle_intelligence
+description: Deterministic baseline, uncertainty and temporal intelligence for Cycle.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  cycle_core_domain:
+    path: ../core_domain
+
+dev_dependencies:
+  test: ^1.25.8
