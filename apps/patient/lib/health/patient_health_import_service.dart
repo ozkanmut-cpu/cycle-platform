@@ -169,7 +169,8 @@ storage.HealthImportSource _historySource(
 ) => switch (sourcePlatform) {
   ingestion.HealthSourcePlatform.healthConnect =>
     storage.HealthImportSource.healthConnect,
-  ingestion.HealthSourcePlatform.healthKit => storage.HealthImportSource.healthKit,
+  ingestion.HealthSourcePlatform.healthKit =>
+    storage.HealthImportSource.healthKit,
   ingestion.HealthSourcePlatform.other => throw UnsupportedError(
     'Unsupported persistent health import source.',
   ),
