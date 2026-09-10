@@ -95,6 +95,17 @@ void main() {
       expect(conflicts, hasLength(1));
       expect(conflicts.single.reason, 'Conflicting numeric values.');
     });
+
+    test('detects explicit yes-no contradictions', () {
+      const engine = ContradictionEngine();
+      final when = DateTime.utc(2026, 9, 10, 11);
+      final conflicts = engine.detect([
+        _event('yes', 1, when, dataState: DataState.yes),
+        _event('no', 1, when, dataState: DataState.no),
+      ]);
+      expect(conflicts, hasLength(1));
+      expect(conflicts.single.reason, 'Conflicting yes/no states.');
+    });
   });
 
   group('Information value and zero-log day', () {
@@ -169,6 +180,7 @@ HealthEvent _event(
   DateTime observedAt, {
   VerificationStatus verificationStatus = VerificationStatus.deviceMeasured,
   ConfidenceClass confidence = ConfidenceClass.high,
+  DataState? dataState,
 }) {
   return HealthEvent(
     id: id,
@@ -176,6 +188,7 @@ HealthEvent _event(
     eventType: 'vitals.heart_rate',
     value: value,
     unit: 'bpm',
+    dataState: dataState,
     temporal: TemporalMetadata(observedAt: observedAt, recordedAt: observedAt),
     provenance: const Provenance(sourceKind: SourceKind.device),
     verificationStatus: verificationStatus,
