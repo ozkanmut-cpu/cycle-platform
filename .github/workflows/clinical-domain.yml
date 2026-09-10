@@ -1,0 +1,38 @@
+name: Clinical Domain
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/clinical_domain/**'
+      - '.github/workflows/clinical-domain.yml'
+  pull_request:
+    paths:
+      - 'packages/clinical_domain/**'
+      - '.github/workflows/clinical-domain.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Dependencies
+        run: dart pub get
+        working-directory: packages/clinical_domain
+
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed .
+        working-directory: packages/clinical_domain
+
+      - name: Analyze
+        run: dart analyze .
+        working-directory: packages/clinical_domain
+
+      - name: Test
+        run: dart test
+        working-directory: packages/clinical_domain
