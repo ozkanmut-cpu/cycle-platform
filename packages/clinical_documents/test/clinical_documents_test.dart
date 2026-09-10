@@ -7,7 +7,8 @@ void main() {
   final fixture = File('test/fixtures/clinical_document.txt').readAsBytesSync();
   final receivedAt = DateTime.utc(2026, 9, 10, 9);
 
-  test('direct ingestion preserves source and extracts normalized entities', () {
+  test('direct ingestion preserves source and extracts normalized entities',
+      () {
     final result = const ClinicalDocumentIngestionPipeline().ingest(
       ClinicalDocumentInput(
         id: 'doc-1',
@@ -21,7 +22,7 @@ void main() {
 
     expect(result.documentKind, ClinicalDocumentKind.pathology);
     expect(result.extraction.method, ExtractionMethod.direct);
-    expect(result.source.bytes, fixture);
+    expect(result.source.bytes, orderedEquals(fixture));
     expect(result.source.checksum, hasLength(16));
     expect(result.entities, hasLength(7));
 
@@ -51,7 +52,8 @@ void main() {
     expect(result.extraction.method, ExtractionMethod.ocr);
     expect(result.extraction.confidence, 0.82);
     expect(result.entities, isNotEmpty);
-    expect(result.entities.every((entity) => entity.requiresHumanConfirmation), isTrue);
+    expect(result.entities.every((entity) => entity.requiresHumanConfirmation),
+        isTrue);
   });
 
   test('FHIR mapping covers every required resource type', () {
@@ -88,7 +90,8 @@ void main() {
     expect(quantity['unit'], 'g/dL');
   });
 
-  test('ingestion fails deterministically when neither extractor yields text', () {
+  test('ingestion fails deterministically when neither extractor yields text',
+      () {
     expect(
       () => const ClinicalDocumentIngestionPipeline().ingest(
         ClinicalDocumentInput(
