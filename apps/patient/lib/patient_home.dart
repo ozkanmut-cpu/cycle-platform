@@ -353,10 +353,7 @@ class _PatientHomePageState extends State<PatientHomePage>
 
     return Stack(
       fit: StackFit.expand,
-      children: [
-        content,
-        if (_privacyCovered) _buildPrivateCover(strings),
-      ],
+      children: [content, if (_privacyCovered) _buildPrivateCover(strings)],
     );
   }
 }
