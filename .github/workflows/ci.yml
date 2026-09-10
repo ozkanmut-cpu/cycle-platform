@@ -48,6 +48,10 @@ jobs:
         run: dart pub get
         working-directory: packages/core_domain
 
+      - name: Intelligence dependencies
+        run: dart pub get
+        working-directory: packages/intelligence
+
       - name: Crypto dependencies
         run: dart pub get
         working-directory: packages/crypto
@@ -92,6 +96,10 @@ jobs:
       - name: Analyze core domain
         run: dart analyze .
         working-directory: packages/core_domain
+
+      - name: Analyze intelligence
+        run: dart analyze .
+        working-directory: packages/intelligence
 
       - name: Analyze crypto
         run: dart analyze .
@@ -144,6 +152,10 @@ jobs:
       - name: Test core domain
         run: dart test
         working-directory: packages/core_domain
+
+      - name: Test intelligence
+        run: dart test
+        working-directory: packages/intelligence
 
       - name: Test crypto
         run: dart test
