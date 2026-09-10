@@ -44,11 +44,16 @@ def _healthkit_enabled(value: Any) -> bool:
 
 
 def _project_bundle_ids(project_text: str) -> set[str]:
-    return {
+    bundle_ids = {
         match.strip()
         for match in re.findall(r"PRODUCT_BUNDLE_IDENTIFIER\s*=\s*([^;]+);", project_text)
         if match.strip() and "$" not in match
     }
+    # Flutter's generated RunnerTests target has its own bundle identifier. It is
+    # not the signed application target and must not make the app identity
+    # ambiguous for this signing gate.
+    app_bundle_ids = {bundle_id for bundle_id in bundle_ids if not bundle_id.endswith(".RunnerTests")}
+    return app_bundle_ids
 
 
 def verify_project(app_dir: Path) -> str:
@@ -76,7 +81,7 @@ def verify_project(app_dir: Path) -> str:
         raise SystemExit("No concrete PRODUCT_BUNDLE_IDENTIFIER found in Patient Xcode project.")
     if len(bundle_ids) != 1:
         raise SystemExit(
-            "Patient Xcode project contains multiple concrete bundle identifiers: "
+            "Patient Xcode project contains multiple concrete app bundle identifiers: "
             + ", ".join(sorted(bundle_ids))
         )
     return next(iter(bundle_ids))
