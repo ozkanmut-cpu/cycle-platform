@@ -1,0 +1,9 @@
+LABORATORY REPORT
+Reference range
+LAB | 718-7 | Hemoglobin | 13.2 | g/dl | 12.0-16.0
+IMAGING | CT-CHEST | Chest CT | No acute pulmonary finding
+PATHOLOGY | BIOPSY-1 | Gastric biopsy | Chronic gastritis
+CONDITION | K29.7 | Gastritis | active
+SERVICE_REQUEST | LAB-CBC | Complete blood count | repeat in 3 months
+MEDICATION | RX-1 | Omeprazole | 20 mg daily
+PROCEDURE | PROC-1 | Upper endoscopy | completed
