@@ -38,8 +38,7 @@ class PatientLocalizations {
       : 'Only log what matters. Cycle keeps the rest quiet.';
   String get cycleDayUnknown =>
       isTurkish ? 'Döngü günü bilinmiyor' : 'Cycle day unknown';
-  String cycleDay(int day) =>
-      isTurkish ? 'Döngü günü $day' : 'Cycle day $day';
+  String cycleDay(int day) => isTurkish ? 'Döngü günü $day' : 'Cycle day $day';
   String get logPeriodStartHint => isTurkish
       ? 'Başladığında adet başlangıcını kaydet.'
       : 'Log a period start when it happens.';
