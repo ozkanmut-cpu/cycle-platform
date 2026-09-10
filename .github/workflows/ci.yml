@@ -60,6 +60,10 @@ jobs:
         run: dart pub get
         working-directory: packages/clinical_copilot
 
+      - name: Sharing dependencies
+        run: dart pub get
+        working-directory: packages/sharing
+
       - name: Crypto dependencies
         run: dart pub get
         working-directory: packages/crypto
@@ -116,6 +120,10 @@ jobs:
       - name: Analyze clinical copilot
         run: dart analyze .
         working-directory: packages/clinical_copilot
+
+      - name: Analyze sharing
+        run: dart analyze .
+        working-directory: packages/sharing
 
       - name: Analyze crypto
         run: dart analyze .
@@ -181,6 +189,10 @@ jobs:
         run: dart test
         working-directory: packages/clinical_copilot
 
+      - name: Test sharing
+        run: dart test
+        working-directory: packages/sharing
+
       - name: Test crypto
         run: dart test
         working-directory: packages/crypto
@@ -220,6 +232,10 @@ jobs:
       - name: Test Patient
         run: flutter test
         working-directory: apps/patient
+
+      - name: Test Partner
+        run: flutter test
+        working-directory: apps/partner
 
       - name: Test Doctor
         run: flutter test

@@ -1,0 +1,16 @@
+name: cycle_sharing
+description: Secure recipient-scoped sharing, pairing, relay and blind-backup primitives for Cycle.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  cycle_crypto:
+    path: ../crypto
+  cycle_permissions:
+    path: ../permissions
+
+dev_dependencies:
+  test: ^1.25.8

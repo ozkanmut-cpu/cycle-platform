@@ -11,6 +11,14 @@ dependencies:
     sdk: flutter
   cycle_core_domain:
     path: ../../packages/core_domain
+  cycle_permissions:
+    path: ../../packages/permissions
+  cycle_sharing:
+    path: ../../packages/sharing
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true
