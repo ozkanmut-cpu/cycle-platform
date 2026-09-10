@@ -54,6 +54,42 @@ class HealthConnectSyncAdapter implements HealthSourceSyncAdapter {
       gateway.readChanges(token: token, categories: categories);
 }
 
+class HealthKitReadAccessScope {
+  const HealthKitReadAccessScope({
+    required this.availableCategories,
+    required this.requestStatusUnnecessaryCategories,
+    required this.queryVisibleCategories,
+    this.earliestAuthorizedAt = const <HealthDataCategory, DateTime>{},
+  });
+
+  final Set<HealthDataCategory> availableCategories;
+
+  /// Categories for which HealthKit says presenting another authorization
+  /// sheet is unnecessary. This is deliberately not treated as a read grant.
+  final Set<HealthDataCategory> requestStatusUnnecessaryCategories;
+
+  /// Categories for which the app has actually observed readable samples in
+  /// the current query context. Empty means unknown/no visible samples, not No.
+  final Set<HealthDataCategory> queryVisibleCategories;
+
+  /// A date is present only when HealthKit positively identifies limited
+  /// history for that category. Absence is not evidence of denial or full
+  /// access.
+  final Map<HealthDataCategory, DateTime> earliestAuthorizedAt;
+
+  Set<HealthDataCategory> get queryCandidateCategories => availableCategories;
+
+  Set<HealthDataCategory> get unknownCategories =>
+      availableCategories.difference(queryVisibleCategories);
+
+  bool hasLimitedHistory(HealthDataCategory category) =>
+      earliestAuthorizedAt.containsKey(category);
+}
+
+abstract interface class HealthKitReadAccessGateway {
+  Future<HealthKitReadAccessScope> readAccessScope();
+}
+
 class HealthKitAnchorPage {
   const HealthKitAnchorPage({
     required this.upserts,
@@ -71,6 +107,8 @@ class HealthKitAnchorPage {
 }
 
 abstract interface class HealthKitGateway {
+  /// Legacy query-candidate API. HealthKit cannot expose definitive read-grant
+  /// state, so implementations must not infer denial from an empty query.
   Future<Set<HealthDataCategory>> grantedCategories();
 
   Future<List<RawHealthRecord>> readRecords({
@@ -97,9 +135,20 @@ class HealthKitSyncAdapter implements HealthSourceSyncAdapter {
   @override
   HealthSourcePlatform get sourcePlatform => HealthSourcePlatform.healthKit;
 
+  Future<HealthKitReadAccessScope?> readAccessScope() async {
+    final current = gateway;
+    if (current is HealthKitReadAccessGateway) {
+      return current.readAccessScope();
+    }
+    return null;
+  }
+
   @override
-  Future<Set<HealthDataCategory>> grantedCategories() =>
-      gateway.grantedCategories();
+  Future<Set<HealthDataCategory>> grantedCategories() async {
+    final scope = await readAccessScope();
+    if (scope != null) return scope.queryCandidateCategories;
+    return gateway.grantedCategories();
+  }
 
   @override
   Future<List<RawHealthRecord>> readInitial({
