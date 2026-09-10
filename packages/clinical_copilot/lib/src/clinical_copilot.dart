@@ -62,7 +62,8 @@ class ClinicalSnapshot {
     required Map<SnapshotSectionKind, List<SnapshotItem>> sections,
   }) : sections = Map.unmodifiable(
           sections.map(
-            (key, value) => MapEntry(key, List<SnapshotItem>.unmodifiable(value)),
+            (key, value) =>
+                MapEntry(key, List<SnapshotItem>.unmodifiable(value)),
           ),
         );
 
@@ -433,13 +434,12 @@ class ClinicalSnapshotEngine {
     Iterable<String> expectedEventTypes = const <String>[],
     Iterable<String> openLoops = const <String>[],
   }) {
-    final patientEvents = events
-        .where((event) => event.subjectId == patient.id)
-        .toList()
-      ..sort((a, b) {
-        final time = a.temporal.observedAt.compareTo(b.temporal.observedAt);
-        return time != 0 ? time : a.id.compareTo(b.id);
-      });
+    final patientEvents =
+        events.where((event) => event.subjectId == patient.id).toList()
+          ..sort((a, b) {
+            final time = a.temporal.observedAt.compareTo(b.temporal.observedAt);
+            return time != 0 ? time : a.id.compareTo(b.id);
+          });
 
     final sections = <SnapshotSectionKind, List<SnapshotItem>>{
       for (final kind in SnapshotSectionKind.values) kind: <SnapshotItem>[],
@@ -524,12 +524,14 @@ class ClinicalSnapshotEngine {
 
       final unknownLike = missingness.isUnknownLike(latest);
       if (!unknownLike &&
-          (latest.isClinicalSource || latest.confidence == ConfidenceClass.high)) {
+          (latest.isClinicalSource ||
+              latest.confidence == ConfidenceClass.high)) {
         sections[SnapshotSectionKind.whatMatters]!.add(
           SnapshotItem(
             id: 'matter-${latest.id}',
             title: entry.key,
-            detail: latest.value?.toString() ?? latest.dataState?.name ?? 'present',
+            detail:
+                latest.value?.toString() ?? latest.dataState?.name ?? 'present',
             evidenceIds: <String>[latest.id],
             priority: latest.isClinicalSource ? 90 : 50,
           ),
@@ -574,6 +576,7 @@ class ClinicalSnapshotEngine {
         maximum: event.value!.toDouble(),
         standardDeviation: 0,
         windowStart: event.temporal.observedAt,
-        windowEnd: event.temporal.observedAt.add(const Duration(microseconds: 1)),
+        windowEnd:
+            event.temporal.observedAt.add(const Duration(microseconds: 1)),
       );
 }
