@@ -13,6 +13,7 @@ class PersistedHealthImportHistory {
     required this.unmapped,
     required this.deleted,
     required this.usedFullRefresh,
+    this.limitedHistoryFrom = const <String, DateTime>{},
   });
 
   final String id;
@@ -26,6 +27,11 @@ class PersistedHealthImportHistory {
   final int unmapped;
   final int deleted;
   final bool usedFullRefresh;
+
+  /// Per-category lower bounds positively reported by HealthKit for limited
+  /// history access. Missing entries remain Unknown and must not be treated as
+  /// full access or denial.
+  final Map<String, DateTime> limitedHistoryFrom;
 }
 
 abstract interface class HealthImportHistoryRepository {
