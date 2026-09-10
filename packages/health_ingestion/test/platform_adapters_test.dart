@@ -45,6 +45,30 @@ void main() {
     );
   });
 
+  test('HealthKit initial read clamps limited categories only', () async {
+    final gateway = _ScopedHealthKitGateway();
+    final adapter = HealthKitSyncAdapter(gateway);
+
+    await adapter.readInitial(
+      from: DateTime.utc(2026, 8, 1),
+      to: DateTime.utc(2026, 9, 1),
+      categories: {
+        HealthDataCategory.vitals,
+        HealthDataCategory.sleep,
+      },
+    );
+
+    expect(gateway.reads, hasLength(2));
+    final vitals = gateway.reads.singleWhere(
+      (read) => read.category == HealthDataCategory.vitals,
+    );
+    final sleep = gateway.reads.singleWhere(
+      (read) => read.category == HealthDataCategory.sleep,
+    );
+    expect(vitals.from, DateTime.utc(2026, 8, 11));
+    expect(sleep.from, DateTime.utc(2026, 8, 1));
+  });
+
   test('Health Connect adapter delegates token sync to gateway', () async {
     final gateway = _FakeHealthConnectGateway();
     final adapter = HealthConnectSyncAdapter(gateway);
@@ -72,6 +96,13 @@ RawHealthRecord _record(HealthSourcePlatform platform, String id) =>
       value: 70,
       unit: 'bpm',
     );
+
+class _ReadCall {
+  const _ReadCall(this.category, this.from);
+
+  final HealthDataCategory category;
+  final DateTime from;
+}
 
 class _FakeHealthKitGateway implements HealthKitGateway {
   @override
@@ -107,6 +138,8 @@ class _FakeHealthKitGateway implements HealthKitGateway {
 
 class _ScopedHealthKitGateway
     implements HealthKitGateway, HealthKitReadAccessGateway {
+  final List<_ReadCall> reads = [];
+
   @override
   Future<HealthKitReadAccessScope> readAccessScope() async =>
       HealthKitReadAccessScope(
@@ -149,8 +182,12 @@ class _ScopedHealthKitGateway
     required DateTime from,
     required DateTime to,
     required Set<HealthDataCategory> categories,
-  }) async =>
-      const [];
+  }) async {
+    for (final category in categories) {
+      reads.add(_ReadCall(category, from));
+    }
+    return const [];
+  }
 }
 
 class _FakeHealthConnectGateway implements HealthConnectGateway {
