@@ -57,17 +57,17 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🟠 Health Data Time Machine
 
 ## 6 — Permissions, backup and sync
-- [ ] 🔴 Permission Graph
-- [ ] 🔴 field-level permissions
+- [x] 🔴 Permission Graph
+- [x] 🔴 field-level permissions
 - [x] 🔴 VIEW/NOTIFY/BACKUP/EXPORT separation
-- [ ] 🔴 purpose, date range and expiry
-- [ ] 🟠 Privacy Simulator
-- [ ] 🔴 .cyclevault backup
-- [ ] 🔴 recovery material
+- [x] 🔴 purpose, date range and expiry
+- [x] 🟠 Privacy Simulator
+- [x] 🔴 .cyclevault backup
+- [x] 🔴 recovery material
 - [x] 🔴 QR pairing and per-recipient keys
 - [x] 🔴 opaque E2EE relay envelope
 - [x] 🔴 blind backup
-- [ ] 🟠 Recovery Drill
+- [x] 🟠 Recovery Drill
 
 ## 7 — Clinical domain
 - [x] 🔴 Condition Pack framework
