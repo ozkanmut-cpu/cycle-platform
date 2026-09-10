@@ -95,37 +95,41 @@ void main() {
     },
   );
 
-  test('HealthKit bridge decodes limited-history scope without guessing denial',
-      () async {
-    final earliest = DateTime.utc(2026, 8, 11);
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (call) async {
-          if (call.method == 'healthKit.readAccessScope') {
-            return {
-              'availableCategories': ['vitals', 'sleep'],
-              'requestStatusUnnecessaryCategories': ['vitals'],
-              'queryVisibleCategories': ['sleep'],
-              'earliestAuthorizedAtEpochMillis': {
-                'vitals': earliest.millisecondsSinceEpoch,
-              },
-            };
-          }
-          return null;
-        });
+  test(
+    'HealthKit bridge decodes limited-history scope without guessing denial',
+    () async {
+      final earliest = DateTime.utc(2026, 8, 11);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            if (call.method == 'healthKit.readAccessScope') {
+              return {
+                'availableCategories': ['vitals', 'sleep'],
+                'requestStatusUnnecessaryCategories': ['vitals'],
+                'queryVisibleCategories': ['sleep'],
+                'earliestAuthorizedAtEpochMillis': {
+                  'vitals': earliest.millisecondsSinceEpoch,
+                },
+              };
+            }
+            return null;
+          });
 
-    final scope = await HealthKitSyncAdapter(bridge.healthKit).readAccessScope();
+      final scope = await HealthKitSyncAdapter(
+        bridge.healthKit,
+      ).readAccessScope();
 
-    expect(scope.availableCategories, {
-      HealthDataCategory.vitals,
-      HealthDataCategory.sleep,
-    });
-    expect(scope.requestStatusUnnecessaryCategories, {
-      HealthDataCategory.vitals,
-    });
-    expect(scope.queryVisibleCategories, {HealthDataCategory.sleep});
-    expect(scope.unknownCategories, {HealthDataCategory.vitals});
-    expect(scope.earliestAuthorizedAt[HealthDataCategory.vitals], earliest);
-  });
+      expect(scope.availableCategories, {
+        HealthDataCategory.vitals,
+        HealthDataCategory.sleep,
+      });
+      expect(scope.requestStatusUnnecessaryCategories, {
+        HealthDataCategory.vitals,
+      });
+      expect(scope.queryVisibleCategories, {HealthDataCategory.sleep});
+      expect(scope.unknownCategories, {HealthDataCategory.vitals});
+      expect(scope.earliestAuthorizedAt[HealthDataCategory.vitals], earliest);
+    },
+  );
 
   test('HealthKit bridge fails closed when native scope is absent', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
