@@ -2,6 +2,7 @@ import 'package:cycle_core_domain/cycle_core_domain.dart';
 import 'package:flutter/material.dart';
 
 import 'cycle_timeline.dart';
+import 'patient_localizations.dart';
 
 class PatientTimelineView extends StatelessWidget {
   const PatientTimelineView({
@@ -17,10 +18,9 @@ class PatientTimelineView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = PatientLocalizations.of(context);
     if (events.isEmpty) {
-      return const Center(
-        child: Text('Nothing logged yet. Add something only when useful.'),
-      );
+      return Center(child: Text(strings.nothingLogged));
     }
 
     final timeline = CycleTimeline(events);
@@ -49,7 +49,7 @@ class PatientTimelineView extends StatelessWidget {
                     const SizedBox(width: 8),
                     Chip(
                       visualDensity: VisualDensity.compact,
-                      label: Text('Cycle day $cycleDay'),
+                      label: Text(strings.cycleDay(cycleDay)),
                     ),
                   ],
                 ],
