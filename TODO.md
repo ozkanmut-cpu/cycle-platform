@@ -10,13 +10,13 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 Clinical/regulatory feature classification
 
 ## 1 — Canonical domain
-- [ ] 🔴 HealthEvent
-- [ ] 🔴 Observation/value/unit model
-- [ ] 🔴 Episode model
-- [ ] 🔴 Provenance
-- [ ] 🔴 YES/NO/UNKNOWN/NOT_RECORDED/NOT_APPLICABLE semantics
-- [ ] 🔴 temporal metadata + knowledge time
-- [ ] 🔴 immutable identifiers and schema versioning
+- [x] 🔴 HealthEvent
+- [x] 🔴 Observation/value/unit model
+- [x] 🔴 Episode model
+- [x] 🔴 Provenance
+- [x] 🔴 YES/NO/UNKNOWN/NOT_RECORDED/NOT_APPLICABLE semantics
+- [x] 🔴 temporal metadata + knowledge time
+- [x] 🔴 immutable identifiers and schema versioning
 
 ## 2 — Local security
 - [ ] 🔴 encrypted SQLite
