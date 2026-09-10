@@ -27,7 +27,7 @@ void main() {
 
     expect(en.cycleDay(7), 'Cycle day 7');
     expect(tr.cycleDay(7), 'Döngü günü 7');
-    expect(en.loggedEventsCount(2), '2 logged events');
+    expect(en.loggedEventsCount(2), '2 logged event(s)');
     expect(tr.loggedEventsCount(2), '2 kayıtlı olay');
   });
 
