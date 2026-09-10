@@ -8,7 +8,7 @@ void main() {
   );
 
   group('fertility domain', () {
-    test('sexual activity does not infer contraception from missing data', () {
+    test('sexual activity defaults to private and does not infer sharing', () {
       final event = SexualActivityEvent(
         id: 'sex-1',
         occurredAt: DateTime.utc(2026, 9, 1),
@@ -17,6 +17,29 @@ void main() {
 
       expect(event.contraceptionUsed, isNull);
       expect(event.userMarkedConceptionRelevant, isFalse);
+      expect(event.privacy, SexualActivityPrivacy.private);
+      expect(event.dataSharingConsent, DataSharingConsent.notRecorded);
+      expect(event.mayShareWithCareTeam, isFalse);
+    });
+
+    test('care-team sharing requires explicit visibility and consent', () {
+      final allowed = SexualActivityEvent(
+        id: 'sex-share',
+        occurredAt: DateTime.utc(2026, 9, 1),
+        provenance: provenance,
+        privacy: SexualActivityPrivacy.sharedWithCareTeam,
+        dataSharingConsent: DataSharingConsent.allowed,
+      );
+      final withdrawn = SexualActivityEvent(
+        id: 'sex-withdrawn',
+        occurredAt: DateTime.utc(2026, 9, 1),
+        provenance: provenance,
+        privacy: SexualActivityPrivacy.sharedWithCareTeam,
+        dataSharingConsent: DataSharingConsent.withdrawn,
+      );
+
+      expect(allowed.mayShareWithCareTeam, isTrue);
+      expect(withdrawn.mayShareWithCareTeam, isFalse);
     });
 
     test(
@@ -98,6 +121,24 @@ void main() {
       },
     );
 
+    test('pregnancy episode rejects an end before its start', () {
+      final dating = PregnancyDating(
+        estimatedStartDate: DateTime.utc(2026, 8, 1),
+        basis: 'lmp',
+        provenance: provenance,
+      );
+
+      expect(
+        () => PregnancyEpisode(
+          id: 'preg-invalid',
+          startedAt: DateTime.utc(2026, 8, 2),
+          endedAt: DateTime.utc(2026, 8, 1),
+          dating: dating,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
     test('postpartum episode links to pregnancy episode explicitly', () {
       final postpartum = PostpartumEpisode(
         id: 'post-1',
@@ -107,6 +148,18 @@ void main() {
 
       expect(postpartum.pregnancyEpisodeId, 'preg-1');
       expect(postpartum.isActive, isTrue);
+    });
+
+    test('postpartum episode rejects an end before its start', () {
+      expect(
+        () => PostpartumEpisode(
+          id: 'post-invalid',
+          pregnancyEpisodeId: 'preg-1',
+          startedAt: DateTime.utc(2027, 5, 2),
+          endedAt: DateTime.utc(2027, 5, 1),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
     });
 
     test('safety disposition vocabulary contains no treatment decision', () {
