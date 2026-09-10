@@ -17,23 +17,19 @@ class SqlCipherHealthImportHistoryRepository
     DatabaseExecutor executor,
     PersistedHealthImportHistory entry,
   ) async {
-    await executor.insert(
-      'health_import_history',
-      <String, Object?>{
-        'id': entry.id,
-        'subject_id': entry.subjectId,
-        'source': entry.source.name,
-        'started_at': entry.startedAt.toUtc().toIso8601String(),
-        'finished_at': entry.finishedAt.toUtc().toIso8601String(),
-        'imported': entry.imported,
-        'skipped_permission': entry.skippedPermission,
-        'skipped_duplicate': entry.skippedDuplicate,
-        'unmapped': entry.unmapped,
-        'deleted': entry.deleted,
-        'used_full_refresh': entry.usedFullRefresh ? 1 : 0,
-      },
-      conflictAlgorithm: ConflictAlgorithm.abort,
-    );
+    await executor.insert('health_import_history', <String, Object?>{
+      'id': entry.id,
+      'subject_id': entry.subjectId,
+      'source': entry.source.name,
+      'started_at': entry.startedAt.toUtc().toIso8601String(),
+      'finished_at': entry.finishedAt.toUtc().toIso8601String(),
+      'imported': entry.imported,
+      'skipped_permission': entry.skippedPermission,
+      'skipped_duplicate': entry.skippedDuplicate,
+      'unmapped': entry.unmapped,
+      'deleted': entry.deleted,
+      'used_full_refresh': entry.usedFullRefresh ? 1 : 0,
+    }, conflictAlgorithm: ConflictAlgorithm.abort);
   }
 
   @override
