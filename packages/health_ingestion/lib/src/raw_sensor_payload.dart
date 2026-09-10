@@ -17,8 +17,7 @@ class RawSensorPayload {
   final String? contentType;
   final Map<String, Object?> metadata;
 
-  String get storageId =>
-      'raw:${sourcePlatform.name}:$sourceRecordId';
+  String get storageId => 'raw:${sourcePlatform.name}:$sourceRecordId';
 }
 
 abstract interface class RawSensorPayloadSink {
