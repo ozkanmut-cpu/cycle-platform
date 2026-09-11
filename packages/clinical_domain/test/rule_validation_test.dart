@@ -23,7 +23,10 @@ void main() {
       guidelineIdentifier: 'test-guideline',
       guidelineVersion: '1.0.0',
       report: const SymptomReport(symptomKeys: {'pain'}),
-      packs: [pack('b', {'pain'}), pack('a', {'pain'})],
+      packs: [
+        pack('b', {'pain'}),
+        pack('a', {'pain'})
+      ],
       expectedConfidence: RoutingConfidence.high,
       expectedCandidateIds: const ['a', 'b'],
     );
@@ -47,7 +50,9 @@ void main() {
         symptomKeys: {},
         unknownKeys: {' Bleeding ', 'PAIN'},
       ),
-      packs: [pack('a', {'pain'})],
+      packs: [
+        pack('a', {'pain'})
+      ],
       expectedConfidence: RoutingConfidence.insufficientInformation,
       expectedCandidateIds: const [],
       expectedMissingInformation: const {'bleeding', 'pain'},
@@ -62,7 +67,9 @@ void main() {
       guidelineIdentifier: 'test-guideline',
       guidelineVersion: '2.0.0',
       report: const SymptomReport(symptomKeys: {'pain'}),
-      packs: [pack('a', {'pain'})],
+      packs: [
+        pack('a', {'pain'})
+      ],
       expectedConfidence: RoutingConfidence.high,
       expectedCandidateIds: const ['a'],
     );
@@ -75,7 +82,9 @@ void main() {
   });
 
   test('equivalent symptom input ordering produces the same result', () {
-    final packs = [pack('a', {'pain', 'bleeding'})];
+    final packs = [
+      pack('a', {'pain', 'bleeding'})
+    ];
     RoutingValidationFixture fixture(Set<String> symptoms) =>
         RoutingValidationFixture(
           id: 'ordering',
