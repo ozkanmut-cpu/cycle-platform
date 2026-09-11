@@ -25,11 +25,8 @@ jobs:
         run: dart pub get
         working-directory: packages/clinical_domain
 
-      - name: Format diagnostic
-        run: |
-          dart format .
-          git diff -- .
-          git diff --exit-code -- .
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed .
         working-directory: packages/clinical_domain
 
       - name: Analyze
