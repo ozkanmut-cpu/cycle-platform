@@ -57,10 +57,10 @@ class PregnancyRuleValidationResult {
   final PregnancyRuleValidationReason reason;
 
   Map<String, String> toJson() => {
-    'fixtureId': fixtureId,
-    'status': status.name,
-    'reason': reason.name,
-  };
+        'fixtureId': fixtureId,
+        'status': status.name,
+        'reason': reason.name,
+      };
 }
 
 class PregnancySafetyRuleValidator {
@@ -86,7 +86,8 @@ class PregnancySafetyRuleValidator {
 
     final ruleIds = results.map((result) => result.ruleId).toList();
     if (!_sameList(ruleIds, fixture.expectedRuleIds)) {
-      return _failed(fixture.id, PregnancyRuleValidationReason.ruleOrderMismatch);
+      return _failed(
+          fixture.id, PregnancyRuleValidationReason.ruleOrderMismatch);
     }
 
     final dispositions = results.map((result) => result.disposition).toList();
@@ -99,7 +100,8 @@ class PregnancySafetyRuleValidator {
 
     final evidenceIds = results.expand((result) => result.evidenceIds).toSet();
     if (!_sameSet(evidenceIds, fixture.expectedEvidenceIds)) {
-      return _failed(fixture.id, PregnancyRuleValidationReason.evidenceMismatch);
+      return _failed(
+          fixture.id, PregnancyRuleValidationReason.evidenceMismatch);
     }
 
     final unsafe = results.any((result) {
@@ -127,11 +129,12 @@ class PregnancySafetyRuleValidator {
   static PregnancyRuleValidationResult _failed(
     String id,
     PregnancyRuleValidationReason reason,
-  ) => PregnancyRuleValidationResult(
-    fixtureId: id,
-    status: PregnancyRuleValidationStatus.failed,
-    reason: reason,
-  );
+  ) =>
+      PregnancyRuleValidationResult(
+        fixtureId: id,
+        status: PregnancyRuleValidationStatus.failed,
+        reason: reason,
+      );
 
   static bool _sameList<T>(List<T> a, List<T> b) {
     if (a.length != b.length) return false;
