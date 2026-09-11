@@ -24,29 +24,30 @@ void main() {
       PregnancySafetyDisposition.reviewRecommended,
     ],
     Set<String> expectedEvidenceIds = const {'symptom-1'},
-  }) => PregnancySafetyValidationFixture(
-    id: 'pregnancy-safety',
-    ruleSet: PregnancySafetyRuleSetVersion(
-      identifier: 'pregnancy-safety',
-      version: version,
-    ),
-    expectedRuleSet: const PregnancySafetyRuleSetVersion(
-      identifier: 'pregnancy-safety',
-      version: '1.0.0',
-    ),
-    episode: episode,
-    vitals: const [],
-    symptoms: [
-      PregnancySymptomObservation(
-        symptomKey: 'pain',
-        observedAt: DateTime.utc(2026, 1, 2),
-        provenance: provenance,
-      ),
-    ],
-    expectedRuleIds: expectedRuleIds,
-    expectedDispositions: expectedDispositions,
-    expectedEvidenceIds: expectedEvidenceIds,
-  );
+  }) =>
+      PregnancySafetyValidationFixture(
+        id: 'pregnancy-safety',
+        ruleSet: PregnancySafetyRuleSetVersion(
+          identifier: 'pregnancy-safety',
+          version: version,
+        ),
+        expectedRuleSet: const PregnancySafetyRuleSetVersion(
+          identifier: 'pregnancy-safety',
+          version: '1.0.0',
+        ),
+        episode: episode,
+        vitals: const [],
+        symptoms: [
+          PregnancySymptomObservation(
+            symptomKey: 'pain',
+            observedAt: DateTime.utc(2026, 1, 2),
+            provenance: provenance,
+          ),
+        ],
+        expectedRuleIds: expectedRuleIds,
+        expectedDispositions: expectedDispositions,
+        expectedEvidenceIds: expectedEvidenceIds,
+      );
 
   test('passes review recommendation with evidence', () {
     final result = validator.validate(
@@ -145,7 +146,8 @@ class _Kernel implements PregnancySafetyKernel {
     required PregnancyEpisode episode,
     required List<PregnancyVitalObservation> vitals,
     required List<PregnancySymptomObservation> symptoms,
-  }) => results;
+  }) =>
+      results;
 }
 
 class _CountingKernel implements PregnancySafetyKernel {
