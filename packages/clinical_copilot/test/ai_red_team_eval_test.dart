@@ -50,7 +50,9 @@ void main() {
       final result = validator.validate(
         output: AiCandidateOutput(
           text: 'Claim',
-          claims: [AiClaim(text: 'Claim', evidenceIds: const ['evt-missing'])],
+          claims: [
+            AiClaim(text: 'Claim', evidenceIds: const ['evt-missing'])
+          ],
         ),
         availableEvidenceIds: const {'evt-known'},
       );
@@ -124,7 +126,8 @@ void main() {
       expect(result.reasons, contains(AiValidationReason.doctorReviewRequired));
     });
 
-    test('prompt-injection-like text cannot override structured safety action', () {
+    test('prompt-injection-like text cannot override structured safety action',
+        () {
       const validator = AiSafetyValidator();
       final result = validator.validate(
         AiCandidateOutput(
