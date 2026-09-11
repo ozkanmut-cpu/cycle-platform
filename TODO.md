@@ -132,7 +132,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 biometrics/PIN
 - [x] 🔴 security/crypto review
 - [x] 🔴 clinical rule validation
-- [ ] 🔴 AI red-team/evals
+- [x] 🔴 AI red-team/evals
 - [x] 🔴 backup/recovery torture tests
 - [x] 🔴 sync conflict tests
 - [ ] 🔴 patient and doctor usability testing
