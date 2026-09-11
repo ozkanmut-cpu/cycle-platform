@@ -25,11 +25,8 @@ jobs:
           sdk: stable
       - name: Dependencies
         run: dart pub get
-      - name: Format diagnostic
-        run: |
-          dart format .
-          git diff -- .
-          git diff --exit-code -- .
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
         run: dart analyze --fatal-infos
       - name: Test
