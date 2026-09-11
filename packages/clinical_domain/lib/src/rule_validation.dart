@@ -82,7 +82,8 @@ class SymptomRoutingRuleValidator {
       return _failed(fixture.id, RuleValidationReason.candidateOrderMismatch);
     }
 
-    if (!_sameSet(result.missingInformation, fixture.expectedMissingInformation)) {
+    if (!_sameSet(
+        result.missingInformation, fixture.expectedMissingInformation)) {
       return _failed(
         fixture.id,
         RuleValidationReason.missingInformationMismatch,
