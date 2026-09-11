@@ -157,7 +157,8 @@ void main() {
       expect(second.reasons, first.reasons);
     });
 
-    test('orchestrator fails closed before model invocation on blocked context', () {
+    test('orchestrator fails closed before model invocation on blocked context',
+        () {
       const orchestrator = AiOrchestrator();
       var modelInvoked = false;
       final result = orchestrator.run(
@@ -189,7 +190,8 @@ void main() {
         [AiOrchestrationStage.contextFirewall],
       );
       expect(
-        result.audit.any((entry) => entry.stage == AiOrchestrationStage.completed),
+        result.audit
+            .any((entry) => entry.stage == AiOrchestrationStage.completed),
         isFalse,
       );
     });
@@ -230,7 +232,8 @@ void main() {
       expect(result.audit.last.disposition, AiValidationDisposition.fail);
       expect(result.audit.last.detail, contains('prescribing'));
       expect(
-        result.audit.any((entry) => entry.stage == AiOrchestrationStage.completed),
+        result.audit
+            .any((entry) => entry.stage == AiOrchestrationStage.completed),
         isFalse,
       );
     });
