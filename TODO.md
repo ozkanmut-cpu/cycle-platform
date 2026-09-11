@@ -131,7 +131,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 app switcher privacy
 - [x] 🔴 biometrics/PIN
 - [x] 🔴 security/crypto review
-- [ ] 🔴 clinical rule validation
+- [x] 🔴 clinical rule validation
 - [ ] 🔴 AI red-team/evals
 - [x] 🔴 backup/recovery torture tests
 - [x] 🔴 sync conflict tests
