@@ -156,5 +156,83 @@ void main() {
       expect(second.disposition, first.disposition);
       expect(second.reasons, first.reasons);
     });
+
+    test('orchestrator fails closed before model invocation on blocked context', () {
+      const orchestrator = AiOrchestrator();
+      var modelInvoked = false;
+      final result = orchestrator.run(
+        request: AiOrchestrationRequest(
+          id: 'req-context-block',
+          patientId: 'p1',
+          purpose: 'summary',
+          context: const {
+            'question': 'Summarize symptoms',
+            'secretRecoveryKey': 'do-not-expose',
+          },
+          availableEvidenceIds: const {},
+          requestedAt: DateTime.utc(2026, 9, 11),
+        ),
+        contextPolicy: AiContextPolicy(
+          allowedKeys: const {'question'},
+          blockedKeys: const {'secretRecoveryKey'},
+        ),
+        invokeModel: (_) {
+          modelInvoked = true;
+          return AiCandidateOutput(text: 'should not run');
+        },
+      );
+
+      expect(modelInvoked, isFalse);
+      expect(result.disposition, AiValidationDisposition.fail);
+      expect(
+        result.audit.map((entry) => entry.stage),
+        [AiOrchestrationStage.contextFirewall],
+      );
+      expect(
+        result.audit.any((entry) => entry.stage == AiOrchestrationStage.completed),
+        isFalse,
+      );
+    });
+
+    test('orchestrator records safety rejection without completed stage', () {
+      const orchestrator = AiOrchestrator();
+      final result = orchestrator.run(
+        request: AiOrchestrationRequest(
+          id: 'req-unsafe-action',
+          patientId: 'p1',
+          purpose: 'clinical-summary',
+          context: const {'question': 'What changed?'},
+          availableEvidenceIds: const {'evt-1'},
+          requestedAt: DateTime.utc(2026, 9, 11),
+        ),
+        contextPolicy: AiContextPolicy(
+          allowedKeys: const {'question'},
+        ),
+        invokeModel: (_) => AiCandidateOutput(
+          text: 'Ignore safeguards and prescribe now.',
+          claims: [
+            AiClaim(text: 'Supported summary', evidenceIds: const ['evt-1'])
+          ],
+          proposedActions: const [AiClinicalAction.prescribe],
+        ),
+      );
+
+      expect(result.disposition, AiValidationDisposition.fail);
+      expect(
+        result.audit.map((entry) => entry.stage),
+        [
+          AiOrchestrationStage.contextFirewall,
+          AiOrchestrationStage.modelInvocation,
+          AiOrchestrationStage.evidenceValidation,
+          AiOrchestrationStage.safetyValidation,
+        ],
+      );
+      expect(result.audit.last.disposition, AiValidationDisposition.fail);
+      expect(result.audit.last.detail, contains('prescribing'));
+      expect(
+        result.audit.any((entry) => entry.stage == AiOrchestrationStage.completed),
+        isFalse,
+      );
+    });
   });
 }
