@@ -57,10 +57,10 @@ class PregnancyRuleValidationResult {
   final PregnancyRuleValidationReason reason;
 
   Map<String, String> toJson() => {
-        'fixtureId': fixtureId,
-        'status': status.name,
-        'reason': reason.name,
-      };
+    'fixtureId': fixtureId,
+    'status': status.name,
+    'reason': reason.name,
+  };
 }
 
 class PregnancySafetyRuleValidator {
@@ -102,9 +102,6 @@ class PregnancySafetyRuleValidator {
       return _failed(fixture.id, PregnancyRuleValidationReason.evidenceMismatch);
     }
 
-    // The production kernel result type intentionally has no diagnosis,
-    // prescription or treatment-change action channel. Reject common action
-    // directives if they are ever smuggled through free-text reasons.
     final unsafe = results.any((result) {
       final reason = result.reason.toLowerCase();
       return reason.contains('diagnose ') ||
@@ -130,12 +127,11 @@ class PregnancySafetyRuleValidator {
   static PregnancyRuleValidationResult _failed(
     String id,
     PregnancyRuleValidationReason reason,
-  ) =>
-      PregnancyRuleValidationResult(
-        fixtureId: id,
-        status: PregnancyRuleValidationStatus.failed,
-        reason: reason,
-      );
+  ) => PregnancyRuleValidationResult(
+    fixtureId: id,
+    status: PregnancyRuleValidationStatus.failed,
+    reason: reason,
+  );
 
   static bool _sameList<T>(List<T> a, List<T> b) {
     if (a.length != b.length) return false;
