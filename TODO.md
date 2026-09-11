@@ -130,7 +130,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 localization TR/EN
 - [x] 🔴 app switcher privacy
 - [x] 🔴 biometrics/PIN
-- [ ] 🔴 security/crypto review
+- [x] 🔴 security/crypto review
 - [ ] 🔴 clinical rule validation
 - [ ] 🔴 AI red-team/evals
 - [x] 🔴 backup/recovery torture tests
