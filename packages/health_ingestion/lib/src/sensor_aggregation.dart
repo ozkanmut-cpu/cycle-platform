@@ -147,6 +147,96 @@ class DeterministicTimeBucketStrategy {
   }
 }
 
+class SensorAggregationGroup {
+  const SensorAggregationGroup({
+    required this.policy,
+    required this.bucket,
+    required this.records,
+  });
+
+  final AggregationPolicy policy;
+  final AggregationBucket bucket;
+  final List<NormalizedHealthRecord> records;
+}
+
+class DeterministicSensorGrouper {
+  DeterministicSensorGrouper({
+    required this.policyResolver,
+    DeterministicTimeBucketStrategy? bucketStrategy,
+  }) : bucketStrategy = bucketStrategy ?? const DeterministicTimeBucketStrategy();
+
+  final AggregationPolicyResolver policyResolver;
+  final DeterministicTimeBucketStrategy bucketStrategy;
+
+  List<SensorAggregationGroup> group({
+    required Iterable<NormalizedHealthRecord> records,
+    required DateTime rangeStart,
+    required DateTime rangeEnd,
+  }) {
+    final start = rangeStart.toUtc();
+    final end = rangeEnd.toUtc();
+    if (!end.isAfter(start)) {
+      throw ArgumentError('rangeEnd must be after rangeStart');
+    }
+
+    final groups = <String, _MutableSensorAggregationGroup>{};
+    for (final record in records) {
+      final observed = record.source.observedAt.toUtc();
+      if (observed.isBefore(start) || !observed.isBefore(end)) continue;
+
+      final policy = policyResolver.policyFor(record.mapping.canonicalCode);
+      if (policy == null) continue;
+
+      final bucket = bucketStrategy.bucketFor(
+        observedAt: observed,
+        rangeStart: start,
+        bucketSize: policy.bucketSize,
+      );
+      final key = '${policy.canonicalCode}|${bucket.start.microsecondsSinceEpoch}';
+      final group = groups.putIfAbsent(
+        key,
+        () => _MutableSensorAggregationGroup(policy: policy, bucket: bucket),
+      );
+      group.records.add(record);
+    }
+
+    final result = groups.values.toList()
+      ..sort((a, b) {
+        final timeOrder = a.bucket.start.compareTo(b.bucket.start);
+        if (timeOrder != 0) return timeOrder;
+        return a.policy.canonicalCode.compareTo(b.policy.canonicalCode);
+      });
+
+    return List.unmodifiable(
+      result.map((group) {
+        group.records.sort((a, b) {
+          final timeOrder = a.source.observedAt.toUtc().compareTo(
+                b.source.observedAt.toUtc(),
+              );
+          if (timeOrder != 0) return timeOrder;
+          return a.deduplicationKey.compareTo(b.deduplicationKey);
+        });
+        return SensorAggregationGroup(
+          policy: group.policy,
+          bucket: group.bucket,
+          records: List.unmodifiable(group.records),
+        );
+      }),
+    );
+  }
+}
+
+class _MutableSensorAggregationGroup {
+  _MutableSensorAggregationGroup({
+    required this.policy,
+    required this.bucket,
+  });
+
+  final AggregationPolicy policy;
+  final AggregationBucket bucket;
+  final List<NormalizedHealthRecord> records = <NormalizedHealthRecord>[];
+}
+
 abstract interface class HealthSensorAggregator {
   List<AggregatedHealthRecord> aggregate({
     required Iterable<NormalizedHealthRecord> records,
