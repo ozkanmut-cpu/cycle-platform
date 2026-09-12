@@ -88,4 +88,47 @@ void main() {
 
     expect(groups, isEmpty);
   });
+
+  test('three close equivalents form one non-overlapping group', () {
+    final observedAt = DateTime.utc(2026, 9, 12, 8, 5);
+    final records = ingest(
+      HealthSourcePlatform.healthConnect,
+      [
+        RawHealthRecord(
+          sourcePlatform: HealthSourcePlatform.healthConnect,
+          sourceType: 'heart_rate',
+          sourceRecordId: 'hr-1',
+          observedAt: observedAt,
+          value: 72,
+          unit: 'bpm',
+        ),
+        RawHealthRecord(
+          sourcePlatform: HealthSourcePlatform.healthConnect,
+          sourceType: 'heart_rate',
+          sourceRecordId: 'hr-2',
+          observedAt: observedAt.add(const Duration(seconds: 10)),
+          value: 72,
+          unit: 'bpm',
+        ),
+        RawHealthRecord(
+          sourcePlatform: HealthSourcePlatform.healthConnect,
+          sourceType: 'heart_rate',
+          sourceRecordId: 'hr-3',
+          observedAt: observedAt.add(const Duration(seconds: 20)),
+          value: 72,
+          unit: 'bpm',
+        ),
+      ],
+    );
+
+    const detector = DeterministicNearDuplicateDetector();
+    final forward = detector.detect(records);
+    final reverse = detector.detect(records.reversed);
+
+    expect(forward, hasLength(1));
+    expect(forward.single.records, hasLength(3));
+    expect(forward.single.recordKeys.toSet(), hasLength(3));
+    expect(reverse, hasLength(1));
+    expect(reverse.single.recordKeys, forward.single.recordKeys);
+  });
 }
