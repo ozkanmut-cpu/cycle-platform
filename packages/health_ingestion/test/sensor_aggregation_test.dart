@@ -70,6 +70,47 @@ void main() {
     );
   });
 
+  test('default resting heart rate policy keeps the latest daily value', () {
+    final records = ingest([
+      RawHealthRecord(
+        sourcePlatform: HealthSourcePlatform.healthConnect,
+        sourceType: 'resting_heart_rate',
+        sourceRecordId: 'rhr-1',
+        observedAt: DateTime.utc(2026, 9, 12, 7),
+        value: 61,
+        unit: 'bpm',
+      ),
+      RawHealthRecord(
+        sourcePlatform: HealthSourcePlatform.healthConnect,
+        sourceType: 'resting_heart_rate',
+        sourceRecordId: 'rhr-2',
+        observedAt: DateTime.utc(2026, 9, 12, 18),
+        value: 59,
+        unit: 'bpm',
+      ),
+    ]);
+    final aggregator = DeterministicHealthSensorAggregator(
+      policyResolver: MapAggregationPolicyResolver(
+        defaultSensorAggregationPolicies,
+      ),
+    );
+
+    final result = aggregator
+        .aggregate(
+          records: records,
+          rangeStart: DateTime.utc(2026, 9, 12),
+          rangeEnd: DateTime.utc(2026, 9, 13),
+        )
+        .single;
+
+    expect(result.canonicalCode, 'vital.resting_heart_rate');
+    expect(result.policyId, 'resting-heart-rate-daily-latest');
+    expect(result.value, 59);
+    expect(result.unit, 'bpm');
+    expect(result.contributingRecords, hasLength(2));
+    expect(result.missingness, AggregationMissingness.observed);
+  });
+
   test('unit mismatch is exposed as a conflict and suppresses value', () {
     final records = ingest([
       RawHealthRecord(
