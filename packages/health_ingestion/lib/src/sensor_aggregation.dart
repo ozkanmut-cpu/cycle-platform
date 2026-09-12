@@ -244,3 +244,105 @@ abstract interface class HealthSensorAggregator {
     required DateTime rangeEnd,
   });
 }
+
+class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
+  DeterministicHealthSensorAggregator({
+    required AggregationPolicyResolver policyResolver,
+    DeterministicSensorGrouper? grouper,
+  }) : grouper = grouper ?? DeterministicSensorGrouper(
+          policyResolver: policyResolver,
+        );
+
+  final DeterministicSensorGrouper grouper;
+
+  @override
+  List<AggregatedHealthRecord> aggregate({
+    required Iterable<NormalizedHealthRecord> records,
+    required DateTime rangeStart,
+    required DateTime rangeEnd,
+  }) {
+    final groups = grouper.group(
+      records: records,
+      rangeStart: rangeStart,
+      rangeEnd: rangeEnd,
+    );
+
+    return List.unmodifiable(groups.map(_aggregateGroup));
+  }
+
+  AggregatedHealthRecord _aggregateGroup(SensorAggregationGroup group) {
+    final records = group.records;
+    final values = records
+        .map((record) => record.normalizedValue)
+        .whereType<num>()
+        .map((value) => value.toDouble())
+        .toList(growable: false);
+
+    final value = switch (group.policy.method) {
+      AggregationMethod.mean => _mean(values),
+      AggregationMethod.min => _min(values),
+      AggregationMethod.max => _max(values),
+      AggregationMethod.sum => _sum(values),
+      AggregationMethod.latest =>
+        records.isEmpty ? null : records.last.normalizedValue,
+      AggregationMethod.earliest =>
+        records.isEmpty ? null : records.first.normalizedValue,
+      AggregationMethod.count => records.length,
+      AggregationMethod.median => null,
+      AggregationMethod.duration => null,
+    };
+
+    final missingness = records.isEmpty
+        ? AggregationMissingness.missing
+        : values.length == records.length ||
+                group.policy.method == AggregationMethod.latest ||
+                group.policy.method == AggregationMethod.earliest ||
+                group.policy.method == AggregationMethod.count
+            ? AggregationMissingness.observed
+            : AggregationMissingness.partiallyMissing;
+
+    return AggregatedHealthRecord(
+      canonicalCode: group.policy.canonicalCode,
+      bucketStart: group.bucket.start,
+      bucketEnd: group.bucket.end,
+      value: value,
+      unit: records.isEmpty ? null : records.first.normalizedUnit,
+      policyId: group.policy.policyId,
+      policyVersion: group.policy.version,
+      contributingRecords: records,
+      missingness: missingness,
+    );
+  }
+
+  double? _mean(List<double> values) {
+    if (values.isEmpty) return null;
+    return _sum(values)! / values.length;
+  }
+
+  double? _sum(List<double> values) {
+    if (values.isEmpty) return null;
+    var total = 0.0;
+    for (final value in values) {
+      total += value;
+    }
+    return total;
+  }
+
+  double? _min(List<double> values) {
+    if (values.isEmpty) return null;
+    var result = values.first;
+    for (final value in values.skip(1)) {
+      if (value < result) result = value;
+    }
+    return result;
+  }
+
+  double? _max(List<double> values) {
+    if (values.isEmpty) return null;
+    var result = values.first;
+    for (final value in values.skip(1)) {
+      if (value > result) result = value;
+    }
+    return result;
+  }
+}
