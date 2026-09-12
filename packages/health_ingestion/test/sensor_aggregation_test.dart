@@ -204,13 +204,11 @@ void main() {
       ]),
     );
 
-    final result = aggregator
-        .aggregate(
-          records: [...healthConnect, ...healthKit],
-          rangeStart: DateTime.utc(2026, 9, 12, 8),
-          rangeEnd: DateTime.utc(2026, 9, 12, 9),
-        )
-        .single;
+    final result = aggregator.aggregate(
+      records: [...healthConnect, ...healthKit],
+      rangeStart: DateTime.utc(2026, 9, 12, 8),
+      rangeEnd: DateTime.utc(2026, 9, 12, 9),
+    ).single;
 
     expect(result.value, 72.0);
     expect(result.contributingRecords, hasLength(2));
