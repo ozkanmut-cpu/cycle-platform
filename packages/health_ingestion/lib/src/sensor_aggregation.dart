@@ -285,6 +285,8 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
         .whereType<String>()
         .toSet();
     final unitsConsistent = units.length <= 1;
+    final hasMissingUnit =
+        records.any((record) => record.normalizedUnit == null);
     final conflicts = _detectConflicts(group, units, values);
 
     final value = unitsConsistent
@@ -311,6 +313,7 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
     final missingness = records.isEmpty
         ? AggregationMissingness.missing
         : !unitsConsistent ||
+                hasMissingUnit ||
                 (!supportsNonNumeric && values.length != records.length)
             ? AggregationMissingness.partiallyMissing
             : AggregationMissingness.observed;
