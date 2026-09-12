@@ -163,7 +163,8 @@ class DeterministicSensorGrouper {
   DeterministicSensorGrouper({
     required this.policyResolver,
     DeterministicTimeBucketStrategy? bucketStrategy,
-  }) : bucketStrategy = bucketStrategy ?? const DeterministicTimeBucketStrategy();
+  }) : bucketStrategy =
+            bucketStrategy ?? const DeterministicTimeBucketStrategy();
 
   final AggregationPolicyResolver policyResolver;
   final DeterministicTimeBucketStrategy bucketStrategy;
@@ -192,7 +193,8 @@ class DeterministicSensorGrouper {
         rangeStart: start,
         bucketSize: policy.bucketSize,
       );
-      final key = '${policy.canonicalCode}|${bucket.start.microsecondsSinceEpoch}';
+      final key =
+          '${policy.canonicalCode}|${bucket.start.microsecondsSinceEpoch}';
       final group = groups.putIfAbsent(
         key,
         () => _MutableSensorAggregationGroup(policy: policy, bucket: bucket),
@@ -249,9 +251,10 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
   DeterministicHealthSensorAggregator({
     required AggregationPolicyResolver policyResolver,
     DeterministicSensorGrouper? grouper,
-  }) : grouper = grouper ?? DeterministicSensorGrouper(
-          policyResolver: policyResolver,
-        );
+  }) : grouper = grouper ??
+            DeterministicSensorGrouper(
+              policyResolver: policyResolver,
+            );
 
   final DeterministicSensorGrouper grouper;
 
@@ -300,13 +303,15 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
           }
         : null;
 
-    final supportsNonNumeric = group.policy.method == AggregationMethod.latest ||
-        group.policy.method == AggregationMethod.earliest ||
-        group.policy.method == AggregationMethod.count ||
-        group.policy.method == AggregationMethod.duration;
+    final supportsNonNumeric =
+        group.policy.method == AggregationMethod.latest ||
+            group.policy.method == AggregationMethod.earliest ||
+            group.policy.method == AggregationMethod.count ||
+            group.policy.method == AggregationMethod.duration;
     final missingness = records.isEmpty
         ? AggregationMissingness.missing
-        : !unitsConsistent || (!supportsNonNumeric && values.length != records.length)
+        : !unitsConsistent ||
+                (!supportsNonNumeric && values.length != records.length)
             ? AggregationMissingness.partiallyMissing
             : AggregationMissingness.observed;
 
