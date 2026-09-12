@@ -277,6 +277,30 @@ const defaultHealthMappings = <HealthTypeMapping>[
     canonicalUnit: '%',
   ),
   HealthTypeMapping(
+    sourceType: 'blood_pressure_systolic',
+    canonicalCode: 'vital.blood_pressure.systolic',
+    category: HealthDataCategory.vitals,
+    canonicalUnit: 'mmHg',
+  ),
+  HealthTypeMapping(
+    sourceType: 'blood_pressure_diastolic',
+    canonicalCode: 'vital.blood_pressure.diastolic',
+    category: HealthDataCategory.vitals,
+    canonicalUnit: 'mmHg',
+  ),
+  HealthTypeMapping(
+    sourceType: 'body_temperature',
+    canonicalCode: 'vital.body_temperature',
+    category: HealthDataCategory.vitals,
+    canonicalUnit: 'C',
+  ),
+  HealthTypeMapping(
+    sourceType: 'respiratory_rate',
+    canonicalCode: 'vital.respiratory_rate',
+    category: HealthDataCategory.vitals,
+    canonicalUnit: 'breaths/min',
+  ),
+  HealthTypeMapping(
     sourceType: 'sleep_session',
     canonicalCode: 'sleep.session',
     category: HealthDataCategory.sleep,
