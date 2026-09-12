@@ -31,7 +31,8 @@ class DeterministicNearDuplicateDetector {
     Iterable<NormalizedHealthRecord> records,
   ) {
     if (timeWindow.isNegative) {
-      throw ArgumentError.value(timeWindow, 'timeWindow', 'must not be negative');
+      throw ArgumentError.value(
+          timeWindow, 'timeWindow', 'must not be negative');
     }
     if (valueTolerance < 0) {
       throw ArgumentError.value(
@@ -46,9 +47,8 @@ class DeterministicNearDuplicateDetector {
         final codeOrder =
             a.mapping.canonicalCode.compareTo(b.mapping.canonicalCode);
         if (codeOrder != 0) return codeOrder;
-        final timeOrder = a.source.observedAt
-            .toUtc()
-            .compareTo(b.source.observedAt.toUtc());
+        final timeOrder =
+            a.source.observedAt.toUtc().compareTo(b.source.observedAt.toUtc());
         if (timeOrder != 0) return timeOrder;
         return a.deduplicationKey.compareTo(b.deduplicationKey);
       });
@@ -61,13 +61,15 @@ class DeterministicNearDuplicateDetector {
       var next = index + 1;
       while (next < sorted.length) {
         final candidate = sorted[next];
-        if (candidate.mapping.canonicalCode != seed.mapping.canonicalCode) break;
+        if (candidate.mapping.canonicalCode != seed.mapping.canonicalCode)
+          break;
         final delta = candidate.source.observedAt
             .toUtc()
             .difference(seed.source.observedAt.toUtc())
             .abs();
         if (delta > timeWindow) break;
-        if (_valuesEquivalent(seed.normalizedValue, candidate.normalizedValue)) {
+        if (_valuesEquivalent(
+            seed.normalizedValue, candidate.normalizedValue)) {
           members.add(candidate);
         }
         next++;
