@@ -12,12 +12,11 @@ void main() {
         HealthDataCategory.values.toSet(),
       ),
     );
-    return pipeline
-        .ingest(sourcePlatform: platform, records: records)
-        .records;
+    return pipeline.ingest(sourcePlatform: platform, records: records).records;
   }
 
-  test('cross-source equivalent observations are flagged without data loss', () {
+  test('cross-source equivalent observations are flagged without data loss',
+      () {
     final observedAt = DateTime.utc(2026, 9, 12, 8, 5);
     final records = [
       ...ingest(
