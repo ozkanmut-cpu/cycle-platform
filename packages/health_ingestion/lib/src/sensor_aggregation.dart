@@ -57,6 +57,13 @@ const defaultSensorAggregationPolicies = <AggregationPolicy>[
     bucketSize: Duration(hours: 1),
   ),
   AggregationPolicy(
+    policyId: 'resting-heart-rate-daily-latest',
+    version: 1,
+    canonicalCode: 'vital.resting_heart_rate',
+    method: AggregationMethod.latest,
+    bucketSize: Duration(days: 1),
+  ),
+  AggregationPolicy(
     policyId: 'spo2-hourly-mean',
     version: 1,
     canonicalCode: 'vital.oxygen_saturation',
@@ -518,7 +525,6 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
         .whereType<num>()
         .map((value) => value.toDouble())
         .toList(growable: false);
-    if (numeric.length == records.length) return _sum(numeric);
-    return null;
+    return numeric.length == records.length ? _sum(numeric) : null;
   }
 }
