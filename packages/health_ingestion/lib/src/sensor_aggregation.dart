@@ -282,6 +282,7 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
         .whereType<String>()
         .toSet();
     final unitsConsistent = units.length <= 1;
+    final conflicts = _detectConflicts(group, units, values);
 
     final value = unitsConsistent
         ? switch (group.policy.method) {
@@ -319,7 +320,61 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
       policyVersion: group.policy.version,
       contributingRecords: records,
       missingness: missingness,
+      conflicts: conflicts,
     );
+  }
+
+  List<AggregationConflict> _detectConflicts(
+    SensorAggregationGroup group,
+    Set<String> units,
+    List<double> values,
+  ) {
+    final conflicts = <AggregationConflict>[];
+    if (units.length > 1) {
+      conflicts.add(
+        AggregationConflict(
+          reason: 'unit_mismatch',
+          contributingRecordKeys: List.unmodifiable(
+            group.records.map((record) => record.deduplicationKey),
+          ),
+          details: <String, Object?>{
+            'units': List<String>.unmodifiable(units.toList()..sort()),
+          },
+        ),
+      );
+    }
+
+    final tolerance = group.policy.conflictTolerance?.toDouble();
+    if (tolerance != null && values.length > 1) {
+      if (tolerance < 0) {
+        throw ArgumentError.value(
+          group.policy.conflictTolerance,
+          'conflictTolerance',
+          'must not be negative',
+        );
+      }
+      final minimum = _min(values)!;
+      final maximum = _max(values)!;
+      final spread = maximum - minimum;
+      if (spread > tolerance) {
+        conflicts.add(
+          AggregationConflict(
+            reason: 'value_disagreement',
+            contributingRecordKeys: List.unmodifiable(
+              group.records.map((record) => record.deduplicationKey),
+            ),
+            details: <String, Object?>{
+              'min': minimum,
+              'max': maximum,
+              'spread': spread,
+              'tolerance': tolerance,
+            },
+          ),
+        );
+      }
+    }
+
+    return List.unmodifiable(conflicts);
   }
 
   double? _mean(List<double> values) {
