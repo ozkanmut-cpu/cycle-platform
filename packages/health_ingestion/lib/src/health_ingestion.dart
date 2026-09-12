@@ -271,6 +271,12 @@ const defaultHealthMappings = <HealthTypeMapping>[
     canonicalUnit: 'bpm',
   ),
   HealthTypeMapping(
+    sourceType: 'resting_heart_rate',
+    canonicalCode: 'vital.resting_heart_rate',
+    category: HealthDataCategory.vitals,
+    canonicalUnit: 'bpm',
+  ),
+  HealthTypeMapping(
     sourceType: 'oxygen_saturation',
     canonicalCode: 'vital.oxygen_saturation',
     category: HealthDataCategory.vitals,
