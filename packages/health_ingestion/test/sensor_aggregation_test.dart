@@ -220,4 +220,64 @@ void main() {
       ]),
     );
   });
+
+  test('missing unit marks aggregate partially missing without dropping value', () {
+    const mapping = HealthTypeMapping(
+      sourceType: 'heart_rate_untyped',
+      canonicalCode: 'vital.heart_rate',
+      category: HealthDataCategory.vitals,
+    );
+    final pipeline = HealthIngestionPipeline(
+      mappings: const [mapping],
+      permissionPolicy: AllowlistedImportPermissionPolicy(
+        HealthDataCategory.values.toSet(),
+      ),
+    );
+    final records = pipeline
+        .ingest(
+          sourcePlatform: HealthSourcePlatform.healthConnect,
+          records: [
+            RawHealthRecord(
+              sourcePlatform: HealthSourcePlatform.healthConnect,
+              sourceType: 'heart_rate_untyped',
+              sourceRecordId: 'hr-with-unit',
+              observedAt: DateTime.utc(2026, 9, 12, 8, 5),
+              value: 70,
+              unit: 'bpm',
+            ),
+            RawHealthRecord(
+              sourcePlatform: HealthSourcePlatform.healthConnect,
+              sourceType: 'heart_rate_untyped',
+              sourceRecordId: 'hr-without-unit',
+              observedAt: DateTime.utc(2026, 9, 12, 8, 10),
+              value: 72,
+            ),
+          ],
+        )
+        .records;
+    final aggregator = DeterministicHealthSensorAggregator(
+      policyResolver: MapAggregationPolicyResolver([
+        const AggregationPolicy(
+          policyId: 'heart-rate-hourly-mean',
+          version: 1,
+          canonicalCode: 'vital.heart_rate',
+          method: AggregationMethod.mean,
+          bucketSize: Duration(hours: 1),
+        ),
+      ]),
+    );
+
+    final result = aggregator
+        .aggregate(
+          records: records,
+          rangeStart: DateTime.utc(2026, 9, 12, 8),
+          rangeEnd: DateTime.utc(2026, 9, 12, 9),
+        )
+        .single;
+
+    expect(result.value, 71.0);
+    expect(result.unit, 'bpm');
+    expect(result.missingness, AggregationMissingness.partiallyMissing);
+    expect(result.conflicts, isEmpty);
+  });
 }
