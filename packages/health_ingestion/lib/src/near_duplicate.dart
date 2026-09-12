@@ -32,7 +32,10 @@ class DeterministicNearDuplicateDetector {
   ) {
     if (timeWindow.isNegative) {
       throw ArgumentError.value(
-          timeWindow, 'timeWindow', 'must not be negative');
+        timeWindow,
+        'timeWindow',
+        'must not be negative',
+      );
     }
     if (valueTolerance < 0) {
       throw ArgumentError.value(
@@ -54,25 +57,33 @@ class DeterministicNearDuplicateDetector {
       });
 
     final groups = <NearDuplicateGroup>[];
-    var index = 0;
-    while (index < sorted.length) {
+    final consumed = List<bool>.filled(sorted.length, false);
+    for (var index = 0; index < sorted.length; index++) {
+      if (consumed[index]) continue;
+
       final seed = sorted[index];
       final members = <NormalizedHealthRecord>[seed];
-      var next = index + 1;
-      while (next < sorted.length) {
+      consumed[index] = true;
+
+      for (var next = index + 1; next < sorted.length; next++) {
+        if (consumed[next]) continue;
+
         final candidate = sorted[next];
-        if (candidate.mapping.canonicalCode != seed.mapping.canonicalCode)
+        if (candidate.mapping.canonicalCode != seed.mapping.canonicalCode) {
           break;
+        }
         final delta = candidate.source.observedAt
             .toUtc()
             .difference(seed.source.observedAt.toUtc())
             .abs();
         if (delta > timeWindow) break;
         if (_valuesEquivalent(
-            seed.normalizedValue, candidate.normalizedValue)) {
+          seed.normalizedValue,
+          candidate.normalizedValue,
+        )) {
           members.add(candidate);
+          consumed[next] = true;
         }
-        next++;
       }
 
       if (members.length > 1) {
@@ -85,7 +96,6 @@ class DeterministicNearDuplicateDetector {
           ),
         );
       }
-      index++;
     }
 
     return List.unmodifiable(groups);
