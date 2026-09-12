@@ -194,7 +194,7 @@ class DeterministicSensorGrouper {
         bucketSize: policy.bucketSize,
       );
       final key =
-          '${policy.canonicalCode}|${bucket.start.microsecondsSinceEpoch}';
+          '${policy.policyId}|${policy.version}|${policy.canonicalCode}|${bucket.start.microsecondsSinceEpoch}';
       final group = groups.putIfAbsent(
         key,
         () => _MutableSensorAggregationGroup(policy: policy, bucket: bucket),
