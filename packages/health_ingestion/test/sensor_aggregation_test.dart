@@ -2,7 +2,10 @@ import 'package:cycle_health_ingestion/cycle_health_ingestion.dart';
 import 'package:test/test.dart';
 
 void main() {
-  List<NormalizedHealthRecord> ingest(List<RawHealthRecord> records) {
+  List<NormalizedHealthRecord> ingest(
+    List<RawHealthRecord> records, {
+    HealthSourcePlatform platform = HealthSourcePlatform.healthConnect,
+  }) {
     final pipeline = HealthIngestionPipeline(
       mappings: defaultHealthMappings,
       permissionPolicy: AllowlistedImportPermissionPolicy(
@@ -11,7 +14,7 @@ void main() {
     );
     return pipeline
         .ingest(
-          sourcePlatform: HealthSourcePlatform.healthConnect,
+          sourcePlatform: platform,
           records: records,
         )
         .records;
@@ -157,5 +160,66 @@ void main() {
     expect(result.conflicts.single.reason, 'value_disagreement');
     expect(result.conflicts.single.details['spread'], 7.0);
     expect(result.conflicts.single.details['tolerance'], 3);
+  });
+
+  test('cross-source equivalent observations retain both provenances', () {
+    final observedAt = DateTime.utc(2026, 9, 12, 8, 5);
+    final healthConnect = ingest(
+      [
+        RawHealthRecord(
+          sourcePlatform: HealthSourcePlatform.healthConnect,
+          sourceType: 'heart_rate',
+          sourceRecordId: 'hc-hr-1',
+          observedAt: observedAt,
+          value: 72,
+          unit: 'bpm',
+          sourceName: 'Health Connect source',
+        ),
+      ],
+      platform: HealthSourcePlatform.healthConnect,
+    );
+    final healthKit = ingest(
+      [
+        RawHealthRecord(
+          sourcePlatform: HealthSourcePlatform.healthKit,
+          sourceType: 'heart_rate',
+          sourceRecordId: 'hk-hr-1',
+          observedAt: observedAt.add(const Duration(seconds: 20)),
+          value: 72,
+          unit: 'bpm',
+          sourceName: 'HealthKit source',
+        ),
+      ],
+      platform: HealthSourcePlatform.healthKit,
+    );
+    final aggregator = DeterministicHealthSensorAggregator(
+      policyResolver: MapAggregationPolicyResolver([
+        const AggregationPolicy(
+          policyId: 'heart-rate-hourly-mean',
+          version: 1,
+          canonicalCode: 'vital.heart_rate',
+          method: AggregationMethod.mean,
+          bucketSize: Duration(hours: 1),
+        ),
+      ]),
+    );
+
+    final result = aggregator
+        .aggregate(
+          records: [...healthConnect, ...healthKit],
+          rangeStart: DateTime.utc(2026, 9, 12, 8),
+          rangeEnd: DateTime.utc(2026, 9, 12, 9),
+        )
+        .single;
+
+    expect(result.value, 72.0);
+    expect(result.contributingRecords, hasLength(2));
+    expect(
+      result.contributingRecordKeys,
+      containsAll(<String>[
+        'healthConnect|hc-hr-1|vital.heart_rate',
+        'healthKit|hk-hr-1|vital.heart_rate',
+      ]),
+    );
   });
 }
