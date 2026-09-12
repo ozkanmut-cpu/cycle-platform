@@ -277,36 +277,44 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
         .whereType<num>()
         .map((value) => value.toDouble())
         .toList(growable: false);
+    final units = records
+        .map((record) => record.normalizedUnit)
+        .whereType<String>()
+        .toSet();
+    final unitsConsistent = units.length <= 1;
 
-    final value = switch (group.policy.method) {
-      AggregationMethod.mean => _mean(values),
-      AggregationMethod.min => _min(values),
-      AggregationMethod.max => _max(values),
-      AggregationMethod.sum => _sum(values),
-      AggregationMethod.latest =>
-        records.isEmpty ? null : records.last.normalizedValue,
-      AggregationMethod.earliest =>
-        records.isEmpty ? null : records.first.normalizedValue,
-      AggregationMethod.count => records.length,
-      AggregationMethod.median => null,
-      AggregationMethod.duration => null,
-    };
+    final value = unitsConsistent
+        ? switch (group.policy.method) {
+            AggregationMethod.mean => _mean(values),
+            AggregationMethod.median => _median(values),
+            AggregationMethod.min => _min(values),
+            AggregationMethod.max => _max(values),
+            AggregationMethod.sum => _sum(values),
+            AggregationMethod.latest =>
+              records.isEmpty ? null : records.last.normalizedValue,
+            AggregationMethod.earliest =>
+              records.isEmpty ? null : records.first.normalizedValue,
+            AggregationMethod.duration => _duration(records),
+            AggregationMethod.count => records.length,
+          }
+        : null;
 
+    final supportsNonNumeric = group.policy.method == AggregationMethod.latest ||
+        group.policy.method == AggregationMethod.earliest ||
+        group.policy.method == AggregationMethod.count ||
+        group.policy.method == AggregationMethod.duration;
     final missingness = records.isEmpty
         ? AggregationMissingness.missing
-        : values.length == records.length ||
-                group.policy.method == AggregationMethod.latest ||
-                group.policy.method == AggregationMethod.earliest ||
-                group.policy.method == AggregationMethod.count
-            ? AggregationMissingness.observed
-            : AggregationMissingness.partiallyMissing;
+        : !unitsConsistent || (!supportsNonNumeric && values.length != records.length)
+            ? AggregationMissingness.partiallyMissing
+            : AggregationMissingness.observed;
 
     return AggregatedHealthRecord(
       canonicalCode: group.policy.canonicalCode,
       bucketStart: group.bucket.start,
       bucketEnd: group.bucket.end,
       value: value,
-      unit: records.isEmpty ? null : records.first.normalizedUnit,
+      unit: unitsConsistent && units.isNotEmpty ? units.single : null,
       policyId: group.policy.policyId,
       policyVersion: group.policy.version,
       contributingRecords: records,
@@ -317,6 +325,14 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
   double? _mean(List<double> values) {
     if (values.isEmpty) return null;
     return _sum(values)! / values.length;
+  }
+
+  double? _median(List<double> values) {
+    if (values.isEmpty) return null;
+    final sorted = List<double>.of(values)..sort();
+    final middle = sorted.length ~/ 2;
+    if (sorted.length.isOdd) return sorted[middle];
+    return (sorted[middle - 1] + sorted[middle]) / 2;
   }
 
   double? _sum(List<double> values) {
@@ -344,5 +360,28 @@ class DeterministicHealthSensorAggregator implements HealthSensorAggregator {
       if (value > result) result = value;
     }
     return result;
+  }
+
+  Object? _duration(List<NormalizedHealthRecord> records) {
+    if (records.isEmpty) return null;
+    final durations = records
+        .map((record) => record.normalizedValue)
+        .whereType<Duration>()
+        .toList(growable: false);
+    if (durations.length == records.length) {
+      var totalMicros = 0;
+      for (final duration in durations) {
+        totalMicros += duration.inMicroseconds;
+      }
+      return Duration(microseconds: totalMicros);
+    }
+
+    final numeric = records
+        .map((record) => record.normalizedValue)
+        .whereType<num>()
+        .map((value) => value.toDouble())
+        .toList(growable: false);
+    if (numeric.length == records.length) return _sum(numeric);
+    return null;
   }
 }
