@@ -48,6 +48,52 @@ class AggregationPolicy {
   final num? conflictTolerance;
 }
 
+const defaultSensorAggregationPolicies = <AggregationPolicy>[
+  AggregationPolicy(
+    policyId: 'heart-rate-hourly-mean',
+    version: 1,
+    canonicalCode: 'vital.heart_rate',
+    method: AggregationMethod.mean,
+    bucketSize: Duration(hours: 1),
+  ),
+  AggregationPolicy(
+    policyId: 'spo2-hourly-mean',
+    version: 1,
+    canonicalCode: 'vital.oxygen_saturation',
+    method: AggregationMethod.mean,
+    bucketSize: Duration(hours: 1),
+    conflictTolerance: 3,
+  ),
+  AggregationPolicy(
+    policyId: 'sleep-daily-duration',
+    version: 1,
+    canonicalCode: 'sleep.session',
+    method: AggregationMethod.duration,
+    bucketSize: Duration(days: 1),
+  ),
+  AggregationPolicy(
+    policyId: 'steps-daily-sum',
+    version: 1,
+    canonicalCode: 'activity.steps',
+    method: AggregationMethod.sum,
+    bucketSize: Duration(days: 1),
+  ),
+  AggregationPolicy(
+    policyId: 'weight-daily-latest',
+    version: 1,
+    canonicalCode: 'body.weight',
+    method: AggregationMethod.latest,
+    bucketSize: Duration(days: 1),
+  ),
+  AggregationPolicy(
+    policyId: 'menstruation-flow-daily-latest',
+    version: 1,
+    canonicalCode: 'reproductive.menstruation.flow',
+    method: AggregationMethod.latest,
+    bucketSize: Duration(days: 1),
+  ),
+];
+
 class AggregatedHealthRecord {
   const AggregatedHealthRecord({
     required this.canonicalCode,
