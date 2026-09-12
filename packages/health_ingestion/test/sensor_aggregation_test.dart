@@ -279,4 +279,61 @@ void main() {
     expect(result.missingness, AggregationMissingness.partiallyMissing);
     expect(result.conflicts, isEmpty);
   });
+
+  test('unitless count aggregate remains observed', () {
+    const mapping = HealthTypeMapping(
+      sourceType: 'unitless_event',
+      canonicalCode: 'wellness.unitless_event',
+      category: HealthDataCategory.wellness,
+    );
+    final pipeline = HealthIngestionPipeline(
+      mappings: const [mapping],
+      permissionPolicy: AllowlistedImportPermissionPolicy(
+        HealthDataCategory.values.toSet(),
+      ),
+    );
+    final records = pipeline.ingest(
+      sourcePlatform: HealthSourcePlatform.healthConnect,
+      records: [
+        RawHealthRecord(
+          sourcePlatform: HealthSourcePlatform.healthConnect,
+          sourceType: 'unitless_event',
+          sourceRecordId: 'event-1',
+          observedAt: DateTime.utc(2026, 9, 12, 8, 5),
+          value: true,
+        ),
+        RawHealthRecord(
+          sourcePlatform: HealthSourcePlatform.healthConnect,
+          sourceType: 'unitless_event',
+          sourceRecordId: 'event-2',
+          observedAt: DateTime.utc(2026, 9, 12, 8, 10),
+          value: true,
+        ),
+      ],
+    ).records;
+    final aggregator = DeterministicHealthSensorAggregator(
+      policyResolver: MapAggregationPolicyResolver([
+        const AggregationPolicy(
+          policyId: 'unitless-event-hourly-count',
+          version: 1,
+          canonicalCode: 'wellness.unitless_event',
+          method: AggregationMethod.count,
+          bucketSize: Duration(hours: 1),
+        ),
+      ]),
+    );
+
+    final result = aggregator
+        .aggregate(
+          records: records,
+          rangeStart: DateTime.utc(2026, 9, 12, 8),
+          rangeEnd: DateTime.utc(2026, 9, 12, 9),
+        )
+        .single;
+
+    expect(result.value, 2);
+    expect(result.unit, isNull);
+    expect(result.missingness, AggregationMissingness.observed);
+    expect(result.conflicts, isEmpty);
+  });
 }
