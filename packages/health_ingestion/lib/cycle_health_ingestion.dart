@@ -5,3 +5,4 @@ export 'src/health_sync.dart';
 export 'src/import_coordinator.dart';
 export 'src/platform_adapters.dart';
 export 'src/raw_sensor_payload.dart';
+export 'src/sensor_aggregation.dart';
