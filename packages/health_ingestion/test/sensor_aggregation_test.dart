@@ -221,7 +221,8 @@ void main() {
     );
   });
 
-  test('missing unit marks aggregate partially missing without dropping value', () {
+  test('missing unit marks aggregate partially missing without dropping value',
+      () {
     const mapping = HealthTypeMapping(
       sourceType: 'heart_rate_untyped',
       canonicalCode: 'vital.heart_rate',
@@ -233,28 +234,26 @@ void main() {
         HealthDataCategory.values.toSet(),
       ),
     );
-    final records = pipeline
-        .ingest(
+    final records = pipeline.ingest(
+      sourcePlatform: HealthSourcePlatform.healthConnect,
+      records: [
+        RawHealthRecord(
           sourcePlatform: HealthSourcePlatform.healthConnect,
-          records: [
-            RawHealthRecord(
-              sourcePlatform: HealthSourcePlatform.healthConnect,
-              sourceType: 'heart_rate_untyped',
-              sourceRecordId: 'hr-with-unit',
-              observedAt: DateTime.utc(2026, 9, 12, 8, 5),
-              value: 70,
-              unit: 'bpm',
-            ),
-            RawHealthRecord(
-              sourcePlatform: HealthSourcePlatform.healthConnect,
-              sourceType: 'heart_rate_untyped',
-              sourceRecordId: 'hr-without-unit',
-              observedAt: DateTime.utc(2026, 9, 12, 8, 10),
-              value: 72,
-            ),
-          ],
-        )
-        .records;
+          sourceType: 'heart_rate_untyped',
+          sourceRecordId: 'hr-with-unit',
+          observedAt: DateTime.utc(2026, 9, 12, 8, 5),
+          value: 70,
+          unit: 'bpm',
+        ),
+        RawHealthRecord(
+          sourcePlatform: HealthSourcePlatform.healthConnect,
+          sourceType: 'heart_rate_untyped',
+          sourceRecordId: 'hr-without-unit',
+          observedAt: DateTime.utc(2026, 9, 12, 8, 10),
+          value: 72,
+        ),
+      ],
+    ).records;
     final aggregator = DeterministicHealthSensorAggregator(
       policyResolver: MapAggregationPolicyResolver([
         const AggregationPolicy(
