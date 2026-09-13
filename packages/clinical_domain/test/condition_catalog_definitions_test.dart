@@ -75,6 +75,8 @@ void main() {
         expect(pack.symptomKeys, isNotEmpty);
         expect(pack.guideline.identifier, 'cycle-condition-catalog');
         expect(pack.evidence, isNotEmpty);
+        expect(pack.category, isNot(ConditionCategory.uncategorized));
+        expect(pack.groupKey, isNot('uncategorized'));
       }
     });
   });
