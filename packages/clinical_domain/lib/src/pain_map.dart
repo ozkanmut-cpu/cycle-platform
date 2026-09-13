@@ -31,9 +31,20 @@ class PainMapValidationException implements Exception {
 }
 
 class PainRegionTaxonomy {
-  PainRegionTaxonomy(Iterable<PainRegionDefinition> definitions)
-      : regions = List.unmodifiable(_validate(definitions));
+  PainRegionTaxonomy(
+    Iterable<PainRegionDefinition> definitions, {
+    this.schemaVersion = 1,
+    this.catalogVersion = '2026.1',
+  }) : regions = List.unmodifiable(_validate(definitions)) {
+    if (schemaVersion <= 0 || catalogVersion.trim().isEmpty) {
+      throw const PainMapValidationException(
+        'Pain taxonomy version metadata must be valid.',
+      );
+    }
+  }
 
+  final int schemaVersion;
+  final String catalogVersion;
   final List<PainRegionDefinition> regions;
 
   PainRegionDefinition? findById(String id) {
