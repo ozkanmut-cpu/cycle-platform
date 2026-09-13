@@ -39,7 +39,7 @@ void main() {
     expect(find.text('No connected health data yet.'), findsOneWidget);
   });
 
-  testWidgets('keeps missing and conflicting states explicit', (tester) async {
+  testWidgets('keeps missing, stale and conflicting states explicit', (tester) async {
     await tester.pumpWidget(
       buildApp(
         const ConnectedHealthViewModel(
@@ -47,6 +47,13 @@ void main() {
             ConnectedHealthMetricSummary(
               label: 'SpO2',
               state: ConnectedHealthMetricState.missing,
+            ),
+            ConnectedHealthMetricSummary(
+              label: 'Weight',
+              state: ConnectedHealthMetricState.stale,
+              value: 72,
+              unit: 'kg',
+              sourceLabel: 'HealthKit',
             ),
             ConnectedHealthMetricSummary(
               label: 'Heart rate',
@@ -60,8 +67,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Data missing'), findsWidgets);
+    expect(find.text('Data stale'), findsWidgets);
     expect(find.text('Sources conflict'), findsWidgets);
     expect(find.textContaining('Health Connect + HealthKit'), findsOneWidget);
+    expect(find.text('72 kg'), findsNothing);
     expect(find.text('0'), findsNothing);
   });
 
