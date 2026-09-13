@@ -32,6 +32,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('Connected Health'), findsWidgets);
     expect(find.text('Health Connect'), findsOneWidget);
@@ -56,6 +57,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('Data missing'), findsWidgets);
     expect(find.text('Sources conflict'), findsWidgets);
@@ -80,6 +82,7 @@ void main() {
         locale: const Locale('tr'),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('Bağlı Sağlık'), findsWidgets);
     expect(find.text('62 bpm'), findsOneWidget);
