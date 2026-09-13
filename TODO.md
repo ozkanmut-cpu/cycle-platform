@@ -73,7 +73,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 Condition Pack framework
 - [x] 🔴 guideline/rule versioning
 - [x] 🔴 symptom-first routing
-- [ ] 🟠 78-condition catalog definitions
+- [x] 🟠 78-condition catalog definitions
 - [ ] 🟠 body/pelvic pain map
 - [ ] 🟠 bleeding intelligence
 
