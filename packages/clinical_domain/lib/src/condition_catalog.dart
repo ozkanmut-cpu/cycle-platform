@@ -11,7 +11,7 @@ class ConditionCatalogValidationException implements Exception {
 
 class ConditionCatalog {
   ConditionCatalog(Iterable<ConditionPack> packs)
-    : _packs = List.unmodifiable(_validateAndSort(packs));
+      : _packs = List.unmodifiable(_validateAndSort(packs));
 
   final List<ConditionPack> _packs;
 
@@ -61,6 +61,13 @@ class ConditionCatalog {
           .isEmpty) {
         throw ConditionCatalogValidationException(
           'Condition "$normalizedId" must define at least one symptom key.',
+        );
+      }
+      if (pack.evidence.isEmpty ||
+          pack.evidence.any((entry) =>
+              entry.sourceId.trim().isEmpty || entry.summary.trim().isEmpty)) {
+        throw ConditionCatalogValidationException(
+          'Condition "$normalizedId" must define valid provenance evidence.',
         );
       }
       if (!ids.add(normalizedId)) {
