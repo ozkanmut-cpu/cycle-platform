@@ -6,11 +6,11 @@ void main() {
     test('loads the initial tranche deterministically', () {
       final catalog = ConditionCatalog(conditionCatalogDefinitions);
 
-      expect(catalog.length, 60);
+      expect(catalog.length, 72);
       final ids = catalog.packs.map((pack) => pack.id).toList();
       final sortedIds = [...ids]..sort();
       expect(ids, orderedEquals(sortedIds));
-      expect(ids.toSet(), hasLength(60));
+      expect(ids.toSet(), hasLength(72));
       expect(
           ids,
           containsAll(<String>{
@@ -22,6 +22,9 @@ void main() {
             'pelvic-congestion-syndrome',
             'rectocele',
             'genital-warts',
+            'ovarian-cancer',
+            'tubo-ovarian-abscess',
+            'vulvar-cancer',
           }));
     });
 
