@@ -72,10 +72,45 @@ final List<ConditionPack> conditionCatalogExpansion2Definitions =
       {'vulvar lump', 'vulvar discomfort', 'vulvar pain'}),
 ]);
 
+final List<ConditionPack> conditionCatalogExpansion3Definitions =
+    List.unmodifiable([
+  _pack('cervical-cancer', 'Cervical cancer',
+      {'postcoital bleeding', 'abnormal vaginal bleeding', 'pelvic pain'}),
+  _pack('endometrial-cancer', 'Endometrial cancer',
+      {'postmenopausal bleeding', 'abnormal uterine bleeding', 'pelvic pain'}),
+  _pack('hydrosalpinx', 'Hydrosalpinx',
+      {'pelvic pain', 'lower abdominal pain', 'vaginal discharge'}),
+  _pack('ovarian-cancer', 'Ovarian cancer', {
+    'persistent bloating',
+    'pelvic pain',
+    'early satiety',
+    'urinary frequency'
+  }),
+  _pack(
+      'ovarian-hyperstimulation-syndrome',
+      'Ovarian hyperstimulation syndrome',
+      {'abdominal bloating', 'pelvic pain', 'nausea', 'shortness of breath'}),
+  _pack('pelvic-abscess', 'Pelvic abscess',
+      {'pelvic pain', 'fever', 'abnormal vaginal discharge'}),
+  _pack('pudendal-neuralgia', 'Pudendal neuralgia',
+      {'pelvic pain', 'vulvar pain', 'pain with sitting'}),
+  _pack('tubo-ovarian-abscess', 'Tubo-ovarian abscess',
+      {'pelvic pain', 'fever', 'lower abdominal pain'}),
+  _pack('urethral-diverticulum', 'Urethral diverticulum',
+      {'painful urination', 'urethral pain', 'urinary leakage'}),
+  _pack('vaginal-cancer', 'Vaginal cancer',
+      {'abnormal vaginal bleeding', 'vaginal discharge', 'pelvic pain'}),
+  _pack('vulvar-abscess', 'Vulvar abscess',
+      {'vulvar lump', 'vulvar pain', 'fever'}),
+  _pack('vulvar-cancer', 'Vulvar cancer',
+      {'vulvar lump', 'vulvar itching', 'vulvar pain', 'skin change'}),
+]);
+
 final List<ConditionPack> conditionCatalogDefinitions = List.unmodifiable([
   ...initialConditionCatalogDefinitions,
   ...conditionCatalogExpansionDefinitions,
   ...conditionCatalogExpansion2Definitions,
+  ...conditionCatalogExpansion3Definitions,
 ]);
 
 ConditionPack _pack(String id, String title, Set<String> symptomKeys) =>
