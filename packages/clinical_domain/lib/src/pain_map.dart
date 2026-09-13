@@ -63,11 +63,37 @@ class PainRegionTaxonomy {
         throw PainMapValidationException('Region "$id" needs routing keys.');
       }
     }
+    final byId = <String, PainRegionDefinition>{
+      for (final region in result) region.id.trim().toLowerCase(): region,
+    };
     for (final region in result) {
+      final id = region.id.trim().toLowerCase();
       final parent = region.parentId?.trim().toLowerCase();
-      if (parent != null && parent.isNotEmpty && !ids.contains(parent)) {
+      if (parent == null || parent.isEmpty) continue;
+      final parentRegion = byId[parent];
+      if (parentRegion == null) {
         throw PainMapValidationException(
           'Region "${region.id}" references missing parent "$parent".',
+        );
+      }
+      if (parent == id) {
+        throw PainMapValidationException(
+          'Region "${region.id}" cannot parent itself.',
+        );
+      }
+      if (parentRegion.group != region.group) {
+        throw PainMapValidationException(
+          'Region "${region.id}" must share its parent group.',
+        );
+      }
+      if (region.laterality == PainLaterality.none) {
+        throw PainMapValidationException(
+          'Child region "${region.id}" needs explicit laterality.',
+        );
+      }
+      if (parentRegion.laterality != PainLaterality.none) {
+        throw PainMapValidationException(
+          'Parent region "${parentRegion.id}" must be generalized.',
         );
       }
     }
