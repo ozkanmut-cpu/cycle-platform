@@ -43,8 +43,8 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 normalization + unit conversion
 - [x] 🔴 source provenance
 - [x] 🔴 deduplication
-- [ ] 🟠 sensor aggregation
-- [ ] 🟠 Connected Health screen
+- [x] 🟠 sensor aggregation
+- [x] 🟠 Connected Health screen
 
 ## 5 — Intelligence foundations
 - [x] 🔴 Personal Baseline Engine
