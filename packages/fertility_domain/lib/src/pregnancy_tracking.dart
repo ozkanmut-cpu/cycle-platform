@@ -35,9 +35,9 @@ class KickCountSession {
     this.schemaVersion = 1,
   }) : observations = List.unmodifiable(
           [...observations]..sort((a, b) {
-            final byTime = a.observedAt.compareTo(b.observedAt);
-            return byTime != 0 ? byTime : a.id.compareTo(b.id);
-          }),
+              final byTime = a.observedAt.compareTo(b.observedAt);
+              return byTime != 0 ? byTime : a.id.compareTo(b.id);
+            }),
         ) {
     _validateIds(this.observations.map((item) => item.id));
     if (id.trim().isEmpty || pregnancyEpisodeId.trim().isEmpty) {
@@ -103,7 +103,8 @@ class ContractionObservation {
   final DataState state;
   final DomainProvenance provenance;
 
-  Duration? get duration => endedAt == null ? null : endedAt!.difference(startedAt);
+  Duration? get duration =>
+      endedAt == null ? null : endedAt!.difference(startedAt);
 }
 
 class ContractionTiming {
@@ -140,9 +141,9 @@ class ContractionSession {
     this.schemaVersion = 1,
   }) : observations = List.unmodifiable(
           [...observations]..sort((a, b) {
-            final byTime = a.startedAt.compareTo(b.startedAt);
-            return byTime != 0 ? byTime : a.id.compareTo(b.id);
-          }),
+              final byTime = a.startedAt.compareTo(b.startedAt);
+              return byTime != 0 ? byTime : a.id.compareTo(b.id);
+            }),
         ) {
     _validateIds(this.observations.map((item) => item.id));
     if (id.trim().isEmpty || pregnancyEpisodeId.trim().isEmpty) {
@@ -201,12 +202,10 @@ class ContractionSession {
       timings.add(
         ContractionTiming(
           observationId: observation.id,
-          duration: observation.state == DataState.yes
-              ? observation.duration
-              : null,
-          intervalFromPreviousStart: observation.state == DataState.yes
-              ? interval
-              : null,
+          duration:
+              observation.state == DataState.yes ? observation.duration : null,
+          intervalFromPreviousStart:
+              observation.state == DataState.yes ? interval : null,
         ),
       );
 
@@ -240,7 +239,8 @@ void validateTrackingAgainstPregnancy({
   DateTime? sessionEndedAt,
 }) {
   if (sessionStartedAt.isBefore(pregnancy.startedAt) ||
-      (pregnancy.endedAt != null && sessionStartedAt.isAfter(pregnancy.endedAt!)) ||
+      (pregnancy.endedAt != null &&
+          sessionStartedAt.isAfter(pregnancy.endedAt!)) ||
       (sessionEndedAt != null &&
           pregnancy.endedAt != null &&
           sessionEndedAt.isAfter(pregnancy.endedAt!))) {
