@@ -1,3 +1,5 @@
+import 'condition_category.dart';
+
 enum RoutingConfidence { insufficientInformation, low, medium, high }
 
 class GuidelineVersion {
@@ -38,6 +40,10 @@ class ConditionPack {
   final GuidelineVersion guideline;
   final Set<String> symptomKeys;
   final List<ClinicalEvidenceRef> evidence;
+
+  ConditionCategory get category => conditionCategoryForId(id);
+
+  String get groupKey => conditionGroupKey(category);
 }
 
 class SymptomReport {
