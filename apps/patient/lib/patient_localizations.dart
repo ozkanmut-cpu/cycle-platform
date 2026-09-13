@@ -64,15 +64,15 @@ class PatientLocalizations {
   String get headache => isTurkish ? 'Baş ağrısı' : 'Headache';
   String get lowMood => isTurkish ? 'Düşük ruh hali' : 'Low mood';
 
-  String get connectedHealth =>
-      isTurkish ? 'Bağlı Sağlık' : 'Connected Health';
+  String get connectedHealth => isTurkish ? 'Bağlı Sağlık' : 'Connected Health';
   String get connectedHealthCardHint => isTurkish
       ? 'Health Connect ve HealthKit verilerini, eksikleri ve çelişkileri gör'
       : 'See Health Connect and HealthKit data, gaps and conflicts';
   String get connectedHealthHint => isTurkish
       ? 'Telefonunuzdaki sağlık kaynaklarını tek yerde görün. Cycle eksik veriyi normal kabul etmez ve çelişkileri gizlemez.'
       : 'See health sources from your phone in one place. Cycle never treats missing data as normal and does not hide conflicts.';
-  String get healthSources => isTurkish ? 'Sağlık Kaynakları' : 'Health Sources';
+  String get healthSources =>
+      isTurkish ? 'Sağlık Kaynakları' : 'Health Sources';
   String get healthMetrics => isTurkish ? 'Sağlık Ölçümleri' : 'Health Metrics';
   String get noConnectedHealthData => isTurkish
       ? 'Henüz bağlı sağlık verisi yok.'
