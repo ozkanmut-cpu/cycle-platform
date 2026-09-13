@@ -23,10 +23,7 @@ HealthEvent event({
       recordedAt: observedAt,
       knownAt: observedAt,
     ),
-    provenance: Provenance(
-      sourceKind: sourceKind,
-      sourceRecordId: id,
-    ),
+    provenance: Provenance(sourceKind: sourceKind, sourceRecordId: id),
     verificationStatus: VerificationStatus.deviceMeasured,
     confidence: ConfidenceClass.high,
     privacyClass: 'health',
@@ -57,13 +54,16 @@ void main() {
       ],
     );
 
-    final spo2 = viewModel.metrics.singleWhere((metric) => metric.label == 'SpO2');
+    final spo2 = viewModel.metrics.singleWhere(
+      (metric) => metric.label == 'SpO2',
+    );
     expect(spo2.state, ConnectedHealthMetricState.conflicting);
     expect(spo2.value, 94.5);
     expect(spo2.sourceLabel, 'Health Connect + HealthKit');
     expect(
-      viewModel.sources
-          .where((source) => source.state == ConnectedHealthSourceState.available),
+      viewModel.sources.where(
+        (source) => source.state == ConnectedHealthSourceState.available,
+      ),
       hasLength(2),
     );
   });
@@ -82,10 +82,12 @@ void main() {
       ],
     );
 
-    final heartRate = viewModel.metrics
-        .singleWhere((metric) => metric.label == 'Heart rate');
-    final restingHeartRate = viewModel.metrics
-        .singleWhere((metric) => metric.label == 'Resting heart rate');
+    final heartRate = viewModel.metrics.singleWhere(
+      (metric) => metric.label == 'Heart rate',
+    );
+    final restingHeartRate = viewModel.metrics.singleWhere(
+      (metric) => metric.label == 'Resting heart rate',
+    );
 
     expect(heartRate.state, ConnectedHealthMetricState.observed);
     expect(heartRate.value, 72.0);
@@ -93,21 +95,24 @@ void main() {
     expect(restingHeartRate.value, isNull);
   });
 
-  test('returns an empty metric view when no connected-source events exist', () {
-    final viewModel = ConnectedHealthViewModelBuilder().build(
-      events: [
-        event(
-          id: 'manual-hr',
-          eventType: 'vital.heart_rate',
-          value: 70,
-          unit: 'bpm',
-          observedAt: DateTime.utc(2026, 9, 13, 8),
-          sourceKind: SourceKind.patient,
-        ),
-      ],
-    );
+  test(
+    'returns an empty metric view when no connected-source events exist',
+    () {
+      final viewModel = ConnectedHealthViewModelBuilder().build(
+        events: [
+          event(
+            id: 'manual-hr',
+            eventType: 'vital.heart_rate',
+            value: 70,
+            unit: 'bpm',
+            observedAt: DateTime.utc(2026, 9, 13, 8),
+            sourceKind: SourceKind.patient,
+          ),
+        ],
+      );
 
-    expect(viewModel.metrics, isEmpty);
-    expect(viewModel.isEmpty, isTrue);
-  });
+      expect(viewModel.metrics, isEmpty);
+      expect(viewModel.isEmpty, isTrue);
+    },
+  );
 }
