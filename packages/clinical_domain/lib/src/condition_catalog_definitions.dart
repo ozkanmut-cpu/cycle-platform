@@ -319,4 +319,142 @@ final List<ConditionPack> initialConditionCatalogDefinitions =
     },
     evidence: const [_catalogBaselineEvidence],
   ),
+  ConditionPack(
+    id: 'cervical-polyp',
+    schemaVersion: 1,
+    title: 'Cervical polyp',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'postcoital bleeding',
+      'intermenstrual bleeding',
+      'vaginal discharge'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'cervicitis',
+    schemaVersion: 1,
+    title: 'Cervicitis',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'abnormal vaginal discharge',
+      'postcoital bleeding',
+      'pelvic pain'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'chlamydia',
+    schemaVersion: 1,
+    title: 'Chlamydia',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'abnormal vaginal discharge',
+      'painful urination',
+      'pelvic pain'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'endometrial-hyperplasia',
+    schemaVersion: 1,
+    title: 'Endometrial hyperplasia',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'abnormal uterine bleeding',
+      'heavy menstrual bleeding',
+      'postmenopausal bleeding'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'genital-herpes',
+    schemaVersion: 1,
+    title: 'Genital herpes',
+    guideline: _catalogGuideline,
+    symptomKeys: const {'genital sores', 'genital pain', 'painful urination'},
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'gonorrhea',
+    schemaVersion: 1,
+    title: 'Gonorrhea',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'abnormal vaginal discharge',
+      'painful urination',
+      'pelvic pain'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'menopause',
+    schemaVersion: 1,
+    title: 'Menopause',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'absent periods',
+      'hot flashes',
+      'night sweats',
+      'vaginal dryness'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'ovarian-endometrioma',
+    schemaVersion: 1,
+    title: 'Ovarian endometrioma',
+    guideline: _catalogGuideline,
+    symptomKeys: const {'pelvic pain', 'painful periods', 'pain during sex'},
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'pelvic-organ-prolapse',
+    schemaVersion: 1,
+    title: 'Pelvic organ prolapse',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'pelvic pressure',
+      'vaginal bulge',
+      'difficulty emptying bladder'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'primary-ovarian-insufficiency',
+    schemaVersion: 1,
+    title: 'Primary ovarian insufficiency',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'irregular periods',
+      'absent periods',
+      'hot flashes',
+      'vaginal dryness'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'trichomoniasis',
+    schemaVersion: 1,
+    title: 'Trichomoniasis',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'vaginal discharge',
+      'vaginal irritation',
+      'painful urination'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'urinary-retention',
+    schemaVersion: 1,
+    title: 'Urinary retention',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'difficulty emptying bladder',
+      'weak urine stream',
+      'lower abdominal pressure'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
 ]);
