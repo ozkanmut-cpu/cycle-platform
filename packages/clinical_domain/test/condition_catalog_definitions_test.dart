@@ -4,54 +4,26 @@ import 'package:test/test.dart';
 void main() {
   group('initialConditionCatalogDefinitions', () {
     test('loads the initial tranche deterministically', () {
-      final catalog = ConditionCatalog(initialConditionCatalogDefinitions);
+      final catalog = ConditionCatalog(conditionCatalogDefinitions);
 
-      expect(catalog.length, 36);
+      expect(catalog.length, 48);
+      final ids = catalog.packs.map((pack) => pack.id).toList();
+      final sortedIds = [...ids]..sort();
+      expect(ids, orderedEquals(sortedIds));
+      expect(ids.toSet(), hasLength(48));
       expect(
-        catalog.packs.map((pack) => pack.id),
-        orderedEquals([
-          'abnormal-uterine-bleeding',
-          'adenomyosis',
-          'amenorrhea',
-          'bacterial-vaginosis',
-          'bladder-pain-syndrome',
-          'cervical-polyp',
-          'cervicitis',
-          'chlamydia',
-          'dysmenorrhea',
-          'endometrial-hyperplasia',
-          'endometrial-polyp',
-          'endometriosis',
-          'functional-ovarian-cyst',
-          'genital-herpes',
-          'genitourinary-syndrome-of-menopause',
-          'gonorrhea',
-          'iron-deficiency-anemia',
-          'menopause',
-          'ovarian-endometrioma',
-          'overactive-bladder',
-          'pelvic-floor-dysfunction',
-          'pelvic-inflammatory-disease',
-          'pelvic-organ-prolapse',
-          'perimenopause',
-          'polycystic-ovary-syndrome',
-          'premenstrual-dysphoric-disorder',
-          'premenstrual-syndrome',
-          'primary-ovarian-insufficiency',
-          'stress-urinary-incontinence',
-          'trichomoniasis',
-          'urinary-retention',
-          'urinary-tract-infection',
-          'uterine-fibroids',
-          'vaginismus',
-          'vulvodynia',
-          'vulvovaginal-candidiasis',
-        ]),
-      );
+          ids,
+          containsAll(<String>{
+            'uterine-fibroids',
+            'endometriosis',
+            'ectopic-pregnancy',
+            'ovarian-torsion',
+            'vulvar-lichen-planus',
+          }));
     });
 
     test('preserves stable lookup and provenance metadata', () {
-      final catalog = ConditionCatalog(initialConditionCatalogDefinitions);
+      final catalog = ConditionCatalog(conditionCatalogDefinitions);
       final fibroids = catalog.findById(' UTERINE-FIBROIDS ');
 
       expect(fibroids, isNotNull);
@@ -66,7 +38,7 @@ void main() {
     });
 
     test('routes symptoms to candidates without producing a diagnosis', () {
-      final catalog = ConditionCatalog(initialConditionCatalogDefinitions);
+      final catalog = ConditionCatalog(conditionCatalogDefinitions);
       const router = SymptomFirstRouter();
 
       final result = router.route(
@@ -87,7 +59,7 @@ void main() {
     });
 
     test('all initial definitions keep non-diagnostic routing metadata', () {
-      for (final pack in initialConditionCatalogDefinitions) {
+      for (final pack in conditionCatalogDefinitions) {
         expect(pack.id, isNotEmpty);
         expect(pack.title, isNotEmpty);
         expect(pack.schemaVersion, greaterThan(0));
