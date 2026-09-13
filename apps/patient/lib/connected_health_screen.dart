@@ -4,7 +4,7 @@ import 'patient_localizations.dart';
 
 enum ConnectedHealthSourceState { available, unavailable }
 
-enum ConnectedHealthMetricState { observed, missing, conflicting }
+enum ConnectedHealthMetricState { observed, missing, stale, conflicting }
 
 class ConnectedHealthSourceSummary {
   const ConnectedHealthSourceSummary({required this.name, required this.state});
@@ -122,6 +122,7 @@ class _MetricCard extends StatelessWidget {
     final stateText = switch (metric.state) {
       ConnectedHealthMetricState.observed => strings.observedHealthData,
       ConnectedHealthMetricState.missing => strings.missingHealthData,
+      ConnectedHealthMetricState.stale => strings.staleHealthData,
       ConnectedHealthMetricState.conflicting => strings.conflictingHealthData,
     };
     final displayValue =
@@ -135,6 +136,7 @@ class _MetricCard extends StatelessWidget {
         leading: Icon(switch (metric.state) {
           ConnectedHealthMetricState.observed => Icons.check_circle_outline,
           ConnectedHealthMetricState.missing => Icons.help_outline,
+          ConnectedHealthMetricState.stale => Icons.schedule_outlined,
           ConnectedHealthMetricState.conflicting =>
             Icons.warning_amber_outlined,
         }),
