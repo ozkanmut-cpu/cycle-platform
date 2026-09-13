@@ -59,6 +59,18 @@ class BleedingEpisode {
   final List<BleedingObservation> observations;
 }
 
+class BleedingEvidenceRef {
+  const BleedingEvidenceRef({
+    required this.observationId,
+    required this.observedAt,
+    this.sourceId,
+  });
+
+  final String observationId;
+  final DateTime observedAt;
+  final String? sourceId;
+}
+
 class BleedingIntelligenceValidationException implements Exception {
   const BleedingIntelligenceValidationException(this.message);
   final String message;
@@ -71,14 +83,17 @@ class BleedingIntelligenceResult {
   const BleedingIntelligenceResult({
     required this.descriptors,
     required this.symptomKeys,
-    required this.evidenceObservationIds,
+    required this.evidence,
     required this.missingInformation,
   });
 
   final List<BleedingDescriptor> descriptors;
   final List<String> symptomKeys;
-  final List<String> evidenceObservationIds;
+  final List<BleedingEvidenceRef> evidence;
   final Set<String> missingInformation;
+
+  List<String> get evidenceObservationIds =>
+      List.unmodifiable(evidence.map((item) => item.observationId));
 
   SymptomReport toSymptomReport() => SymptomReport(
         symptomKeys: symptomKeys.toSet(),
@@ -116,7 +131,7 @@ class BleedingIntelligenceEngine {
     final ids = <String>{};
     final descriptors = <BleedingDescriptor>{};
     final symptomKeys = <String>{};
-    final evidence = <String>{};
+    final evidence = <BleedingEvidenceRef>[];
     final missing = <String>{};
     final flowsByInstant = <DateTime, Set<BleedingFlow>>{};
 
@@ -127,6 +142,11 @@ class BleedingIntelligenceEngine {
           id.isEmpty
               ? 'Observation id must not be empty.'
               : 'Duplicate observation id: $id.',
+        );
+      }
+      if (observation.sourceId != null && observation.sourceId!.trim().isEmpty) {
+        throw BleedingIntelligenceValidationException(
+          'Observation "$id" has an empty source id.',
         );
       }
       if (observation.observedAt.isBefore(episode.startedAt) ||
@@ -154,7 +174,14 @@ class BleedingIntelligenceEngine {
           'Bleeding observation "$id" must be yes, unknown, or notRecorded.',
         );
       }
-      evidence.add(id);
+
+      evidence.add(
+        BleedingEvidenceRef(
+          observationId: id,
+          observedAt: observation.observedAt,
+          sourceId: observation.sourceId?.trim(),
+        ),
+      );
 
       if (observation.context == null) missing.add('bleeding context');
       if (observation.flow == null) missing.add('bleeding flow');
@@ -203,11 +230,15 @@ class BleedingIntelligenceEngine {
     final sortedDescriptors = descriptors.toList()
       ..sort((a, b) => a.name.compareTo(b.name));
     final sortedSymptoms = symptomKeys.toList()..sort();
-    final sortedEvidence = evidence.toList()..sort();
+    evidence.sort((a, b) {
+      final byTime = a.observedAt.compareTo(b.observedAt);
+      if (byTime != 0) return byTime;
+      return a.observationId.compareTo(b.observationId);
+    });
     return BleedingIntelligenceResult(
       descriptors: List.unmodifiable(sortedDescriptors),
       symptomKeys: List.unmodifiable(sortedSymptoms),
-      evidenceObservationIds: List.unmodifiable(sortedEvidence),
+      evidence: List.unmodifiable(evidence),
       missingInformation: Set.unmodifiable(missing),
     );
   }
