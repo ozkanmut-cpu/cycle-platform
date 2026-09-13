@@ -6,7 +6,7 @@ void main() {
     test('loads the initial tranche deterministically', () {
       final catalog = ConditionCatalog(initialConditionCatalogDefinitions);
 
-      expect(catalog.length, 24);
+      expect(catalog.length, 36);
       expect(
         catalog.packs.map((pack) => pack.id),
         orderedEquals([
@@ -15,20 +15,32 @@ void main() {
           'amenorrhea',
           'bacterial-vaginosis',
           'bladder-pain-syndrome',
+          'cervical-polyp',
+          'cervicitis',
+          'chlamydia',
           'dysmenorrhea',
+          'endometrial-hyperplasia',
           'endometrial-polyp',
           'endometriosis',
           'functional-ovarian-cyst',
+          'genital-herpes',
           'genitourinary-syndrome-of-menopause',
+          'gonorrhea',
           'iron-deficiency-anemia',
+          'menopause',
+          'ovarian-endometrioma',
           'overactive-bladder',
           'pelvic-floor-dysfunction',
           'pelvic-inflammatory-disease',
+          'pelvic-organ-prolapse',
           'perimenopause',
           'polycystic-ovary-syndrome',
           'premenstrual-dysphoric-disorder',
           'premenstrual-syndrome',
+          'primary-ovarian-insufficiency',
           'stress-urinary-incontinence',
+          'trichomoniasis',
+          'urinary-retention',
           'urinary-tract-infection',
           'uterine-fibroids',
           'vaginismus',
