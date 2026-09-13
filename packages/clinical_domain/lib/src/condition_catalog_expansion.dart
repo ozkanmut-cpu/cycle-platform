@@ -42,9 +42,40 @@ final List<ConditionPack> conditionCatalogExpansionDefinitions =
       {'vulvar pain', 'vulvar burning', 'vaginal discharge', 'skin change'}),
 ]);
 
+final List<ConditionPack> conditionCatalogExpansion2Definitions =
+    List.unmodifiable([
+  _pack(
+      'bacterial-urinary-tract-infection',
+      'Bacterial urinary tract infection',
+      {'painful urination', 'urinary frequency', 'urinary urgency'}),
+  _pack('chronic-endometritis', 'Chronic endometritis',
+      {'pelvic pain', 'abnormal uterine bleeding', 'vaginal discharge'}),
+  _pack('cystocele', 'Cystocele',
+      {'vaginal bulge', 'pelvic pressure', 'difficulty emptying bladder'}),
+  _pack('endocervical-polyp', 'Endocervical polyp',
+      {'postcoital bleeding', 'intermenstrual bleeding', 'vaginal discharge'}),
+  _pack('genital-warts', 'Genital warts',
+      {'genital lesions', 'genital itching', 'genital discomfort'}),
+  _pack('hemorrhagic-ovarian-cyst', 'Hemorrhagic ovarian cyst',
+      {'pelvic pain', 'sudden pelvic pain', 'lower abdominal pain'}),
+  _pack('mittelschmerz', 'Mittelschmerz',
+      {'midcycle pelvic pain', 'one-sided pelvic pain'}),
+  _pack('pelvic-congestion-syndrome', 'Pelvic congestion syndrome',
+      {'chronic pelvic pain', 'pelvic heaviness', 'pain during sex'}),
+  _pack('rectocele', 'Rectocele',
+      {'vaginal bulge', 'pelvic pressure', 'difficulty with bowel movements'}),
+  _pack('urethritis', 'Urethritis',
+      {'painful urination', 'urethral irritation', 'urinary frequency'}),
+  _pack('vaginal-prolapse', 'Vaginal prolapse',
+      {'vaginal bulge', 'pelvic pressure', 'pelvic discomfort'}),
+  _pack('vulvar-cyst', 'Vulvar cyst',
+      {'vulvar lump', 'vulvar discomfort', 'vulvar pain'}),
+]);
+
 final List<ConditionPack> conditionCatalogDefinitions = List.unmodifiable([
   ...initialConditionCatalogDefinitions,
   ...conditionCatalogExpansionDefinitions,
+  ...conditionCatalogExpansion2Definitions,
 ]);
 
 ConditionPack _pack(String id, String title, Set<String> symptomKeys) =>
