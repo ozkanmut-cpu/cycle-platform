@@ -75,7 +75,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 symptom-first routing
 - [x] 🟠 78-condition catalog definitions
 - [x] 🟠 body/pelvic pain map
-- [ ] 🟠 bleeding intelligence
+- [x] 🟠 bleeding intelligence
 
 ## 8 — Fertility, pregnancy and postpartum
 - [x] 🔴 sexual activity model
