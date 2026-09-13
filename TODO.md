@@ -86,7 +86,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 pregnancy vitals/symptoms
 - [x] 🔴 Pregnancy Safety Kernel
 - [x] 🔴 outcomes and postpartum
-- [ ] 🟠 kick counter and contraction timer
+- [x] 🟠 kick counter and contraction timer
 
 ## 9 — Documents and interoperability
 - [x] 🔴 document ingestion
