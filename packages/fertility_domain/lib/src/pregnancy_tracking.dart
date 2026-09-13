@@ -34,7 +34,8 @@ class KickCountSession {
     this.endedAt,
     this.schemaVersion = 1,
   }) : observations = List.unmodifiable(
-          [...observations]..sort((a, b) {
+          List<FetalMovementObservation>.from(observations)
+            ..sort((a, b) {
               final byTime = a.observedAt.compareTo(b.observedAt);
               return byTime != 0 ? byTime : a.id.compareTo(b.id);
             }),
@@ -140,7 +141,8 @@ class ContractionSession {
     this.endedAt,
     this.schemaVersion = 1,
   }) : observations = List.unmodifiable(
-          [...observations]..sort((a, b) {
+          List<ContractionObservation>.from(observations)
+            ..sort((a, b) {
               final byTime = a.startedAt.compareTo(b.startedAt);
               return byTime != 0 ? byTime : a.id.compareTo(b.id);
             }),
@@ -198,7 +200,7 @@ class ContractionSession {
     for (final observation in observations) {
       final interval = previousStart == null
           ? null
-          : observation.startedAt.difference(previousStart!);
+          : observation.startedAt.difference(previousStart);
       timings.add(
         ContractionTiming(
           observationId: observation.id,
@@ -210,10 +212,12 @@ class ContractionSession {
       );
 
       if (observation.state == DataState.yes) {
-        if (previousExplicit?.endedAt != null &&
-            observation.startedAt.isBefore(previousExplicit!.endedAt!)) {
+        final previous = previousExplicit;
+        if (previous != null &&
+            previous.endedAt != null &&
+            observation.startedAt.isBefore(previous.endedAt!)) {
           overlaps
-            ..add(previousExplicit!.id)
+            ..add(previous.id)
             ..add(observation.id);
         }
         previousExplicit = observation;
