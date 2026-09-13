@@ -16,7 +16,8 @@ const ClinicalEvidenceRef _catalogBaselineEvidence = ClinicalEvidenceRef(
   summary: 'Curated symptom-routing metadata; not a diagnostic rule.',
 );
 
-final List<ConditionPack> initialConditionCatalogDefinitions = List.unmodifiable([
+final List<ConditionPack> initialConditionCatalogDefinitions =
+    List.unmodifiable([
   ConditionPack(
     id: 'adenomyosis',
     schemaVersion: 1,
@@ -167,6 +168,154 @@ final List<ConditionPack> initialConditionCatalogDefinitions = List.unmodifiable
       'vaginal irritation',
       'vaginal discharge',
       'painful urination',
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'amenorrhea',
+    schemaVersion: 1,
+    title: 'Amenorrhea',
+    guideline: _catalogGuideline,
+    symptomKeys: const {'absent periods', 'missed periods'},
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'abnormal-uterine-bleeding',
+    schemaVersion: 1,
+    title: 'Abnormal uterine bleeding',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'irregular bleeding',
+      'heavy menstrual bleeding',
+      'intermenstrual bleeding'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'bladder-pain-syndrome',
+    schemaVersion: 1,
+    title: 'Bladder pain syndrome',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'bladder pain',
+      'urinary frequency',
+      'urinary urgency',
+      'pelvic pain'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'genitourinary-syndrome-of-menopause',
+    schemaVersion: 1,
+    title: 'Genitourinary syndrome of menopause',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'vaginal dryness',
+      'pain during sex',
+      'urinary urgency',
+      'vaginal irritation'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'overactive-bladder',
+    schemaVersion: 1,
+    title: 'Overactive bladder',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'urinary urgency',
+      'urinary frequency',
+      'nocturia',
+      'urge incontinence'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'pelvic-floor-dysfunction',
+    schemaVersion: 1,
+    title: 'Pelvic floor dysfunction',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'pelvic pressure',
+      'pelvic pain',
+      'pain during sex',
+      'difficulty emptying bladder'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'perimenopause',
+    schemaVersion: 1,
+    title: 'Perimenopause',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'irregular periods',
+      'hot flashes',
+      'night sweats',
+      'sleep disturbance'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'premenstrual-dysphoric-disorder',
+    schemaVersion: 1,
+    title: 'Premenstrual dysphoric disorder',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'premenstrual mood change',
+      'irritability',
+      'depressed mood',
+      'anxiety'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'premenstrual-syndrome',
+    schemaVersion: 1,
+    title: 'Premenstrual syndrome',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'premenstrual symptoms',
+      'bloating',
+      'breast tenderness',
+      'mood change'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'stress-urinary-incontinence',
+    schemaVersion: 1,
+    title: 'Stress urinary incontinence',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'urine leakage with cough',
+      'urine leakage with exercise',
+      'urinary leakage'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'vaginismus',
+    schemaVersion: 1,
+    title: 'Vaginismus',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'pain during penetration',
+      'difficulty with penetration',
+      'pelvic floor tightening'
+    },
+    evidence: const [_catalogBaselineEvidence],
+  ),
+  ConditionPack(
+    id: 'vulvodynia',
+    schemaVersion: 1,
+    title: 'Vulvodynia',
+    guideline: _catalogGuideline,
+    symptomKeys: const {
+      'vulvar pain',
+      'vulvar burning',
+      'pain with touch',
+      'pain during sex'
     },
     evidence: const [_catalogBaselineEvidence],
   ),
