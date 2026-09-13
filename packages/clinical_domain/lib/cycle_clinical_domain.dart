@@ -1,5 +1,6 @@
 library cycle_clinical_domain;
 
+export 'src/bleeding_intelligence.dart';
 export 'src/condition_catalog.dart';
 export 'src/condition_category.dart';
 export 'src/condition_catalog_expansion.dart';
