@@ -8,13 +8,24 @@ void main() {
     effectiveFrom: DateTime.utc(2026, 1, 1),
   );
 
-  ConditionPack pack(String id, {String? title, Set<String>? symptoms}) {
+  ConditionPack pack(
+    String id, {
+    String? title,
+    Set<String>? symptoms,
+    int schemaVersion = 1,
+    GuidelineVersion? packGuideline,
+    List<ClinicalEvidenceRef>? evidence,
+  }) {
     return ConditionPack(
       id: id,
-      schemaVersion: 1,
+      schemaVersion: schemaVersion,
       title: title ?? id,
-      guideline: guideline,
+      guideline: packGuideline ?? guideline,
       symptomKeys: symptoms ?? const {'pain'},
+      evidence: evidence ??
+          const [
+            ClinicalEvidenceRef(sourceId: 'test', summary: 'test evidence')
+          ],
     );
   }
 
@@ -49,6 +60,27 @@ void main() {
       );
       expect(
         () => ConditionCatalog([pack('no-symptoms', symptoms: const {})]),
+        throwsA(isA<ConditionCatalogValidationException>()),
+      );
+      expect(
+        () => ConditionCatalog([pack('bad-schema', schemaVersion: 0)]),
+        throwsA(isA<ConditionCatalogValidationException>()),
+      );
+      expect(
+        () => ConditionCatalog([
+          pack(
+            'bad-guideline',
+            packGuideline: GuidelineVersion(
+              identifier: ' ',
+              version: '2026.1',
+              effectiveFrom: DateTime.utc(2026, 1, 1),
+            ),
+          ),
+        ]),
+        throwsA(isA<ConditionCatalogValidationException>()),
+      );
+      expect(
+        () => ConditionCatalog([pack('no-evidence', evidence: const [])]),
         throwsA(isA<ConditionCatalogValidationException>()),
       );
     });
