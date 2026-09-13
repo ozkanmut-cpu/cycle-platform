@@ -11,7 +11,7 @@ class ConditionCatalogValidationException implements Exception {
 
 class ConditionCatalog {
   ConditionCatalog(Iterable<ConditionPack> packs)
-      : _packs = List.unmodifiable(_validateAndSort(packs));
+    : _packs = List.unmodifiable(_validateAndSort(packs));
 
   final List<ConditionPack> _packs;
 
