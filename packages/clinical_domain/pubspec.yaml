@@ -6,5 +6,9 @@ publish_to: none
 environment:
   sdk: ^3.5.0
 
+dependencies:
+  cycle_core_domain:
+    path: ../core_domain
+
 dev_dependencies:
   test: ^1.25.0
