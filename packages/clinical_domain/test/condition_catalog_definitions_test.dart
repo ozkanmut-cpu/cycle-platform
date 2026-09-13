@@ -6,21 +6,33 @@ void main() {
     test('loads the initial tranche deterministically', () {
       final catalog = ConditionCatalog(initialConditionCatalogDefinitions);
 
-      expect(catalog.length, 12);
+      expect(catalog.length, 24);
       expect(
         catalog.packs.map((pack) => pack.id),
         orderedEquals([
+          'abnormal-uterine-bleeding',
           'adenomyosis',
+          'amenorrhea',
           'bacterial-vaginosis',
+          'bladder-pain-syndrome',
           'dysmenorrhea',
           'endometrial-polyp',
           'endometriosis',
           'functional-ovarian-cyst',
+          'genitourinary-syndrome-of-menopause',
           'iron-deficiency-anemia',
+          'overactive-bladder',
+          'pelvic-floor-dysfunction',
           'pelvic-inflammatory-disease',
+          'perimenopause',
           'polycystic-ovary-syndrome',
+          'premenstrual-dysphoric-disorder',
+          'premenstrual-syndrome',
+          'stress-urinary-incontinence',
           'urinary-tract-infection',
           'uterine-fibroids',
+          'vaginismus',
+          'vulvodynia',
           'vulvovaginal-candidiasis',
         ]),
       );
@@ -35,7 +47,10 @@ void main() {
       expect(fibroids.schemaVersion, 1);
       expect(fibroids.guideline.identifier, 'cycle-condition-catalog');
       expect(fibroids.guideline.version, '2026.1');
-      expect(fibroids.evidence.map((entry) => entry.sourceId), contains('nice-ng88'));
+      expect(
+        fibroids.evidence.map((entry) => entry.sourceId),
+        contains('nice-ng88'),
+      );
     });
 
     test('routes symptoms to candidates without producing a diagnosis', () {
