@@ -4,6 +4,15 @@ import 'package:test/test.dart';
 
 void main() {
   group('bodyPelvicPainTaxonomy', () {
+    test('exposes stable taxonomy version metadata', () {
+      expect(bodyPelvicPainTaxonomy.schemaVersion, 1);
+      expect(bodyPelvicPainTaxonomy.catalogVersion, '2026.1');
+      expect(
+        () => PainRegionTaxonomy(const [], schemaVersion: 0),
+        throwsA(isA<PainMapValidationException>()),
+      );
+    });
+
     test('orders and looks up regions deterministically', () {
       final ids = bodyPelvicPainTaxonomy.regions.map((e) => e.id).toList();
       expect(ids, orderedEquals([...ids]..sort()));
