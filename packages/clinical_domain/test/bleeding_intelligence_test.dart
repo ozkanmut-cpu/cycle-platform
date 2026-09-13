@@ -22,7 +22,8 @@ void main() {
         features: features,
       );
 
-  test('heavy and prolonged bleeding produces evidence-backed routing keys', () {
+  test('heavy and prolonged bleeding produces evidence-backed routing keys',
+      () {
     final result = const BleedingIntelligenceEngine().evaluate(
       BleedingEpisode(
         id: 'episode-1',
@@ -73,7 +74,8 @@ void main() {
     expect(result.symptomKeys, contains('spotting'));
   });
 
-  test('unknown and not-recorded remain missing and never become no bleeding', () {
+  test('unknown and not-recorded remain missing and never become no bleeding',
+      () {
     final result = const BleedingIntelligenceEngine().evaluate(
       BleedingEpisode(
         id: 'episode-3',
@@ -103,7 +105,8 @@ void main() {
     expect(result.descriptors, contains(BleedingDescriptor.incomplete));
   });
 
-  test('conflicting recorded flow observations are surfaced deterministically', () {
+  test('conflicting recorded flow observations are surfaced deterministically',
+      () {
     final result = const BleedingIntelligenceEngine().evaluate(
       BleedingEpisode(
         id: 'episode-4',
@@ -130,7 +133,8 @@ void main() {
       ),
     );
 
-    expect(result.missingInformation, containsAll(['bleeding context', 'bleeding flow']));
+    expect(result.missingInformation,
+        containsAll(['bleeding context', 'bleeding flow']));
     expect(result.descriptors, contains(BleedingDescriptor.incomplete));
   });
 
