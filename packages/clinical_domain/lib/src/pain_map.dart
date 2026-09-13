@@ -97,6 +97,21 @@ class PainRegionTaxonomy {
         );
       }
     }
+    for (final region in result) {
+      final seen = <String>{};
+      var current = region;
+      while (current.parentId != null && current.parentId!.trim().isNotEmpty) {
+        final currentId = current.id.trim().toLowerCase();
+        if (!seen.add(currentId)) {
+          throw PainMapValidationException(
+              'Cycle detected at pain region "$currentId".');
+        }
+        final parentId = current.parentId!.trim().toLowerCase();
+        final parentRegion = byId[parentId];
+        if (parentRegion == null) break;
+        current = parentRegion;
+      }
+    }
     result.sort((a, b) => a.id.compareTo(b.id));
     return result;
   }
@@ -208,6 +223,13 @@ const bodyPelvicPainRegions = <PainRegionDefinition>[
       parentId: 'pelvis-generalized',
       routingKeys: {'pelvic pain', 'right pelvic pain'}),
   PainRegionDefinition(
+      id: 'pelvis-bilateral',
+      title: 'Both sides of pelvis',
+      group: PainRegionGroup.pelvis,
+      laterality: PainLaterality.bilateral,
+      parentId: 'pelvis-generalized',
+      routingKeys: {'pelvic pain', 'bilateral pelvic pain'}),
+  PainRegionDefinition(
       id: 'pelvis-midline',
       title: 'Central pelvis',
       group: PainRegionGroup.pelvis,
@@ -232,6 +254,12 @@ const bodyPelvicPainRegions = <PainRegionDefinition>[
       group: PainRegionGroup.back,
       laterality: PainLaterality.midline,
       routingKeys: {'lower back pain'}),
+  PainRegionDefinition(
+      id: 'flank-bilateral',
+      title: 'Both flanks',
+      group: PainRegionGroup.back,
+      laterality: PainLaterality.bilateral,
+      routingKeys: {'flank pain', 'bilateral flank pain'}),
   PainRegionDefinition(
       id: 'flank-left',
       title: 'Left flank',
