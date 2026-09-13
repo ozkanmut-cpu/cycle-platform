@@ -39,7 +39,9 @@ void main() {
     expect(find.text('No connected health data yet.'), findsOneWidget);
   });
 
-  testWidgets('keeps missing, stale and conflicting states explicit', (tester) async {
+  testWidgets('keeps missing, stale and conflicting states explicit', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       buildApp(
         const ConnectedHealthViewModel(
