@@ -78,6 +78,7 @@ class PatientLocalizations {
       ? 'Henüz bağlı sağlık verisi yok.'
       : 'No connected health data yet.';
   String get missingHealthData => isTurkish ? 'Veri eksik' : 'Data missing';
+  String get staleHealthData => isTurkish ? 'Veri eski' : 'Data stale';
   String get conflictingHealthData =>
       isTurkish ? 'Kaynaklar çelişiyor' : 'Sources conflict';
   String get observedHealthData => isTurkish ? 'Gözlendi' : 'Observed';
