@@ -4,6 +4,7 @@ import 'package:cycle_patient/connected_health_screen.dart';
 import 'package:cycle_patient/patient_home.dart';
 import 'package:cycle_patient/patient_localizations.dart';
 import 'package:cycle_patient/vault_session.dart';
+import 'package:cycle_security/cycle_security.dart';
 import 'package:cycle_storage/cycle_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -39,8 +40,12 @@ class _VaultRepository implements HealthEventRepository {
   }
 
   @override
-  Future<HealthEvent?> getById(String id) async =>
-      events.where((event) => event.id == id).firstOrNull;
+  Future<HealthEvent?> getById(String id) async {
+    for (final event in events) {
+      if (event.id == id) return event;
+    }
+    return null;
+  }
 
   @override
   Future<void> upsert(HealthEvent event) async => events.add(event);
