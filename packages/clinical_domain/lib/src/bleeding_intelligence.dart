@@ -1,5 +1,7 @@
 import 'package:cycle_core_domain/cycle_core_domain.dart';
 
+import 'condition_pack.dart';
+
 enum BleedingContext {
   menstrual,
   intermenstrual,
@@ -77,6 +79,11 @@ class BleedingIntelligenceResult {
   final List<String> symptomKeys;
   final List<String> evidenceObservationIds;
   final Set<String> missingInformation;
+
+  SymptomReport toSymptomReport() => SymptomReport(
+        symptomKeys: symptomKeys.toSet(),
+        unknownKeys: missingInformation,
+      );
 }
 
 class BleedingIntelligenceEngine {
@@ -111,7 +118,7 @@ class BleedingIntelligenceEngine {
     final symptomKeys = <String>{};
     final evidence = <String>{};
     final missing = <String>{};
-    final recordedFlows = <BleedingFlow>{};
+    final flowsByInstant = <DateTime, Set<BleedingFlow>>{};
 
     for (final observation in episode.observations) {
       final id = observation.id.trim().toLowerCase();
@@ -152,7 +159,9 @@ class BleedingIntelligenceEngine {
       if (observation.context == null) missing.add('bleeding context');
       if (observation.flow == null) missing.add('bleeding flow');
       final flow = observation.flow;
-      if (flow != null) recordedFlows.add(flow);
+      if (flow != null) {
+        flowsByInstant.putIfAbsent(observation.observedAt, () => {}).add(flow);
+      }
       if (flow == BleedingFlow.spotting) {
         descriptors.add(BleedingDescriptor.spotting);
         symptomKeys.add('spotting');
@@ -181,7 +190,7 @@ class BleedingIntelligenceEngine {
       }
     }
 
-    if (recordedFlows.length > 1) {
+    if (flowsByInstant.values.any((flows) => flows.length > 1)) {
       descriptors.add(BleedingDescriptor.conflicting);
     }
     if (episode.endedAt != null &&
