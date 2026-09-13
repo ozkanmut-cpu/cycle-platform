@@ -5,6 +5,8 @@ import 'package:cycle_storage/cycle_storage.dart';
 import 'package:flutter/material.dart';
 
 import 'app_lock.dart';
+import 'connected_health_screen.dart';
+import 'connected_health_view_model_builder.dart';
 import 'cycle_timeline.dart';
 import 'month_calendar.dart';
 import 'patient_localizations.dart';
@@ -149,6 +151,16 @@ class _PatientHomePageState extends State<PatientHomePage>
           ),
         );
       },
+    );
+  }
+
+  Future<void> _openConnectedHealth() async {
+    if (_privacyCovered) return;
+    final viewModel = ConnectedHealthViewModelBuilder().build(events: _events);
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => ConnectedHealthScreen(viewModel: viewModel),
+      ),
     );
   }
 
@@ -317,6 +329,16 @@ class _PatientHomePageState extends State<PatientHomePage>
                   subtitle: Text(strings.quickLogCardHint),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: _privacyCovered ? null : _openQuickLog,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.monitor_heart_outlined),
+                  title: Text(strings.connectedHealth),
+                  subtitle: Text(strings.connectedHealthCardHint),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _privacyCovered ? null : _openConnectedHealth,
                 ),
               ),
               const SizedBox(height: 12),
