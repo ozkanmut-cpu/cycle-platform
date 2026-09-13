@@ -99,7 +99,8 @@ class BleedingIntelligenceEngine {
         'Bleeding episode needs an id and observations.',
       );
     }
-    if (episode.endedAt != null && episode.endedAt!.isBefore(episode.startedAt)) {
+    if (episode.endedAt != null &&
+        episode.endedAt!.isBefore(episode.startedAt)) {
       throw const BleedingIntelligenceValidationException(
         'Bleeding episode cannot end before it starts.',
       );
@@ -116,11 +117,14 @@ class BleedingIntelligenceEngine {
       final id = observation.id.trim().toLowerCase();
       if (id.isEmpty || !ids.add(id)) {
         throw BleedingIntelligenceValidationException(
-          id.isEmpty ? 'Observation id must not be empty.' : 'Duplicate observation id: $id.',
+          id.isEmpty
+              ? 'Observation id must not be empty.'
+              : 'Duplicate observation id: $id.',
         );
       }
       if (observation.observedAt.isBefore(episode.startedAt) ||
-          (episode.endedAt != null && observation.observedAt.isAfter(episode.endedAt!))) {
+          (episode.endedAt != null &&
+              observation.observedAt.isAfter(episode.endedAt!))) {
         throw BleedingIntelligenceValidationException(
           'Observation "$id" is outside its episode.',
         );
@@ -155,7 +159,8 @@ class BleedingIntelligenceEngine {
       }
       if (flow == BleedingFlow.heavy ||
           observation.features.contains(BleedingFeature.floodingGushing) ||
-          observation.features.contains(BleedingFeature.frequentProtectionChange)) {
+          observation.features
+              .contains(BleedingFeature.frequentProtectionChange)) {
         descriptors.add(BleedingDescriptor.heavyFlow);
         symptomKeys.add('heavy menstrual bleeding');
       }
