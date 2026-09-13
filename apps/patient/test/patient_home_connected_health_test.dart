@@ -15,7 +15,9 @@ class _AlwaysUnlockedAppLock extends AppLockService {
   bool get authInProgress => false;
 
   @override
-  Future<bool> authenticate({LockSensitivity sensitivity = LockSensitivity.standard}) async => true;
+  Future<bool> authenticate({
+    LockSensitivity sensitivity = LockSensitivity.standard,
+  }) async => true;
 
   @override
   Future<void> cancel() async {}
@@ -51,7 +53,10 @@ class _VaultRepository implements HealthEventRepository {
   Future<void> upsert(HealthEvent event) async => events.add(event);
 
   @override
-  Future<void> markDeleted({required String eventId, required DateTime deletedAt}) async {}
+  Future<void> markDeleted({
+    required String eventId,
+    required DateTime deletedAt,
+  }) async {}
 }
 
 class _VaultSession extends PatientVaultSession {
@@ -102,49 +107,52 @@ HealthEvent _event({
 }
 
 void main() {
-  testWidgets('opens Connected Health from vault events and preserves aggregation conflict', (tester) async {
-    final repository = _VaultRepository([
-      _event(
-        id: 'vault-hc-spo2',
-        value: 98,
-        sourceKind: SourceKind.healthConnect,
-        observedAt: DateTime.utc(2026, 9, 13, 8, 5),
-      ),
-      _event(
-        id: 'vault-hk-spo2',
-        value: 91,
-        sourceKind: SourceKind.healthKit,
-        observedAt: DateTime.utc(2026, 9, 13, 8, 6),
-      ),
-    ]);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        supportedLocales: PatientLocalizations.supportedLocales,
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          PatientLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        home: PatientHomePage(
-          session: _VaultSession(repository),
-          appLock: _AlwaysUnlockedAppLock(),
+  testWidgets(
+    'opens Connected Health from vault events and preserves aggregation conflict',
+    (tester) async {
+      final repository = _VaultRepository([
+        _event(
+          id: 'vault-hc-spo2',
+          value: 98,
+          sourceKind: SourceKind.healthConnect,
+          observedAt: DateTime.utc(2026, 9, 13, 8, 5),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+        _event(
+          id: 'vault-hk-spo2',
+          value: 91,
+          sourceKind: SourceKind.healthKit,
+          observedAt: DateTime.utc(2026, 9, 13, 8, 6),
+        ),
+      ]);
 
-    expect(repository.queryCount, 1);
-    expect(find.text('Connected Health'), findsOneWidget);
+      await tester.pumpWidget(
+        MaterialApp(
+          supportedLocales: PatientLocalizations.supportedLocales,
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+            PatientLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: PatientHomePage(
+            session: _VaultSession(repository),
+            appLock: _AlwaysUnlockedAppLock(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Connected Health'));
-    await tester.pumpAndSettle();
+      expect(repository.queryCount, 1);
+      expect(find.text('Connected Health'), findsOneWidget);
 
-    expect(find.byType(ConnectedHealthScreen), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('SpO2'), 300);
-    expect(find.text('Sources conflict'), findsWidgets);
-    expect(find.textContaining('Health Connect + HealthKit'), findsOneWidget);
-    expect(find.text('0'), findsNothing);
-  });
+      await tester.tap(find.text('Connected Health'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ConnectedHealthScreen), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('SpO2'), 300);
+      expect(find.text('Sources conflict'), findsWidgets);
+      expect(find.textContaining('Health Connect + HealthKit'), findsOneWidget);
+      expect(find.text('0'), findsNothing);
+    },
+  );
 }
