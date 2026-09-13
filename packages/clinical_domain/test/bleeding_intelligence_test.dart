@@ -13,6 +13,7 @@ void main() {
     BleedingFlow? flow = BleedingFlow.moderate,
     Set<BleedingFeature> features = const {},
     int hour = 0,
+    String? sourceId,
   }) =>
       BleedingObservation(
         id: id,
@@ -21,7 +22,24 @@ void main() {
         context: context,
         flow: flow,
         features: features,
+        sourceId: sourceId,
       );
+
+  test('exposes stable engine version metadata', () {
+    const engine = BleedingIntelligenceEngine();
+    expect(engine.schemaVersion, 1);
+    expect(engine.catalogVersion, '2026.1');
+    expect(
+      () => const BleedingIntelligenceEngine(schemaVersion: 0).evaluate(
+        BleedingEpisode(
+          id: 'version-invalid',
+          startedAt: start,
+          observations: [observation(id: 'v1', day: 0)],
+        ),
+      ),
+      throwsA(isA<BleedingIntelligenceValidationException>()),
+    );
+  });
 
   test('heavy and prolonged bleeding produces evidence-backed routing keys',
       () {
@@ -46,6 +64,44 @@ void main() {
     expect(result.symptomKeys, contains('heavy menstrual bleeding'));
     expect(result.symptomKeys, contains('prolonged bleeding'));
     expect(result.evidenceObservationIds, ['o1', 'o2']);
+  });
+
+  test('derived output preserves deterministic evidence provenance', () {
+    final result = const BleedingIntelligenceEngine().evaluate(
+      BleedingEpisode(
+        id: 'episode-provenance',
+        startedAt: start,
+        observations: [
+          observation(
+            id: 'later',
+            day: 1,
+            flow: BleedingFlow.light,
+            sourceId: 'patient-quick-log',
+          ),
+          observation(
+            id: 'earlier-b',
+            day: 0,
+            flow: BleedingFlow.heavy,
+            sourceId: 'health-import',
+          ),
+          observation(
+            id: 'earlier-a',
+            day: 0,
+            flow: BleedingFlow.heavy,
+            sourceId: 'patient-quick-log',
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      result.evidence.map((item) => item.observationId),
+      ['earlier-a', 'earlier-b', 'later'],
+    );
+    expect(
+      result.evidence.map((item) => item.sourceId),
+      ['patient-quick-log', 'health-import', 'patient-quick-log'],
+    );
   });
 
   test('context routing is symptom metadata, not a diagnosis', () {
@@ -215,6 +271,37 @@ void main() {
           observations: [
             observation(id: 'same', day: 0),
             observation(id: ' SAME ', day: 1),
+          ],
+        ),
+      ),
+      throwsA(isA<BleedingIntelligenceValidationException>()),
+    );
+  });
+
+  test('empty provenance source id fails validation', () {
+    expect(
+      () => const BleedingIntelligenceEngine().evaluate(
+        BleedingEpisode(
+          id: 'episode-empty-source',
+          startedAt: start,
+          observations: [
+            observation(id: 'source-empty', day: 0, sourceId: '   '),
+          ],
+        ),
+      ),
+      throwsA(isA<BleedingIntelligenceValidationException>()),
+    );
+  });
+
+  test('observation outside episode fails validation', () {
+    expect(
+      () => const BleedingIntelligenceEngine().evaluate(
+        BleedingEpisode(
+          id: 'episode-window',
+          startedAt: start,
+          endedAt: start.add(const Duration(days: 1)),
+          observations: [
+            observation(id: 'too-late', day: 2),
           ],
         ),
       ),
