@@ -142,7 +142,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(ConnectedHealthScreen), findsOneWidget);
-    expect(find.text('Sources conflict'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('SpO2'), 300);
+    expect(find.text('Sources conflict'), findsWidgets);
     expect(find.textContaining('Health Connect + HealthKit'), findsOneWidget);
     expect(find.text('0'), findsNothing);
   });
