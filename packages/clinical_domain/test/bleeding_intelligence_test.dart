@@ -106,7 +106,8 @@ void main() {
     expect(result.descriptors, contains(BleedingDescriptor.incomplete));
   });
 
-  test('conflicting same-instant flow observations are surfaced deterministically',
+  test(
+      'conflicting same-instant flow observations are surfaced deterministically',
       () {
     final result = const BleedingIntelligenceEngine().evaluate(
       BleedingEpisode(
