@@ -14,11 +14,7 @@ class ConnectedHealthViewModelBuilder {
 
   final HealthSensorAggregator aggregator;
 
-  ConnectedHealthViewModel build({
-    required Iterable<HealthEvent> events,
-    required DateTime rangeStart,
-    required DateTime rangeEnd,
-  }) {
+  ConnectedHealthViewModel build({required Iterable<HealthEvent> events}) {
     final connectedEvents = events
         .where((event) => _platformFor(event.provenance.sourceKind) != null)
         .toList(growable: false);
@@ -77,10 +73,23 @@ class ConnectedHealthViewModelBuilder {
       );
     }
 
+    if (normalizedRecords.isEmpty) {
+      return ConnectedHealthViewModel(sources: sources);
+    }
+
+    var rangeStart = normalizedRecords.first.source.observedAt.toUtc();
+    var rangeEnd = rangeStart;
+    for (final record in normalizedRecords.skip(1)) {
+      final observedAt = record.source.observedAt.toUtc();
+      if (observedAt.isBefore(rangeStart)) rangeStart = observedAt;
+      if (observedAt.isAfter(rangeEnd)) rangeEnd = observedAt;
+    }
+    rangeEnd = rangeEnd.add(const Duration(microseconds: 1));
+
     final aggregates = aggregator.aggregate(
       records: normalizedRecords,
-      rangeStart: rangeStart.toUtc(),
-      rangeEnd: rangeEnd.toUtc(),
+      rangeStart: rangeStart,
+      rangeEnd: rangeEnd,
     );
     final latestByCanonicalCode = <String, AggregatedHealthRecord>{};
     for (final aggregate in aggregates) {
