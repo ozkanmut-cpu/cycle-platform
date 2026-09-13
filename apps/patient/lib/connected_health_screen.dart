@@ -7,10 +7,7 @@ enum ConnectedHealthSourceState { available, unavailable }
 enum ConnectedHealthMetricState { observed, missing, conflicting }
 
 class ConnectedHealthSourceSummary {
-  const ConnectedHealthSourceSummary({
-    required this.name,
-    required this.state,
-  });
+  const ConnectedHealthSourceSummary({required this.name, required this.state});
 
   final String name;
   final ConnectedHealthSourceState state;
@@ -45,10 +42,7 @@ class ConnectedHealthViewModel {
 }
 
 class ConnectedHealthScreen extends StatelessWidget {
-  const ConnectedHealthScreen({
-    required this.viewModel,
-    super.key,
-  });
+  const ConnectedHealthScreen({required this.viewModel, super.key});
 
   final ConnectedHealthViewModel viewModel;
 
@@ -64,10 +58,7 @@ class ConnectedHealthScreen extends StatelessWidget {
           children: [
             Text(
               strings.connectedHealth,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(strings.connectedHealthHint),
@@ -82,14 +73,12 @@ class ConnectedHealthScreen extends StatelessWidget {
                 child: ListTile(
                   leading: const Icon(Icons.sync_alt),
                   title: Text(source.name),
-                  subtitle: Text(
-                    switch (source.state) {
-                      ConnectedHealthSourceState.available =>
-                        strings.sourceAvailable,
-                      ConnectedHealthSourceState.unavailable =>
-                        strings.sourceUnavailable,
-                    },
-                  ),
+                  subtitle: Text(switch (source.state) {
+                    ConnectedHealthSourceState.available =>
+                      strings.sourceAvailable,
+                    ConnectedHealthSourceState.unavailable =>
+                      strings.sourceUnavailable,
+                  }),
                 ),
               ),
             ),
@@ -114,9 +103,7 @@ class ConnectedHealthScreen extends StatelessWidget {
                 ),
               )
             else
-              ...viewModel.metrics.map(
-                (metric) => _MetricCard(metric: metric),
-              ),
+              ...viewModel.metrics.map((metric) => _MetricCard(metric: metric)),
           ],
         ),
       ),
@@ -137,20 +124,20 @@ class _MetricCard extends StatelessWidget {
       ConnectedHealthMetricState.missing => strings.missingHealthData,
       ConnectedHealthMetricState.conflicting => strings.conflictingHealthData,
     };
-    final displayValue = metric.state == ConnectedHealthMetricState.observed &&
+    final displayValue =
+        metric.state == ConnectedHealthMetricState.observed &&
             metric.value != null
         ? '${metric.value}${metric.unit == null ? '' : ' ${metric.unit}'}'
         : stateText;
 
     return Card(
       child: ListTile(
-        leading: Icon(
-          switch (metric.state) {
-            ConnectedHealthMetricState.observed => Icons.check_circle_outline,
-            ConnectedHealthMetricState.missing => Icons.help_outline,
-            ConnectedHealthMetricState.conflicting => Icons.warning_amber_outlined,
-          },
-        ),
+        leading: Icon(switch (metric.state) {
+          ConnectedHealthMetricState.observed => Icons.check_circle_outline,
+          ConnectedHealthMetricState.missing => Icons.help_outline,
+          ConnectedHealthMetricState.conflicting =>
+            Icons.warning_amber_outlined,
+        }),
         title: Text(metric.label),
         subtitle: Text(
           metric.sourceLabel == null
