@@ -106,11 +106,28 @@ final List<ConditionPack> conditionCatalogExpansion3Definitions =
       {'vulvar lump', 'vulvar itching', 'vulvar pain', 'skin change'}),
 ]);
 
+final List<ConditionPack> conditionCatalogExpansion4Definitions =
+    List.unmodifiable([
+  _pack('asherman-syndrome', 'Asherman syndrome',
+      {'absent periods', 'infrequent periods', 'pelvic pain'}),
+  _pack('cervical-stenosis', 'Cervical stenosis',
+      {'painful periods', 'absent periods', 'pelvic pain'}),
+  _pack('endometrial-atrophy', 'Endometrial atrophy',
+      {'postmenopausal bleeding', 'vaginal spotting'}),
+  _pack('ovarian-cyst-rupture', 'Ovarian cyst rupture',
+      {'sudden pelvic pain', 'lower abdominal pain', 'nausea'}),
+  _pack('pelvic-adhesions', 'Pelvic adhesions',
+      {'chronic pelvic pain', 'pain during sex', 'lower abdominal pain'}),
+  _pack('vulvar-intraepithelial-neoplasia', 'Vulvar intraepithelial neoplasia',
+      {'vulvar itching', 'vulvar pain', 'skin change'}),
+]);
+
 final List<ConditionPack> conditionCatalogDefinitions = List.unmodifiable([
   ...initialConditionCatalogDefinitions,
   ...conditionCatalogExpansionDefinitions,
   ...conditionCatalogExpansion2Definitions,
   ...conditionCatalogExpansion3Definitions,
+  ...conditionCatalogExpansion4Definitions,
 ]);
 
 ConditionPack _pack(String id, String title, Set<String> symptomKeys) =>
