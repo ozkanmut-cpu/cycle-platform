@@ -144,7 +144,8 @@ class BleedingIntelligenceEngine {
               : 'Duplicate observation id: $id.',
         );
       }
-      if (observation.sourceId != null && observation.sourceId!.trim().isEmpty) {
+      if (observation.sourceId != null &&
+          observation.sourceId!.trim().isEmpty) {
         throw BleedingIntelligenceValidationException(
           'Observation "$id" has an empty source id.',
         );
