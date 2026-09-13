@@ -67,5 +67,47 @@ void main() {
         throwsA(isA<PainMapValidationException>()),
       );
     });
+
+    test('rejects invalid parent/laterality relationships', () {
+      expect(
+        () => PainRegionTaxonomy(const [
+          PainRegionDefinition(
+            id: 'pelvis-generalized',
+            title: 'Pelvis',
+            group: PainRegionGroup.pelvis,
+            laterality: PainLaterality.none,
+            routingKeys: {'pelvic pain'},
+          ),
+          PainRegionDefinition(
+            id: 'abdomen-left',
+            title: 'Left abdomen',
+            group: PainRegionGroup.abdomen,
+            laterality: PainLaterality.left,
+            parentId: 'pelvis-generalized',
+            routingKeys: {'lower abdominal pain'},
+          ),
+        ]),
+        throwsA(isA<PainMapValidationException>()),
+      );
+    });
+
+    test('feeds routing keys into existing symptom-first router', () {
+      final pain = const PainMapRouter().route(
+        selection: const PainLocationSelection(
+          state: DataState.yes,
+          regionIds: {'pelvis-generalized'},
+        ),
+        taxonomy: bodyPelvicPainTaxonomy,
+      );
+      final routed = const SymptomFirstRouter().route(
+        report: SymptomReport(symptomKeys: pain.symptomKeys.toSet()),
+        packs: ConditionCatalog(conditionCatalogDefinitions).packs,
+      );
+
+      expect(routed.hasCandidates, isTrue);
+      expect(routed.matches.map((match) => match.pack.id),
+          contains('endometriosis'));
+      expect(routed.missingInformation, isEmpty);
+    });
   });
 }
