@@ -91,6 +91,42 @@ void main() {
       );
     });
 
+    test('supports bilateral pelvic routing explicitly', () {
+      final result = const PainMapRouter().route(
+        selection: const PainLocationSelection(
+          state: DataState.yes,
+          regionIds: {'pelvis-bilateral'},
+        ),
+        taxonomy: bodyPelvicPainTaxonomy,
+      );
+      expect(result.symptomKeys,
+          containsAll(['pelvic pain', 'bilateral pelvic pain']));
+      expect(bodyPelvicPainTaxonomy.findById('pelvis-bilateral')?.laterality,
+          PainLaterality.bilateral);
+    });
+
+    test('rejects parent cycles deterministically', () {
+      expect(
+        () => PainRegionTaxonomy(const [
+          PainRegionDefinition(
+              id: 'a',
+              title: 'A',
+              group: PainRegionGroup.pelvis,
+              laterality: PainLaterality.left,
+              parentId: 'b',
+              routingKeys: {'pelvic pain'}),
+          PainRegionDefinition(
+              id: 'b',
+              title: 'B',
+              group: PainRegionGroup.pelvis,
+              laterality: PainLaterality.left,
+              parentId: 'a',
+              routingKeys: {'pelvic pain'}),
+        ]),
+        throwsA(isA<PainMapValidationException>()),
+      );
+    });
+
     test('feeds routing keys into existing symptom-first router', () {
       final pain = const PainMapRouter().route(
         selection: const PainLocationSelection(
