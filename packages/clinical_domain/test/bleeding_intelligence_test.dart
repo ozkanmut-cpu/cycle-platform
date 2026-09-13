@@ -12,10 +12,11 @@ void main() {
     BleedingContext? context = BleedingContext.menstrual,
     BleedingFlow? flow = BleedingFlow.moderate,
     Set<BleedingFeature> features = const {},
+    int hour = 0,
   }) =>
       BleedingObservation(
         id: id,
-        observedAt: start.add(Duration(days: day)),
+        observedAt: start.add(Duration(days: day, hours: hour)),
         state: state,
         context: context,
         flow: flow,
@@ -105,7 +106,7 @@ void main() {
     expect(result.descriptors, contains(BleedingDescriptor.incomplete));
   });
 
-  test('conflicting recorded flow observations are surfaced deterministically',
+  test('conflicting same-instant flow observations are surfaced deterministically',
       () {
     final result = const BleedingIntelligenceEngine().evaluate(
       BleedingEpisode(
@@ -113,13 +114,28 @@ void main() {
         startedAt: start,
         observations: [
           observation(id: 'heavy', day: 0, flow: BleedingFlow.heavy),
-          observation(id: 'light', day: 1, flow: BleedingFlow.light),
+          observation(id: 'light', day: 0, flow: BleedingFlow.light),
         ],
       ),
     );
 
     expect(result.descriptors, contains(BleedingDescriptor.conflicting));
     expect(result.evidenceObservationIds, ['heavy', 'light']);
+  });
+
+  test('flow changing over time is not treated as a contradiction', () {
+    final result = const BleedingIntelligenceEngine().evaluate(
+      BleedingEpisode(
+        id: 'episode-4b',
+        startedAt: start,
+        observations: [
+          observation(id: 'heavy-first', day: 0, flow: BleedingFlow.heavy),
+          observation(id: 'light-later', day: 1, flow: BleedingFlow.light),
+        ],
+      ),
+    );
+
+    expect(result.descriptors, isNot(contains(BleedingDescriptor.conflicting)));
   });
 
   test('incomplete recorded observation preserves missing fields', () {
@@ -136,6 +152,57 @@ void main() {
     expect(result.missingInformation,
         containsAll(['bleeding context', 'bleeding flow']));
     expect(result.descriptors, contains(BleedingDescriptor.incomplete));
+  });
+
+  test('bleeding result feeds existing symptom-first router', () {
+    final result = const BleedingIntelligenceEngine().evaluate(
+      BleedingEpisode(
+        id: 'episode-routing',
+        startedAt: start,
+        observations: [
+          observation(
+            id: 'routing-heavy',
+            day: 0,
+            context: BleedingContext.intermenstrual,
+            flow: BleedingFlow.heavy,
+          ),
+        ],
+      ),
+    );
+    final routed = const SymptomFirstRouter().route(
+      report: result.toSymptomReport(),
+      packs: ConditionCatalog(conditionCatalogDefinitions).packs,
+    );
+
+    expect(routed.hasCandidates, isTrue);
+    expect(
+      routed.matches.map((match) => match.pack.id),
+      contains('abnormal-uterine-bleeding'),
+    );
+    expect(routed.missingInformation, isEmpty);
+  });
+
+  test('missing bleeding fields remain missing through symptom routing', () {
+    final result = const BleedingIntelligenceEngine().evaluate(
+      BleedingEpisode(
+        id: 'episode-missing-routing',
+        startedAt: start,
+        observations: [
+          observation(id: 'partial-routing', day: 0, context: null, flow: null),
+        ],
+      ),
+    );
+    final routed = const SymptomFirstRouter().route(
+      report: result.toSymptomReport(),
+      packs: ConditionCatalog(conditionCatalogDefinitions).packs,
+    );
+
+    expect(routed.confidence, RoutingConfidence.insufficientInformation);
+    expect(routed.matches, isEmpty);
+    expect(
+      routed.missingInformation,
+      containsAll(['bleeding context', 'bleeding flow']),
+    );
   });
 
   test('duplicate observation ids fail validation', () {
