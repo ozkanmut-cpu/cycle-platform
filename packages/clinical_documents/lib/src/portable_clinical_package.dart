@@ -195,8 +195,7 @@ class PortableClinicalPackageBuilder {
       }
     }
 
-    final sorted = [...input]
-      ..sort((a, b) {
+    final sorted = [...input]..sort((a, b) {
         final pathCompare = a.path.trim().compareTo(b.path.trim());
         return pathCompare != 0
             ? pathCompare
