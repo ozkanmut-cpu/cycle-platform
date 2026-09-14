@@ -22,3 +22,4 @@ export 'src/couple_memory.dart';
 export 'src/read_the_room.dart';
 export 'src/relationship_home.dart';
 export 'src/partner_experience.dart';
+export 'src/relationship_notifications.dart';
