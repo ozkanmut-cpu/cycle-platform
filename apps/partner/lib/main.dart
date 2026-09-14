@@ -6,9 +6,16 @@ void main() {
 }
 
 class CyclePartnerApp extends StatelessWidget {
-  const CyclePartnerApp({super.key, this.homeModel});
+  const CyclePartnerApp({
+    super.key,
+    this.experienceInput,
+    this.homeModel,
+    this.coordinator = const PartnerExperienceCoordinator(),
+  });
 
+  final PartnerExperienceInput? experienceInput;
   final RelationshipHomeModel? homeModel;
+  final PartnerExperienceCoordinator coordinator;
 
   @override
   Widget build(BuildContext context) {
@@ -16,15 +23,26 @@ class CyclePartnerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Cycle Partner',
       theme: ThemeData(useMaterial3: true),
-      home: PartnerHomePage(homeModel: homeModel),
+      home: PartnerHomePage(
+        experienceInput: experienceInput,
+        homeModel: homeModel,
+        coordinator: coordinator,
+      ),
     );
   }
 }
 
 class PartnerHomePage extends StatefulWidget {
-  const PartnerHomePage({super.key, this.homeModel});
+  const PartnerHomePage({
+    super.key,
+    this.experienceInput,
+    this.homeModel,
+    this.coordinator = const PartnerExperienceCoordinator(),
+  });
 
+  final PartnerExperienceInput? experienceInput;
   final RelationshipHomeModel? homeModel;
+  final PartnerExperienceCoordinator coordinator;
 
   @override
   State<PartnerHomePage> createState() => _PartnerHomePageState();
@@ -35,8 +53,11 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
   bool _paired = false;
   NotificationPrivacyMode _privacyMode = NotificationPrivacyMode.generic;
 
-  RelationshipHomeModel get _model =>
-      widget.homeModel ?? RelationshipHomeModel(cards: const []);
+  RelationshipHomeModel get _model {
+    final input = widget.experienceInput;
+    if (input != null) return widget.coordinator.build(input);
+    return widget.homeModel ?? RelationshipHomeModel(cards: const []);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +81,10 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
               _PairingBanner(onPair: () => setState(() => _paired = true)),
               const SizedBox(height: 16),
             ],
-            Text(_title(tab),
-                style: Theme.of(context).textTheme.headlineMedium),
+            Text(
+              _title(tab),
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
             const SizedBox(height: 6),
             Text(_subtitle(tab)),
             const SizedBox(height: 18),
@@ -87,13 +110,22 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
         onDestinationSelected: (index) =>
             setState(() => _selectedIndex = index),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.bolt_outlined), label: 'Now'),
-          NavigationDestination(icon: Icon(Icons.favorite_border), label: 'Us'),
           NavigationDestination(
-              icon: Icon(Icons.auto_awesome_outlined), label: 'Surprise'),
+            icon: Icon(Icons.bolt_outlined),
+            label: 'Now',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.health_and_safety_outlined),
-              label: 'Shared Health'),
+            icon: Icon(Icons.favorite_border),
+            label: 'Us',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.auto_awesome_outlined),
+            label: 'Surprise',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.health_and_safety_outlined),
+            label: 'Shared Health',
+          ),
         ],
       ),
     );
@@ -102,6 +134,7 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
 
 class _PairingBanner extends StatelessWidget {
   const _PairingBanner({required this.onPair});
+
   final VoidCallback onPair;
 
   @override
@@ -111,11 +144,14 @@ class _PairingBanner extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Connect securely',
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Connect securely',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 6),
               const Text(
-                  'Scan a time-limited pairing QR. Only explicitly shared information can appear here.'),
+                'Scan a time-limited pairing QR. Only explicitly shared information can appear here.',
+              ),
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: onPair,
@@ -130,6 +166,7 @@ class _PairingBanner extends StatelessWidget {
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.tab});
+
   final RelationshipHomeTab tab;
 
   @override
@@ -139,8 +176,10 @@ class _EmptyState extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(_emptyTitle(tab),
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                _emptyTitle(tab),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Text(_emptyBody(tab)),
             ],
@@ -151,6 +190,7 @@ class _EmptyState extends StatelessWidget {
 
 class _RelationshipCard extends StatelessWidget {
   const _RelationshipCard({required this.card});
+
   final RelationshipHomeCard card;
 
   @override
@@ -185,15 +225,17 @@ class _SharingControls extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Sharing controls',
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Sharing controls',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 10),
               const Wrap(
                 spacing: 8,
                 children: [
                   Chip(label: Text('VIEW')),
                   Chip(label: Text('NOTIFY')),
-                  Chip(label: Text('BACKUP'))
+                  Chip(label: Text('BACKUP')),
                 ],
               ),
               const SizedBox(height: 12),
@@ -202,8 +244,12 @@ class _SharingControls extends StatelessWidget {
                 value: privacyMode,
                 isExpanded: true,
                 items: NotificationPrivacyMode.values
-                    .map((mode) => DropdownMenuItem(
-                        value: mode, child: Text(_privacyLabel(mode))))
+                    .map(
+                      (mode) => DropdownMenuItem(
+                        value: mode,
+                        child: Text(_privacyLabel(mode)),
+                      ),
+                    )
                     .toList(),
                 onChanged: (mode) {
                   if (mode != null) onPrivacyChanged(mode);
