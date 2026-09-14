@@ -15,3 +15,4 @@ export 'src/support_responsiveness.dart';
 export 'src/mutuality.dart';
 export 'src/intimacy.dart';
 export 'src/playful_engine.dart';
+export 'src/novelty.dart';
