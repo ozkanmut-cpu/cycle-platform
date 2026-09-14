@@ -18,8 +18,10 @@ void main() {
     await tester.tap(find.text('Shared Health'));
     await tester.pumpAndSettle();
     expect(find.text('No shared health details to show'), findsOneWidget);
-    expect(find.textContaining('does not indicate whether health data exists'),
-        findsOneWidget);
+    expect(
+      find.textContaining('does not indicate whether health data exists'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('engine-only context is not rendered by partner home',
@@ -70,5 +72,81 @@ void main() {
     expect(find.text('NOTIFY'), findsOneWidget);
     expect(find.text('BACKUP'), findsOneWidget);
     expect(find.text('Private notifications'), findsOneWidget);
+  });
+
+  testWidgets('coordinator pipeline feeds authorized cards into partner UI',
+      (tester) async {
+    final now = DateTime.utc(2026, 9, 14, 10);
+    final input = PartnerExperienceInput(
+      ownerId: 'a',
+      partnerId: 'b',
+      at: now,
+      sharedHealthEntries: [
+        CoupleContextEntry<Object?>(
+          ownerId: 'a',
+          category: 'health.energy',
+          observedAt: now,
+          visibility: RelationshipVisibility.fullyShared,
+          value: 'steady',
+        ),
+      ],
+      grants: [
+        RelationshipCategoryGrant(
+          id: 'view-energy',
+          ownerId: 'a',
+          recipientId: 'b',
+          category: 'health.energy',
+          capabilities: {RelationshipCapability.view},
+          visibility: RelationshipVisibility.fullyShared,
+          createdAt: now.subtract(const Duration(minutes: 1)),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(CyclePartnerApp(experienceInput: input));
+    await tester.tap(find.text('Shared Health'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('health.energy: steady'), findsOneWidget);
+  });
+
+  testWidgets('coordinator pipeline keeps engine-only health hidden',
+      (tester) async {
+    final now = DateTime.utc(2026, 9, 14, 10);
+    final input = PartnerExperienceInput(
+      ownerId: 'a',
+      partnerId: 'b',
+      at: now,
+      sharedHealthEntries: [
+        CoupleContextEntry<Object?>(
+          ownerId: 'a',
+          category: 'health.sleep',
+          observedAt: now,
+          visibility: RelationshipVisibility.engineOnly,
+          value: 'poor',
+        ),
+      ],
+      grants: [
+        RelationshipCategoryGrant(
+          id: 'engine-sleep',
+          ownerId: 'a',
+          recipientId: 'b',
+          category: 'health.sleep',
+          capabilities: {
+            RelationshipCapability.relationshipIntelligence,
+          },
+          visibility: RelationshipVisibility.engineOnly,
+          createdAt: now.subtract(const Duration(minutes: 1)),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(CyclePartnerApp(experienceInput: input));
+    await tester.tap(find.text('Shared Health'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('health.sleep'), findsNothing);
+    expect(find.textContaining('poor'), findsNothing);
+    expect(find.text('No shared health details to show'), findsOneWidget);
   });
 }
