@@ -4,7 +4,8 @@ import 'package:test/test.dart';
 void main() {
   final now = DateTime.utc(2026, 9, 14, 11);
 
-  RelationshipCategoryGrant grant(String owner, String recipient, String category) =>
+  RelationshipCategoryGrant grant(
+          String owner, String recipient, String category) =>
       RelationshipCategoryGrant(
         id: 'g-$owner-$recipient-$category',
         ownerId: owner,
@@ -173,7 +174,8 @@ void main() {
     expect(revoked, isEmpty);
   });
 
-  test('latest version supersedes older private selection deterministically', () {
+  test('latest version supersedes older private selection deterministically',
+      () {
     final matches = const MutualityEngine().findMatches(
       participantAId: 'a',
       participantBId: 'b',
