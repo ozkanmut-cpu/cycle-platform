@@ -45,10 +45,22 @@ jobs:
         run: dart run bin/foundation_smoke.dart --seed=20260914 > foundation-smoke.json
         working-directory: packages/simulation_domain
 
+      - name: Replay failure smoke
+        run: dart run bin/replay_failure.dart test/fixtures/missing_failure.json > replay-evidence.json
+        working-directory: packages/simulation_domain
+
       - name: Upload smoke report
         uses: actions/upload-artifact@v4
         with:
           name: simulation-foundation-smoke
           path: packages/simulation_domain/foundation-smoke.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload replay evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-replay-evidence
+          path: packages/simulation_domain/replay-evidence.json
           if-no-files-found: error
           retention-days: 7
