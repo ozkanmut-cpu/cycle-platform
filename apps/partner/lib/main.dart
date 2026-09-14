@@ -98,8 +98,9 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
                 paired: _paired,
                 privacyMode: _privacyMode,
                 onPrivacyChanged: (mode) => setState(() => _privacyMode = mode),
-                onDisconnect:
-                    _paired ? () => setState(() => _paired = false) : null,
+                onDisconnect: _paired
+                    ? () => setState(() => _paired = false)
+                    : null,
               ),
             ],
           ],
@@ -110,14 +111,8 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
         onDestinationSelected: (index) =>
             setState(() => _selectedIndex = index),
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.bolt_outlined),
-            label: 'Now',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite_border),
-            label: 'Us',
-          ),
+          NavigationDestination(icon: Icon(Icons.bolt_outlined), label: 'Now'),
+          NavigationDestination(icon: Icon(Icons.favorite_border), label: 'Us'),
           NavigationDestination(
             icon: Icon(Icons.auto_awesome_outlined),
             label: 'Surprise',
@@ -139,29 +134,29 @@ class _PairingBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Connect securely',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Scan a time-limited pairing QR. Only explicitly shared information can appear here.',
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: onPair,
-                icon: const Icon(Icons.qr_code_scanner),
-                label: const Text('Scan pairing QR'),
-              ),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Connect securely',
+            style: Theme.of(context).textTheme.titleMedium,
           ),
-        ),
-      );
+          const SizedBox(height: 6),
+          const Text(
+            'Scan a time-limited pairing QR. Only explicitly shared information can appear here.',
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: onPair,
+            icon: const Icon(Icons.qr_code_scanner),
+            label: const Text('Scan pairing QR'),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _EmptyState extends StatelessWidget {
@@ -171,21 +166,21 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _emptyTitle(tab),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(_emptyBody(tab)),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _emptyTitle(tab),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
-        ),
-      );
+          const SizedBox(height: 8),
+          Text(_emptyBody(tab)),
+        ],
+      ),
+    ),
+  );
 }
 
 class _RelationshipCard extends StatelessWidget {
@@ -220,106 +215,104 @@ class _SharingControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    child: Padding(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Sharing controls',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 10),
+          const Wrap(
+            spacing: 8,
             children: [
-              Text(
-                'Sharing controls',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 10),
-              const Wrap(
-                spacing: 8,
-                children: [
-                  Chip(label: Text('VIEW')),
-                  Chip(label: Text('NOTIFY')),
-                  Chip(label: Text('BACKUP')),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Text('Private notifications'),
-              DropdownButton<NotificationPrivacyMode>(
-                value: privacyMode,
-                isExpanded: true,
-                items: NotificationPrivacyMode.values
-                    .map(
-                      (mode) => DropdownMenuItem(
-                        value: mode,
-                        child: Text(_privacyLabel(mode)),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (mode) {
-                  if (mode != null) onPrivacyChanged(mode);
-                },
-              ),
-              if (paired)
-                TextButton.icon(
-                  onPressed: onDisconnect,
-                  icon: const Icon(Icons.link_off),
-                  label: const Text('Disconnect demo'),
-                ),
+              Chip(label: Text('VIEW')),
+              Chip(label: Text('NOTIFY')),
+              Chip(label: Text('BACKUP')),
             ],
           ),
-        ),
-      );
+          const SizedBox(height: 12),
+          const Text('Private notifications'),
+          DropdownButton<NotificationPrivacyMode>(
+            value: privacyMode,
+            isExpanded: true,
+            items: NotificationPrivacyMode.values
+                .map(
+                  (mode) => DropdownMenuItem(
+                    value: mode,
+                    child: Text(_privacyLabel(mode)),
+                  ),
+                )
+                .toList(),
+            onChanged: (mode) {
+              if (mode != null) onPrivacyChanged(mode);
+            },
+          ),
+          if (paired)
+            TextButton.icon(
+              onPressed: onDisconnect,
+              icon: const Icon(Icons.link_off),
+              label: const Text('Disconnect demo'),
+            ),
+        ],
+      ),
+    ),
+  );
 }
 
 String _title(RelationshipHomeTab tab) => switch (tab) {
-      RelationshipHomeTab.now => 'Now',
-      RelationshipHomeTab.us => 'Us',
-      RelationshipHomeTab.surprise => 'Surprise',
-      RelationshipHomeTab.sharedHealth => 'Shared Health',
-    };
+  RelationshipHomeTab.now => 'Now',
+  RelationshipHomeTab.us => 'Us',
+  RelationshipHomeTab.surprise => 'Surprise',
+  RelationshipHomeTab.sharedHealth => 'Shared Health',
+};
 
 String _subtitle(RelationshipHomeTab tab) => switch (tab) {
-      RelationshipHomeTab.now =>
-        'Useful right-now context and low-burden actions.',
-      RelationshipHomeTab.us =>
-        'Shared relationship context, preferences and memories.',
-      RelationshipHomeTab.surprise =>
-        'Only safe, permitted ideas worth surfacing.',
-      RelationshipHomeTab.sharedHealth =>
-        'Only health information explicitly shared for viewing.',
-    };
+  RelationshipHomeTab.now => 'Useful right-now context and low-burden actions.',
+  RelationshipHomeTab.us =>
+    'Shared relationship context, preferences and memories.',
+  RelationshipHomeTab.surprise => 'Only safe, permitted ideas worth surfacing.',
+  RelationshipHomeTab.sharedHealth =>
+    'Only health information explicitly shared for viewing.',
+};
 
 String _emptyTitle(RelationshipHomeTab tab) => switch (tab) {
-      RelationshipHomeTab.now => 'Nothing to surface right now',
-      RelationshipHomeTab.us => 'Nothing shared here right now',
-      RelationshipHomeTab.surprise => 'No suggestion right now',
-      RelationshipHomeTab.sharedHealth => 'No shared health details to show',
-    };
+  RelationshipHomeTab.now => 'Nothing to surface right now',
+  RelationshipHomeTab.us => 'Nothing shared here right now',
+  RelationshipHomeTab.surprise => 'No suggestion right now',
+  RelationshipHomeTab.sharedHealth => 'No shared health details to show',
+};
 
 String _emptyBody(RelationshipHomeTab tab) => switch (tab) {
-      RelationshipHomeTab.now =>
-        'Cycle stays quiet when there is no timely, useful partner action.',
-      RelationshipHomeTab.us =>
-        'Private and engine-only context stays hidden. This screen does not reveal whether other context exists.',
-      RelationshipHomeTab.surprise =>
-        'Cycle will not invent a suggestion just to fill the screen.',
-      RelationshipHomeTab.sharedHealth =>
-        'This does not indicate whether health data exists. Only partner-visible VIEW data appears here.',
-    };
+  RelationshipHomeTab.now =>
+    'Cycle stays quiet when there is no timely, useful partner action.',
+  RelationshipHomeTab.us =>
+    'Private and engine-only context stays hidden. This screen does not reveal whether other context exists.',
+  RelationshipHomeTab.surprise =>
+    'Cycle will not invent a suggestion just to fill the screen.',
+  RelationshipHomeTab.sharedHealth =>
+    'This does not indicate whether health data exists. Only partner-visible VIEW data appears here.',
+};
 
 IconData _icon(RelationshipHomeCardKind kind) => switch (kind) {
-      RelationshipHomeCardKind.roomAction => Icons.touch_app_outlined,
-      RelationshipHomeCardKind.weather => Icons.wb_cloudy_outlined,
-      RelationshipHomeCardKind.microMoment => Icons.flash_on_outlined,
-      RelationshipHomeCardKind.memory => Icons.bookmark_border,
-      RelationshipHomeCardKind.surprise => Icons.auto_awesome_outlined,
-      RelationshipHomeCardKind.sharedHealth => Icons.health_and_safety_outlined,
-    };
+  RelationshipHomeCardKind.roomAction => Icons.touch_app_outlined,
+  RelationshipHomeCardKind.weather => Icons.wb_cloudy_outlined,
+  RelationshipHomeCardKind.microMoment => Icons.flash_on_outlined,
+  RelationshipHomeCardKind.memory => Icons.bookmark_border,
+  RelationshipHomeCardKind.surprise => Icons.auto_awesome_outlined,
+  RelationshipHomeCardKind.sharedHealth => Icons.health_and_safety_outlined,
+};
 
 String _cardTitle(RelationshipHomeCard card) => switch (card.kind) {
-      RelationshipHomeCardKind.roomAction => 'Right now',
-      RelationshipHomeCardKind.weather => 'Relationship weather',
-      RelationshipHomeCardKind.microMoment => 'Small moment',
-      RelationshipHomeCardKind.memory => 'Shared with you',
-      RelationshipHomeCardKind.surprise => 'Surprise idea',
-      RelationshipHomeCardKind.sharedHealth => 'Shared health',
-    };
+  RelationshipHomeCardKind.roomAction => 'Right now',
+  RelationshipHomeCardKind.weather => 'Relationship weather',
+  RelationshipHomeCardKind.microMoment => 'Small moment',
+  RelationshipHomeCardKind.memory => 'Shared with you',
+  RelationshipHomeCardKind.surprise => 'Surprise idea',
+  RelationshipHomeCardKind.sharedHealth => 'Shared health',
+};
 
 String _cardBody(RelationshipHomeCard card) {
   if (card.rawValue != null) return '${card.reference}: ${card.rawValue}';
@@ -330,10 +323,10 @@ String _cardBody(RelationshipHomeCard card) {
 }
 
 String _privacyLabel(NotificationPrivacyMode mode) => switch (mode) {
-      NotificationPrivacyMode.generic => 'Generic',
-      NotificationPrivacyMode.categoryOnly => 'Category only',
-      NotificationPrivacyMode.detailedWhenUnlocked => 'Detailed when unlocked',
-    };
+  NotificationPrivacyMode.generic => 'Generic',
+  NotificationPrivacyMode.categoryOnly => 'Category only',
+  NotificationPrivacyMode.detailedWhenUnlocked => 'Detailed when unlocked',
+};
 
 bool _partnerVisibleCard(RelationshipHomeCard card) {
   if (card.kind != RelationshipHomeCardKind.memory &&
