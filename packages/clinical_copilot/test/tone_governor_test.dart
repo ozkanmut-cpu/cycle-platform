@@ -42,10 +42,7 @@ void main() {
 
   test('review recommendation takes precedence over supportive tone', () {
     final policy = governor.policyFor(
-      const ClinicalToneContext(
-        isSensitive: true,
-        reviewRecommended: true,
-      ),
+      const ClinicalToneContext(isSensitive: true, reviewRecommended: true),
     );
 
     expect(policy.mode, ClinicalToneMode.seriousClinical);
@@ -53,9 +50,7 @@ void main() {
 
   test('urgent review always forces serious clinical tone', () {
     final policy = governor.policyFor(
-      const ClinicalToneContext(
-        urgentReviewRecommended: true,
-      ),
+      const ClinicalToneContext(urgentReviewRecommended: true),
     );
 
     expect(policy.mode, ClinicalToneMode.seriousClinical);
@@ -63,19 +58,21 @@ void main() {
     expect(policy.allowEmoji, isFalse);
   });
 
-  test('clinical playfulness can be explicitly enabled without enabling jokes',
-      () {
-    final policy = governor.policyFor(
-      const ClinicalToneContext(urgentReviewRecommended: true),
-      preferences: const ClinicalTonePreferences(
-        allowPlayfulInSeriousClinical: true,
-      ),
-    );
+  test(
+    'clinical playfulness can be explicitly enabled without enabling jokes',
+    () {
+      final policy = governor.policyFor(
+        const ClinicalToneContext(urgentReviewRecommended: true),
+        preferences: const ClinicalTonePreferences(
+          allowPlayfulInSeriousClinical: true,
+        ),
+      );
 
-    expect(policy.mode, ClinicalToneMode.seriousClinical);
-    expect(policy.allowPlayfulLanguage, isTrue);
-    expect(policy.allowEmoji, isTrue);
-    expect(policy.allowJokes, isFalse);
-    expect(policy.allowCelebratoryPhrasing, isFalse);
-  });
+      expect(policy.mode, ClinicalToneMode.seriousClinical);
+      expect(policy.allowPlayfulLanguage, isTrue);
+      expect(policy.allowEmoji, isTrue);
+      expect(policy.allowJokes, isFalse);
+      expect(policy.allowCelebratoryPhrasing, isFalse);
+    },
+  );
 }
