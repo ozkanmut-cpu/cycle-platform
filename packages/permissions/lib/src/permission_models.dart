@@ -58,6 +58,11 @@ class PermissionGrant {
   final int version;
 
   bool get isRevoked => revokedAt != null;
+
+  bool isActiveAt(DateTime at) =>
+      !at.isBefore(createdAt) &&
+      (revokedAt == null || at.isBefore(revokedAt!)) &&
+      scope.isActiveAt(at);
 }
 
 class PermissionRequest {
