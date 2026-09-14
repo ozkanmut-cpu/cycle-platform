@@ -16,3 +16,4 @@ export 'src/mutuality.dart';
 export 'src/intimacy.dart';
 export 'src/playful_engine.dart';
 export 'src/novelty.dart';
+export 'src/repair_engine.dart';
