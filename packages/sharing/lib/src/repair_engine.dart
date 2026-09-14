@@ -34,7 +34,8 @@ class RepairSignal {
   final DateTime? revokedAt;
 
   bool isActiveAt(DateTime at) {
-    if (at.isBefore(createdAt) || revokedAt != null) return false;
+    if (at.isBefore(createdAt)) return false;
+    if (revokedAt != null && !at.isBefore(revokedAt!)) return false;
     return expiresAt == null || at.isBefore(expiresAt!);
   }
 }
