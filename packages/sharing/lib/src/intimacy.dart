@@ -67,7 +67,8 @@ class IntimacyPreference {
   final DateTime? revokedAt;
   final int version;
 
-  bool isActiveAt(DateTime at) => !at.isBefore(createdAt) && revokedAt == null;
+  bool isActiveAt(DateTime at) =>
+      !at.isBefore(createdAt) && (revokedAt == null || at.isBefore(revokedAt!));
 
   bool get mayMatch => level != IntimacyPreferenceLevel.notInterested;
 }
@@ -131,7 +132,8 @@ class IntimacyWillingness {
   final int version;
 
   bool isActiveAt(DateTime at) {
-    if (at.isBefore(createdAt) || revokedAt != null) return false;
+    if (at.isBefore(createdAt)) return false;
+    if (revokedAt != null && !at.isBefore(revokedAt!)) return false;
     return at.isBefore(expiresAt);
   }
 
@@ -160,6 +162,11 @@ class IntimacyBoundary {
         'intimacy boundary owner and partner must differ',
       );
     }
+    if (revokedAt != null && revokedAt!.isBefore(createdAt)) {
+      throw const RelationshipPolicyException(
+        'intimacy boundary revokedAt must not precede createdAt',
+      );
+    }
   }
 
   final String id;
@@ -174,7 +181,7 @@ class IntimacyBoundary {
 
   bool appliesTo(String category, String optionKey, DateTime at) =>
       !at.isBefore(createdAt) &&
-      revokedAt == null &&
+      (revokedAt == null || at.isBefore(revokedAt!)) &&
       this.category == category &&
       (this.optionKey == null || this.optionKey == optionKey);
 }
