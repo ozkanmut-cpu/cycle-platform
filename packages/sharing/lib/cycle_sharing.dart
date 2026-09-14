@@ -17,3 +17,5 @@ export 'src/intimacy.dart';
 export 'src/playful_engine.dart';
 export 'src/novelty.dart';
 export 'src/repair_engine.dart';
+
+export 'src/couple_memory.dart';
