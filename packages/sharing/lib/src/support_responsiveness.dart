@@ -23,7 +23,13 @@ enum SupportPreferenceOrigin {
   generic,
 }
 
-enum ResponsivenessFeedback { worked, moreLikeThis, neutral, unsure, neverSuggest }
+enum ResponsivenessFeedback {
+  worked,
+  moreLikeThis,
+  neutral,
+  unsure,
+  neverSuggest
+}
 
 class SupportPreference {
   SupportPreference({
@@ -132,7 +138,8 @@ class ResponsivenessEngine {
     final scoped = observations.where((o) => o.ownerId == ownerId).toList();
     final buckets = <String, List<ResponsivenessObservation>>{};
     for (final observation in scoped) {
-      final key = '${observation.signalKind?.name ?? '*'}|${observation.logicalAction}';
+      final key =
+          '${observation.signalKind?.name ?? '*'}|${observation.logicalAction}';
       buckets.putIfAbsent(key, () => []).add(observation);
     }
 
@@ -254,7 +261,8 @@ class SupportEngine {
 
     for (final candidate in learnedCandidates) {
       if (candidate.ownerId != ownerId ||
-          (candidate.signalKind != null && candidate.signalKind != signal.kind)) {
+          (candidate.signalKind != null &&
+              candidate.signalKind != signal.kind)) {
         continue;
       }
       eligible.add(
