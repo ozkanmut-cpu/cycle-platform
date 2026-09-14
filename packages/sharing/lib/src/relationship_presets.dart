@@ -60,7 +60,10 @@ class RelationshipPresetExpander {
           };
           visibility[category] = RelationshipVisibility.abstractShared;
         case RelationshipSharingPreset.fullTransparency:
-          caps[category] = RelationshipCapability.values.toSet();
+          caps[category] = RelationshipCapability.values
+              .where(
+                  (capability) => capability != RelationshipCapability.intimacy)
+              .toSet();
           visibility[category] = RelationshipVisibility.fullyShared;
         case RelationshipSharingPreset.custom:
           throw StateError('custom handled above');
