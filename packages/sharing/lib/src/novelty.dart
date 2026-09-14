@@ -18,7 +18,8 @@ class CoupleDna {
     this.allowIntimacySuggestions = false,
   })  : preferredTags = Set.unmodifiable(_clean(preferredTags)),
         dontSuggestTags = Set.unmodifiable(_clean(dontSuggestTags)),
-        dontSuggestCandidateIds = Set.unmodifiable(_clean(dontSuggestCandidateIds)) {
+        dontSuggestCandidateIds =
+            Set.unmodifiable(_clean(dontSuggestCandidateIds)) {
     _requireNoveltyText(ownerId, 'ownerId');
     _requireNoveltyText(partnerId, 'partnerId');
     if (ownerId == partnerId) {
@@ -64,7 +65,8 @@ class NoveltyCandidate {
     _requireNoveltyText(category, 'category');
     _requireNoveltyText(title, 'title');
     if (cost < 0) {
-      throw const RelationshipPolicyException('candidate cost must not be negative');
+      throw const RelationshipPolicyException(
+          'candidate cost must not be negative');
     }
     if (durationMinutes <= 0) {
       throw const RelationshipPolicyException(
@@ -85,7 +87,11 @@ class NoveltyCandidate {
 }
 
 class NoveltyHistoryEntry {
-  const NoveltyHistoryEntry({required this.candidateId, required this.usedAt});
+  const NoveltyHistoryEntry({
+    required this.candidateId,
+    required this.usedAt,
+  });
+
   final String candidateId;
   final DateTime usedAt;
 }
@@ -98,6 +104,7 @@ class NoveltySuggestion {
     required this.score,
     required this.reasonTags,
   });
+
   final String candidateId;
   final String category;
   final String title;
@@ -130,23 +137,27 @@ class NoveltyEngine {
 
     final recentIds = history
         .where((entry) =>
-            !entry.usedAt.isAfter(at) && at.difference(entry.usedAt) < repeatCooldown)
+            !entry.usedAt.isAfter(at) &&
+            at.difference(entry.usedAt) < repeatCooldown)
         .map((entry) => entry.candidateId)
         .toSet();
 
     final ranked = <_RankedNovelty>[];
     for (final candidate in candidates) {
       if (!_passesHardConstraints(candidate, dna, recentIds)) continue;
-      if (!_purposeAllowed(ownerId, recipientId, candidate.category, at, grants)) {
+      if (!_purposeAllowed(
+          ownerId, recipientId, candidate.category, at, grants)) {
         continue;
       }
       if (candidate.requiresIntimacy &&
-          (!_intimacyAllowed(ownerId, recipientId, candidate.category, at, grants) ||
+          (!_intimacyAllowed(
+                  ownerId, recipientId, candidate.category, at, grants) ||
               !dna.allowIntimacySuggestions)) {
         continue;
       }
 
-      final reasonTags = candidate.tags.intersection(dna.preferredTags).toList()..sort();
+      final reasonTags = candidate.tags.intersection(dna.preferredTags).toList()
+        ..sort();
       final score = 100 + (reasonTags.length * 10) - candidate.energy.index;
       ranked.add(_RankedNovelty(candidate, score, reasonTags));
     }
@@ -176,7 +187,8 @@ class NoveltyEngine {
     Set<String> recentIds,
   ) {
     if (dna.dontSuggestCandidateIds.contains(candidate.id)) return false;
-    if (candidate.tags.intersection(dna.dontSuggestTags).isNotEmpty) return false;
+    if (candidate.tags.intersection(dna.dontSuggestTags).isNotEmpty)
+      return false;
     if (recentIds.contains(candidate.id)) return false;
     if (dna.maxBudget != null && candidate.cost > dna.maxBudget!) return false;
     if (dna.maxDurationMinutes != null &&
@@ -199,16 +211,18 @@ class NoveltyEngine {
     DateTime at,
     Iterable<RelationshipCategoryGrant> grants,
   ) =>
-      firewall.evaluate(
-        request: RelationshipAccessRequest(
-          ownerId: ownerId,
-          recipientId: recipientId,
-          category: 'relationship.novelty.$category',
-          capability: RelationshipCapability.relationshipIntelligence,
-          at: at,
-        ),
-        grants: grants,
-      ).allowed;
+      firewall
+          .evaluate(
+            request: RelationshipAccessRequest(
+              ownerId: ownerId,
+              recipientId: recipientId,
+              category: 'relationship.novelty.$category',
+              capability: RelationshipCapability.relationshipIntelligence,
+              at: at,
+            ),
+            grants: grants,
+          )
+          .allowed;
 
   bool _intimacyAllowed(
     String ownerId,
@@ -217,16 +231,18 @@ class NoveltyEngine {
     DateTime at,
     Iterable<RelationshipCategoryGrant> grants,
   ) =>
-      firewall.evaluate(
-        request: RelationshipAccessRequest(
-          ownerId: ownerId,
-          recipientId: recipientId,
-          category: 'relationship.intimacy.$category',
-          capability: RelationshipCapability.intimacy,
-          at: at,
-        ),
-        grants: grants,
-      ).allowed;
+      firewall
+          .evaluate(
+            request: RelationshipAccessRequest(
+              ownerId: ownerId,
+              recipientId: recipientId,
+              category: 'relationship.intimacy.$category',
+              capability: RelationshipCapability.intimacy,
+              at: at,
+            ),
+            grants: grants,
+          )
+          .allowed;
 }
 
 class _RankedNovelty {
