@@ -86,7 +86,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 pregnancy vitals/symptoms
 - [x] 🔴 Pregnancy Safety Kernel
 - [x] 🔴 outcomes and postpartum
-- [x] 🟠 kick counter and contraction timer
+- [ ] 🟠 kick counter and contraction timer
 
 ## 9 — Documents and interoperability
 - [x] 🔴 document ingestion
@@ -94,7 +94,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 lab/imaging/pathology extraction
 - [x] 🔴 human confirmation flow
 - [x] 🔴 FHIR mappings
-- [ ] 🟠 FHIR export bundle
+- [x] 🟠 FHIR export bundle
 
 ## 10 — Clinical compression and AI
 - [x] 🔴 Evidence Graph
