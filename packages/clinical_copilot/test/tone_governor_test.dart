@@ -62,4 +62,20 @@ void main() {
     expect(policy.allowPlayfulLanguage, isFalse);
     expect(policy.allowEmoji, isFalse);
   });
+
+  test('clinical playfulness can be explicitly enabled without enabling jokes',
+      () {
+    final policy = governor.policyFor(
+      const ClinicalToneContext(urgentReviewRecommended: true),
+      preferences: const ClinicalTonePreferences(
+        allowPlayfulInSeriousClinical: true,
+      ),
+    );
+
+    expect(policy.mode, ClinicalToneMode.seriousClinical);
+    expect(policy.allowPlayfulLanguage, isTrue);
+    expect(policy.allowEmoji, isTrue);
+    expect(policy.allowJokes, isFalse);
+    expect(policy.allowCelebratoryPhrasing, isFalse);
+  });
 }
