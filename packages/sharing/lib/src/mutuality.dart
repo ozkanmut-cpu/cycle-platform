@@ -104,11 +104,10 @@ class MutualityEngine {
     }
 
     final pairSelections = selections.where((selection) {
-      final correctPair =
-          (selection.ownerId == participantAId &&
-                  selection.partnerId == participantBId) ||
-              (selection.ownerId == participantBId &&
-                  selection.partnerId == participantAId);
+      final correctPair = (selection.ownerId == participantAId &&
+              selection.partnerId == participantBId) ||
+          (selection.ownerId == participantBId &&
+              selection.partnerId == participantAId);
       return correctPair && selection.isActiveAt(at);
     }).toList();
 
