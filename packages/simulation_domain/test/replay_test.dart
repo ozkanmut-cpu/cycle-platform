@@ -36,7 +36,8 @@ void main() {
     expect(replay.matches(minimized), isTrue);
   });
 
-  test('minimizer refuses a bundle whose target failure is not reproducible', () {
+  test('minimizer refuses a bundle whose target failure is not reproducible',
+      () {
     final bundle = FailureBundle(
       schemaVersion: 1,
       targetInvariantId: 'missing-is-not-zero',
