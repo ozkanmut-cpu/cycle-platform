@@ -87,7 +87,8 @@ class ScenarioMinimizer {
     final engine = const ReplayEngine();
     final original = engine.replay(bundle: bundle, invariant: invariant);
     if (!original.matches(bundle)) {
-      throw StateError('Target invariant is not reproducible before minimization.');
+      throw StateError(
+          'Target invariant is not reproducible before minimization.');
     }
 
     var current = List<SimulationEvent>.from(bundle.events);
@@ -104,7 +105,8 @@ class ScenarioMinimizer {
         expectedSeverity: bundle.expectedSeverity,
         expectedEvidence: bundle.expectedEvidence,
       );
-      final replay = engine.replay(bundle: candidateBundle, invariant: invariant);
+      final replay =
+          engine.replay(bundle: candidateBundle, invariant: invariant);
       if (replay.matches(candidateBundle)) {
         current = candidate;
       } else {
