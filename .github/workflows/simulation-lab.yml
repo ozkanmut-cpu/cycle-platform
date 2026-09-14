@@ -1,0 +1,54 @@
+name: Simulation Lab
+
+on:
+  pull_request:
+    paths:
+      - 'packages/simulation_domain/**'
+      - 'docs/SIMULATION_LAB.md'
+      - '.github/workflows/simulation-lab.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/simulation_domain/**'
+      - 'docs/SIMULATION_LAB.md'
+      - '.github/workflows/simulation-lab.yml'
+
+jobs:
+  foundation:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Dependencies
+        run: dart pub get
+        working-directory: packages/simulation_domain
+
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed lib test bin
+        working-directory: packages/simulation_domain
+
+      - name: Analyze
+        run: dart analyze .
+        working-directory: packages/simulation_domain
+
+      - name: Test
+        run: dart test
+        working-directory: packages/simulation_domain
+
+      - name: Foundation smoke
+        run: dart run bin/foundation_smoke.dart --seed=20260914 > foundation-smoke.json
+        working-directory: packages/simulation_domain
+
+      - name: Upload smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-foundation-smoke
+          path: packages/simulation_domain/foundation-smoke.json
+          if-no-files-found: error
+          retention-days: 7
