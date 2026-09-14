@@ -5,7 +5,8 @@ import 'package:cycle_simulation_domain/simulation_domain.dart';
 
 void main(List<String> args) {
   if (args.length != 1) {
-    stderr.writeln('Usage: dart run bin/replay_failure.dart <failure-bundle.json>');
+    stderr.writeln(
+        'Usage: dart run bin/replay_failure.dart <failure-bundle.json>');
     exitCode = 64;
     return;
   }
