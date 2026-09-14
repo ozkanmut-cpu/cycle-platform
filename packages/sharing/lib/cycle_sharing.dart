@@ -19,3 +19,4 @@ export 'src/novelty.dart';
 export 'src/repair_engine.dart';
 
 export 'src/couple_memory.dart';
+export 'src/read_the_room.dart';
