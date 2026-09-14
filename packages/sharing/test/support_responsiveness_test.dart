@@ -48,7 +48,8 @@ void main() {
     );
 
     expect(cards.single.action, SupportActionKind.giveSpace);
-    expect(cards.single.preferenceOrigin, SupportPreferenceOrigin.explicitCurrent);
+    expect(
+        cards.single.preferenceOrigin, SupportPreferenceOrigin.explicitCurrent);
   });
 
   test('confirmed learned preference outranks observed candidate', () {
@@ -79,7 +80,8 @@ void main() {
     );
 
     expect(cards.single.action, SupportActionKind.practicalHelp);
-    expect(cards.single.preferenceOrigin, SupportPreferenceOrigin.confirmedLearned);
+    expect(cards.single.preferenceOrigin,
+        SupportPreferenceOrigin.confirmedLearned);
   });
 
   test('never-suggest feedback prevents positive learned candidate', () {
