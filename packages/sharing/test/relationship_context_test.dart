@@ -7,7 +7,7 @@ void main() {
   group('RelationshipPresetExpander', () {
     const expander = RelationshipPresetExpander();
 
-    test('full transparency expands every capability with raw visibility', () {
+    test('full transparency excludes intimacy unless explicitly opted in', () {
       final grants = expander.grantsFromPreset(
         preset: RelationshipSharingPreset.fullTransparency,
         categories: const ['mood', 'sleep'],
@@ -16,8 +16,17 @@ void main() {
         createdAt: now,
       );
       expect(grants, hasLength(2));
+      expect(
+        grants.first.capabilities,
+        containsAll(<RelationshipCapability>{
+          RelationshipCapability.view,
+          RelationshipCapability.notify,
+          RelationshipCapability.relationshipIntelligence,
+          RelationshipCapability.playful,
+        }),
+      );
       expect(grants.first.capabilities,
-          containsAll(RelationshipCapability.values));
+          isNot(contains(RelationshipCapability.intimacy)));
       expect(grants.first.visibility, RelationshipVisibility.fullyShared);
     });
 
