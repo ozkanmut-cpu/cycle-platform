@@ -18,6 +18,18 @@ class ClinicalToneContext {
   final bool urgentReviewRecommended;
 }
 
+class ClinicalTonePreferences {
+  const ClinicalTonePreferences({
+    this.allowPlayfulInSensitive = false,
+    this.allowPlayfulInSeriousClinical = false,
+    this.allowEmojiWhenPlayful = true,
+  });
+
+  final bool allowPlayfulInSensitive;
+  final bool allowPlayfulInSeriousClinical;
+  final bool allowEmojiWhenPlayful;
+}
+
 class ClinicalTonePolicy {
   const ClinicalTonePolicy({
     required this.mode,
@@ -43,16 +55,20 @@ class ClinicalTonePolicy {
 class ClinicalToneGovernor {
   const ClinicalToneGovernor();
 
-  ClinicalTonePolicy policyFor(ClinicalToneContext context) {
+  ClinicalTonePolicy policyFor(
+    ClinicalToneContext context, {
+    ClinicalTonePreferences preferences = const ClinicalTonePreferences(),
+  }) {
     final serious = context.urgentReviewRecommended ||
         context.reviewRecommended ||
         context.isSeriousClinical;
 
     if (serious) {
-      return const ClinicalTonePolicy(
+      final playful = preferences.allowPlayfulInSeriousClinical;
+      return ClinicalTonePolicy(
         mode: ClinicalToneMode.seriousClinical,
-        allowPlayfulLanguage: false,
-        allowEmoji: false,
+        allowPlayfulLanguage: playful,
+        allowEmoji: playful && preferences.allowEmojiWhenPlayful,
         allowJokes: false,
         allowCelebratoryPhrasing: false,
         requireConciseWording: true,
@@ -62,10 +78,11 @@ class ClinicalToneGovernor {
     }
 
     if (context.isSensitive) {
-      return const ClinicalTonePolicy(
+      final playful = preferences.allowPlayfulInSensitive;
+      return ClinicalTonePolicy(
         mode: ClinicalToneMode.supportive,
-        allowPlayfulLanguage: false,
-        allowEmoji: false,
+        allowPlayfulLanguage: playful,
+        allowEmoji: playful && preferences.allowEmojiWhenPlayful,
         allowJokes: false,
         allowCelebratoryPhrasing: false,
         requireConciseWording: true,
