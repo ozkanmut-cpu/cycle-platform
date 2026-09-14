@@ -142,8 +142,14 @@ void main() {
       payload: {'value': 3},
     );
 
-    expect(() => build([one, duplicateId]), throwsA(isA<PortableClinicalPackageException>()));
-    expect(() => build([one, duplicatePath]), throwsA(isA<PortableClinicalPackageException>()));
+    expect(
+      () => build([one, duplicateId]),
+      throwsA(isA<PortableClinicalPackageException>()),
+    );
+    expect(
+      () => build([one, duplicatePath]),
+      throwsA(isA<PortableClinicalPackageException>()),
+    );
   });
 
   test('rejects checksum tampering', () {
@@ -160,7 +166,10 @@ void main() {
       schemaVersion: 1,
     );
 
-    expect(() => build([invalid]), throwsA(isA<PortableClinicalPackageException>()));
+    expect(
+      () => build([invalid]),
+      throwsA(isA<PortableClinicalPackageException>()),
+    );
   });
 
   test('preserves explicit missingness and uncertainty payload bytes', () {
