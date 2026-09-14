@@ -13,3 +13,4 @@ export 'src/couple_context.dart';
 export 'src/relationship_signals.dart';
 export 'src/support_responsiveness.dart';
 export 'src/mutuality.dart';
+export 'src/intimacy.dart';
