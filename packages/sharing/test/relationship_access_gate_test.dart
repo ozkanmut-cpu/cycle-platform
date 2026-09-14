@@ -64,6 +64,86 @@ void main() {
     );
     expect(denied.allowed, isFalse);
     expect(denied.reason, 'relationship_denied');
+    final missingGeneric = gate.evaluate(
+      ownerId: 'a',
+      recipientId: 'b',
+      genericCategory: 'health.energy',
+      relationshipCategory: 'relationship.health.energy',
+      genericAction: PermissionAction.view,
+      relationshipCapability: RelationshipCapability.view,
+      at: now,
+      genericGrants: const [],
+      relationshipGrants: [relationship(RelationshipCapability.view)],
+    );
+    expect(missingGeneric.allowed, isFalse);
+    expect(missingGeneric.reason, 'generic_denied');
+  });
+
+  test('NOTIFY requires both generic and relationship grants', () {
+    final gate = const RelationshipAccessGate();
+    final genericNotify = generic(PermissionAction.notify);
+    final relationshipNotify = relationship(RelationshipCapability.notify);
+    final allowed = gate.evaluate(
+      ownerId: 'a',
+      recipientId: 'b',
+      genericCategory: 'health.energy',
+      relationshipCategory: 'relationship.health.energy',
+      genericAction: PermissionAction.notify,
+      relationshipCapability: RelationshipCapability.notify,
+      at: now,
+      genericGrants: [genericNotify],
+      relationshipGrants: [relationshipNotify],
+    );
+    expect(allowed.allowed, isTrue);
+    expect(
+        gate.evaluate(
+          ownerId: 'a',
+          recipientId: 'b',
+          genericCategory: 'health.energy',
+          relationshipCategory: 'relationship.health.energy',
+          genericAction: PermissionAction.notify,
+          relationshipCapability: RelationshipCapability.notify,
+          at: now,
+          genericGrants: const [],
+          relationshipGrants: [relationshipNotify],
+        ).reason,
+        'generic_denied');
+    expect(
+        gate.evaluate(
+          ownerId: 'a',
+          recipientId: 'b',
+          genericCategory: 'health.energy',
+          relationshipCategory: 'relationship.health.energy',
+          genericAction: PermissionAction.notify,
+          relationshipCapability: RelationshipCapability.notify,
+          at: now,
+          genericGrants: [genericNotify],
+          relationshipGrants: const [],
+        ).reason,
+        'relationship_denied');
+  });
+
+  test('VIEW cannot authorize playful, intelligence or intimacy purposes', () {
+    final gate = const RelationshipAccessGate();
+    for (final capability in <RelationshipCapability>{
+      RelationshipCapability.relationshipIntelligence,
+      RelationshipCapability.playful,
+      RelationshipCapability.intimacy,
+    }) {
+      expect(
+          () => gate.evaluate(
+                ownerId: 'a',
+                recipientId: 'b',
+                genericCategory: 'health.energy',
+                relationshipCategory: 'relationship.health.energy',
+                genericAction: PermissionAction.view,
+                relationshipCapability: capability,
+                at: now,
+                genericGrants: [generic(PermissionAction.view)],
+                relationshipGrants: [relationship(capability)],
+              ),
+          throwsA(isA<RelationshipPolicyException>()));
+    }
   });
 
   test('NOTIFY cannot be satisfied by VIEW on either layer', () {
