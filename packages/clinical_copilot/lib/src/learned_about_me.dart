@@ -258,7 +258,8 @@ bool _isMissing(DataState state) =>
 
 String _normalizedKey(String key) => key.trim().toLowerCase();
 
-String _stableFactId(String patientId, String key) => '${patientId.trim()}::$key';
+String _stableFactId(String patientId, String key) =>
+    '${patientId.trim()}::$key';
 
 String _provenanceIdentity(Provenance provenance) => [
       provenance.sourceKind.name,
