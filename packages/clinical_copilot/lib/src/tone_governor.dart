@@ -55,8 +55,7 @@ class ClinicalToneGovernor {
     ClinicalToneContext context, {
     ClinicalTonePreferences preferences = const ClinicalTonePreferences(),
   }) {
-    final serious =
-        context.urgentReviewRecommended ||
+    final serious = context.urgentReviewRecommended ||
         context.reviewRecommended ||
         context.isSeriousClinical;
 
