@@ -10,9 +10,8 @@ class PermissionEvaluator {
     for (final grant in grants) {
       if (grant.ownerId != request.ownerId) continue;
       if (grant.recipientId != request.recipientId) continue;
-      if (grant.isRevoked) continue;
+      if (!grant.isActiveAt(request.at)) continue;
       if (!grant.actions.contains(request.action)) continue;
-      if (!grant.scope.isActiveAt(request.at)) continue;
       if (!grant.scope.categories.contains(request.category)) continue;
 
       final field = request.field;

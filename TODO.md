@@ -105,7 +105,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 Evidence/Safety validators
 - [x] 🔴 AI audit
 - [x] 🟠 AI Learned About Me
-- [ ] 🟠 Portable Clinical Package
+- [x] 🟠 Portable Clinical Package
 
 ## 11 — Doctor
 - [x] 🔴 multi-patient Doctor shell
@@ -122,11 +122,12 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 permission-aware read-only views
 - [x] 🔴 private notification modes
 - [x] 🔴 blind backup
-- [ ] 🟠 support cards and Partner Signals
+- [x] 🟠 support cards and Partner Signals
+- [x] 🟠 Relationship Intelligence Platform
 
 ## 13 — Experience and validation
 - [x] 🔴 Tone Governor for serious clinical contexts
-- [ ] 🟠 Playful Engine
+- [x] 🟠 Playful Engine
 - [x] 🔴 localization TR/EN
 - [x] 🔴 app switcher privacy
 - [x] 🔴 biometrics/PIN
