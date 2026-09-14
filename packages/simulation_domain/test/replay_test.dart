@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cycle_simulation_domain/simulation_domain.dart';
 import 'package:test/test.dart';
 
@@ -19,6 +21,23 @@ void main() {
     final second = _missingBundle();
 
     expect(first.replay.toJson(), second.replay.toJson());
+  });
+
+  test('failure bundle JSON round-trips without semantic loss', () {
+    final source = File('test/fixtures/missing_failure.json').readAsStringSync();
+    final decoded = FailureBundle.decode(source);
+    final roundTripped = FailureBundle.decode(decoded.toNormalizedJson());
+
+    expect(roundTripped.toNormalizedJson(), decoded.toNormalizedJson());
+    expect(
+      const ReplayEngine()
+          .replay(
+            bundle: roundTripped,
+            invariant: const MissingIsNotZeroInvariant(),
+          )
+          .matches(roundTripped),
+      isTrue,
+    );
   });
 
   test('minimizer removes irrelevant events and preserves target failure', () {
