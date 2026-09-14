@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'models.dart';
 import 'runner.dart';
 
@@ -12,6 +14,55 @@ class FailureBundle {
     required this.expectedSeverity,
     required this.expectedEvidence,
   });
+
+  factory FailureBundle.fromJson(Map<String, Object?> json) {
+    final scenarioJson = Map<String, Object?>.from(json['scenario']! as Map);
+    final actorJson = (json['actors']! as List)
+        .map((item) => Map<String, Object?>.from(item as Map));
+    final eventJson = (json['events']! as List)
+        .map((item) => Map<String, Object?>.from(item as Map));
+
+    return FailureBundle(
+      schemaVersion: json['schemaVersion']! as int,
+      targetInvariantId: json['targetInvariantId']! as String,
+      seed: json['seed']! as int,
+      scenario: SimulationScenario(
+        id: scenarioJson['id']! as String,
+        name: scenarioJson['name']! as String,
+      ),
+      actors: actorJson
+          .map(
+            (item) => SimulationActor(
+              id: item['id']! as String,
+              kind: SimulationActorKind.values.byName(item['kind']! as String),
+              attributes: Map<String, Object?>.from(
+                (item['attributes'] as Map?) ?? const <String, Object?>{},
+              ),
+            ),
+          )
+          .toList(growable: false),
+      events: eventJson
+          .map(
+            (item) => SimulationEvent(
+              id: item['id']! as String,
+              type: item['type']! as String,
+              at: DateTime.parse(item['at']! as String).toUtc(),
+              sequence: item['sequence']! as int,
+              actorId: item['actorId']! as String,
+              payload: Map<String, Object?>.from(
+                (item['payload'] as Map?) ?? const <String, Object?>{},
+              ),
+            ),
+          )
+          .toList(growable: false),
+      expectedSeverity: InvariantSeverity.values.byName(
+        json['expectedSeverity']! as String,
+      ),
+      expectedEvidence: Map<String, Object?>.from(
+        json['expectedEvidence']! as Map,
+      ),
+    );
+  }
 
   final int schemaVersion;
   final String targetInvariantId;
@@ -39,6 +90,12 @@ class FailureBundle {
         'expectedEvidence': expectedEvidence,
         'replay': replay.toJson(),
       };
+
+  String toNormalizedJson() => jsonEncode(toJson());
+
+  static FailureBundle decode(String source) => FailureBundle.fromJson(
+        Map<String, Object?>.from(jsonDecode(source) as Map),
+      );
 }
 
 class ReplayOutcome {
