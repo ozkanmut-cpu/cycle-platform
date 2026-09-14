@@ -18,15 +18,15 @@ void main() {
     const evaluator = PermissionEvaluator();
 
     PermissionDecision decision(DateTime at) => evaluator.evaluate(
-          request: PermissionRequest(
-            ownerId: 'owner',
-            recipientId: 'partner',
-            action: PermissionAction.view,
-            category: 'cycle',
-            at: at,
-          ),
-          grants: [grant],
-        );
+      request: PermissionRequest(
+        ownerId: 'owner',
+        recipientId: 'partner',
+        action: PermissionAction.view,
+        category: 'cycle',
+        at: at,
+      ),
+      grants: [grant],
+    );
 
     expect(
       decision(revokedAt.subtract(const Duration(seconds: 1))).allowed,
