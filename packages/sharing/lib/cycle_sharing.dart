@@ -8,3 +8,5 @@ export 'src/notifications.dart';
 export 'src/revocation.dart';
 export 'src/sync_conflict.dart';
 export 'src/relationship_policy.dart';
+export 'src/relationship_presets.dart';
+export 'src/couple_context.dart';
