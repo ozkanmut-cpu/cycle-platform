@@ -104,7 +104,7 @@ Legend: 🔴 V1 blocker · 🟠 V1 strong target · 🟢 polish/non-blocking
 - [x] 🔴 AI Context Firewall
 - [x] 🔴 Evidence/Safety validators
 - [x] 🔴 AI audit
-- [ ] 🟠 AI Learned About Me
+- [x] 🟠 AI Learned About Me
 - [ ] 🟠 Portable Clinical Package
 
 ## 11 — Doctor
