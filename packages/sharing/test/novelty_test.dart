@@ -80,19 +80,17 @@ void main() {
       recipientId: 'b',
       at: now,
       dna: dna(
-        budget: 50,
-        duration: 30,
-        energy: NoveltyEnergy.low,
-        setting: NoveltySetting.home,
-      ),
+          budget: 50,
+          duration: 30,
+          energy: NoveltyEnergy.low,
+          setting: NoveltySetting.home),
       candidates: [
         candidate(
-          id: 'x',
-          cost: 100,
-          duration: 60,
-          energy: NoveltyEnergy.medium,
-          setting: NoveltySetting.out,
-        )
+            id: 'x',
+            cost: 100,
+            duration: 60,
+            energy: NoveltyEnergy.medium,
+            setting: NoveltySetting.out)
       ],
       history: const [],
       grants: [grant(RelationshipCapability.relationshipIntelligence)],
@@ -109,9 +107,7 @@ void main() {
       candidates: [candidate(id: 'x')],
       history: [
         NoveltyHistoryEntry(
-          candidateId: 'x',
-          usedAt: now.subtract(const Duration(days: 2)),
-        )
+            candidateId: 'x', usedAt: now.subtract(const Duration(days: 2)))
       ],
       grants: [grant(RelationshipCapability.relationshipIntelligence)],
     );
@@ -131,9 +127,11 @@ void main() {
     expect(result, isEmpty);
   });
 
-  test('intimacy idea requires both explicit DNA opt-in and intimacy grant', () {
+  test('intimacy idea requires both explicit DNA opt-in and intimacy grant',
+      () {
     final item = candidate(id: 'x', intimacy: true);
-    final relationshipGrant = grant(RelationshipCapability.relationshipIntelligence);
+    final relationshipGrant =
+        grant(RelationshipCapability.relationshipIntelligence);
     final blocked = const NoveltyEngine().surpriseMeSafely(
       ownerId: 'a',
       recipientId: 'b',
@@ -164,7 +162,7 @@ void main() {
       dna: dna(preferred: {'music'}),
       candidates: [
         candidate(id: 'b', tags: {'food'}),
-        candidate(id: 'a', tags: {'music'}),
+        candidate(id: 'a', tags: {'music'})
       ],
       history: const [],
       grants: [grant(RelationshipCapability.relationshipIntelligence)],
