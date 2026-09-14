@@ -33,13 +33,7 @@ class KickCountSession {
     required List<FetalMovementObservation> observations,
     this.endedAt,
     this.schemaVersion = 1,
-  }) : observations = List.unmodifiable(
-          List<FetalMovementObservation>.from(observations)
-            ..sort((a, b) {
-              final byTime = a.observedAt.compareTo(b.observedAt);
-              return byTime != 0 ? byTime : a.id.compareTo(b.id);
-            }),
-        ) {
+  }) : observations = _validatedMovementOrder(observations) {
     _validateIds(this.observations.map((item) => item.id));
     if (id.trim().isEmpty || pregnancyEpisodeId.trim().isEmpty) {
       throw const PregnancyTrackingValidationException(
@@ -140,13 +134,7 @@ class ContractionSession {
     required List<ContractionObservation> observations,
     this.endedAt,
     this.schemaVersion = 1,
-  }) : observations = List.unmodifiable(
-          List<ContractionObservation>.from(observations)
-            ..sort((a, b) {
-              final byTime = a.startedAt.compareTo(b.startedAt);
-              return byTime != 0 ? byTime : a.id.compareTo(b.id);
-            }),
-        ) {
+  }) : observations = _validatedContractionOrder(observations) {
     _validateIds(this.observations.map((item) => item.id));
     if (id.trim().isEmpty || pregnancyEpisodeId.trim().isEmpty) {
       throw const PregnancyTrackingValidationException(
@@ -176,6 +164,13 @@ class ContractionSession {
           'Contraction cannot end before it starts.',
         );
       }
+      if (endedAt != null &&
+          observation.endedAt != null &&
+          observation.endedAt!.isAfter(endedAt!)) {
+        throw const PregnancyTrackingValidationException(
+          'Contraction observation ends outside its session.',
+        );
+      }
       if (observation.provenance.sourceId.trim().isEmpty) {
         throw const PregnancyTrackingValidationException(
           'Contraction provenance source id must not be blank.',
@@ -195,7 +190,7 @@ class ContractionSession {
     DateTime? previousStart;
     final timings = <ContractionTiming>[];
     final overlaps = <String>{};
-    ContractionObservation? previousExplicit;
+    final activeExplicit = <ContractionObservation>[];
 
     for (final observation in observations) {
       final interval = previousStart == null
@@ -212,15 +207,22 @@ class ContractionSession {
       );
 
       if (observation.state == DataState.yes) {
-        final previous = previousExplicit;
-        if (previous != null &&
-            previous.endedAt != null &&
-            observation.startedAt.isBefore(previous.endedAt!)) {
-          overlaps
-            ..add(previous.id)
-            ..add(observation.id);
+        activeExplicit.removeWhere(
+          (active) =>
+              active.endedAt != null &&
+              !active.endedAt!.isAfter(observation.startedAt),
+        );
+        for (final active in activeExplicit) {
+          if (active.endedAt != null &&
+              observation.startedAt.isBefore(active.endedAt!)) {
+            overlaps
+              ..add(active.id)
+              ..add(observation.id);
+          }
         }
-        previousExplicit = observation;
+        if (observation.endedAt != null) {
+          activeExplicit.add(observation);
+        }
         previousStart = observation.startedAt;
       }
     }
@@ -242,6 +244,11 @@ void validateTrackingAgainstPregnancy({
   required DateTime sessionStartedAt,
   DateTime? sessionEndedAt,
 }) {
+  if (sessionEndedAt != null && sessionEndedAt.isBefore(sessionStartedAt)) {
+    throw const PregnancyTrackingValidationException(
+      'Tracking session cannot end before it starts.',
+    );
+  }
   if (sessionStartedAt.isBefore(pregnancy.startedAt) ||
       (pregnancy.endedAt != null &&
           sessionStartedAt.isAfter(pregnancy.endedAt!)) ||
@@ -269,4 +276,44 @@ void _validateIds(Iterable<String> ids) {
       );
     }
   }
+}
+
+List<FetalMovementObservation> _validatedMovementOrder(
+  List<FetalMovementObservation> observations,
+) {
+  DateTime? previous;
+  for (final observation in observations) {
+    if (previous != null && observation.observedAt.isBefore(previous)) {
+      throw const PregnancyTrackingValidationException(
+        'Movement observations must be supplied in chronological order.',
+      );
+    }
+    previous = observation.observedAt;
+  }
+  final ordered = List<FetalMovementObservation>.from(observations)
+    ..sort((a, b) {
+      final byTime = a.observedAt.compareTo(b.observedAt);
+      return byTime != 0 ? byTime : a.id.compareTo(b.id);
+    });
+  return List<FetalMovementObservation>.unmodifiable(ordered);
+}
+
+List<ContractionObservation> _validatedContractionOrder(
+  List<ContractionObservation> observations,
+) {
+  DateTime? previous;
+  for (final observation in observations) {
+    if (previous != null && observation.startedAt.isBefore(previous)) {
+      throw const PregnancyTrackingValidationException(
+        'Contraction observations must be supplied in chronological order.',
+      );
+    }
+    previous = observation.startedAt;
+  }
+  final ordered = List<ContractionObservation>.from(observations)
+    ..sort((a, b) {
+      final byTime = a.startedAt.compareTo(b.startedAt);
+      return byTime != 0 ? byTime : a.id.compareTo(b.id);
+    });
+  return List<ContractionObservation>.unmodifiable(ordered);
 }

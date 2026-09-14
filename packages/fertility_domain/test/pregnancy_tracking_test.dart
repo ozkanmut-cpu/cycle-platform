@@ -16,15 +16,15 @@ void main() {
       endedAt: DateTime.utc(2026, 9, 14, 9),
       observations: [
         FetalMovementObservation(
-          id: 'm2',
-          observedAt: DateTime.utc(2026, 9, 14, 8, 20),
-          state: DataState.yes,
-          provenance: source,
-        ),
-        FetalMovementObservation(
           id: 'm1',
           observedAt: DateTime.utc(2026, 9, 14, 8, 10),
           state: DataState.unknown,
+          provenance: source,
+        ),
+        FetalMovementObservation(
+          id: 'm2',
+          observedAt: DateTime.utc(2026, 9, 14, 8, 20),
+          state: DataState.yes,
           provenance: source,
         ),
       ],
@@ -115,16 +115,16 @@ void main() {
       startedAt: DateTime.utc(2026, 9, 14, 8),
       observations: [
         ContractionObservation(
-          id: 'b',
-          startedAt: DateTime.utc(2026, 9, 14, 8, 10, 30),
-          endedAt: DateTime.utc(2026, 9, 14, 8, 11),
+          id: 'a',
+          startedAt: DateTime.utc(2026, 9, 14, 8, 10),
+          endedAt: DateTime.utc(2026, 9, 14, 8, 10, 45),
           state: DataState.yes,
           provenance: source,
         ),
         ContractionObservation(
-          id: 'a',
-          startedAt: DateTime.utc(2026, 9, 14, 8, 10),
-          endedAt: DateTime.utc(2026, 9, 14, 8, 10, 45),
+          id: 'b',
+          startedAt: DateTime.utc(2026, 9, 14, 8, 10, 30),
+          endedAt: DateTime.utc(2026, 9, 14, 8, 11),
           state: DataState.yes,
           provenance: source,
         ),
@@ -195,6 +195,163 @@ void main() {
       () => validateTrackingAgainstPregnancy(
         pregnancy: pregnancy,
         sessionStartedAt: DateTime.utc(2026, 9, 14),
+      ),
+      throwsA(isA<PregnancyTrackingValidationException>()),
+    );
+  });
+
+  test('out-of-order movement observations fail deterministically', () {
+    expect(
+      () => KickCountSession(
+        id: 'kick-order',
+        pregnancyEpisodeId: 'preg-1',
+        startedAt: DateTime.utc(2026, 9, 14, 8),
+        observations: [
+          FetalMovementObservation(
+            id: 'm2',
+            observedAt: DateTime.utc(2026, 9, 14, 8, 20),
+            state: DataState.yes,
+            provenance: source,
+          ),
+          FetalMovementObservation(
+            id: 'm1',
+            observedAt: DateTime.utc(2026, 9, 14, 8, 10),
+            state: DataState.yes,
+            provenance: source,
+          ),
+        ],
+      ),
+      throwsA(isA<PregnancyTrackingValidationException>()),
+    );
+  });
+
+  test('out-of-order contraction observations fail deterministically', () {
+    expect(
+      () => ContractionSession(
+        id: 'c-order',
+        pregnancyEpisodeId: 'preg-1',
+        startedAt: DateTime.utc(2026, 9, 14, 8),
+        observations: [
+          ContractionObservation(
+            id: 'c2',
+            startedAt: DateTime.utc(2026, 9, 14, 8, 20),
+            state: DataState.yes,
+            provenance: source,
+          ),
+          ContractionObservation(
+            id: 'c1',
+            startedAt: DateTime.utc(2026, 9, 14, 8, 10),
+            state: DataState.yes,
+            provenance: source,
+          ),
+        ],
+      ),
+      throwsA(isA<PregnancyTrackingValidationException>()),
+    );
+  });
+
+  test('long contraction overlapping multiple later records surfaces all ids',
+      () {
+    final session = ContractionSession(
+      id: 'c-overlap-many',
+      pregnancyEpisodeId: 'preg-1',
+      startedAt: DateTime.utc(2026, 9, 14, 8),
+      observations: [
+        ContractionObservation(
+          id: 'a',
+          startedAt: DateTime.utc(2026, 9, 14, 8, 10),
+          endedAt: DateTime.utc(2026, 9, 14, 8, 30),
+          state: DataState.yes,
+          provenance: source,
+        ),
+        ContractionObservation(
+          id: 'b',
+          startedAt: DateTime.utc(2026, 9, 14, 8, 12),
+          endedAt: DateTime.utc(2026, 9, 14, 8, 13),
+          state: DataState.yes,
+          provenance: source,
+        ),
+        ContractionObservation(
+          id: 'c',
+          startedAt: DateTime.utc(2026, 9, 14, 8, 20),
+          endedAt: DateTime.utc(2026, 9, 14, 8, 21),
+          state: DataState.yes,
+          provenance: source,
+        ),
+      ],
+    );
+    expect(session.summarize().overlappingObservationIds, {'a', 'b', 'c'});
+  });
+
+  test('contraction end beyond session end fails', () {
+    expect(
+      () => ContractionSession(
+        id: 'c-end',
+        pregnancyEpisodeId: 'preg-1',
+        startedAt: DateTime.utc(2026, 9, 14, 8),
+        endedAt: DateTime.utc(2026, 9, 14, 9),
+        observations: [
+          ContractionObservation(
+            id: 'c1',
+            startedAt: DateTime.utc(2026, 9, 14, 8, 59),
+            endedAt: DateTime.utc(2026, 9, 14, 9, 1),
+            state: DataState.yes,
+            provenance: source,
+          ),
+        ],
+      ),
+      throwsA(isA<PregnancyTrackingValidationException>()),
+    );
+  });
+
+  test('tracking helper rejects reversed session chronology', () {
+    final pregnancy = PregnancyEpisode(
+      id: 'preg-2',
+      startedAt: DateTime.utc(2026, 1, 1),
+      dating: PregnancyDating(
+        estimatedStartDate: DateTime.utc(2026, 1, 1),
+        basis: 'reported',
+        provenance: source,
+      ),
+    );
+    expect(
+      () => validateTrackingAgainstPregnancy(
+        pregnancy: pregnancy,
+        sessionStartedAt: DateTime.utc(2026, 9, 14, 9),
+        sessionEndedAt: DateTime.utc(2026, 9, 14, 8),
+      ),
+      throwsA(isA<PregnancyTrackingValidationException>()),
+    );
+  });
+
+  test('blank provenance and non-positive schema versions fail', () {
+    final blank = DomainProvenance(
+      sourceId: '   ',
+      recordedAt: DateTime.utc(2026, 9, 14, 8),
+    );
+    expect(
+      () => KickCountSession(
+        id: 'kick-provenance',
+        pregnancyEpisodeId: 'preg-1',
+        startedAt: DateTime.utc(2026, 9, 14, 8),
+        observations: [
+          FetalMovementObservation(
+            id: 'm1',
+            observedAt: DateTime.utc(2026, 9, 14, 8, 5),
+            state: DataState.yes,
+            provenance: blank,
+          ),
+        ],
+      ),
+      throwsA(isA<PregnancyTrackingValidationException>()),
+    );
+    expect(
+      () => ContractionSession(
+        id: 'c-schema',
+        pregnancyEpisodeId: 'preg-1',
+        startedAt: DateTime.utc(2026, 9, 14, 8),
+        observations: const [],
+        schemaVersion: 0,
       ),
       throwsA(isA<PregnancyTrackingValidationException>()),
     );
