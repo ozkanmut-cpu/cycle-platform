@@ -24,7 +24,8 @@ void main() {
   });
 
   test('failure bundle JSON round-trips without semantic loss', () {
-    final source = File('test/fixtures/missing_failure.json').readAsStringSync();
+    final source =
+        File('test/fixtures/missing_failure.json').readAsStringSync();
     final decoded = FailureBundle.decode(source);
     final roundTripped = FailureBundle.decode(decoded.toNormalizedJson());
 
