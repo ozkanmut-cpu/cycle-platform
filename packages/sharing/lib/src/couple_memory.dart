@@ -65,7 +65,8 @@ class CoupleMemoryItem {
   final int version;
 
   bool isActiveAt(DateTime at) {
-    if (at.isBefore(createdAt) || revokedAt != null) return false;
+    if (at.isBefore(createdAt)) return false;
+    if (revokedAt != null && !at.isBefore(revokedAt!)) return false;
     return validUntil == null || at.isBefore(validUntil!);
   }
 
