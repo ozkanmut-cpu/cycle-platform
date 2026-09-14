@@ -71,7 +71,7 @@ class RelationshipSignal {
 
   bool isActiveAt(DateTime at) {
     if (at.isBefore(createdAt)) return false;
-    if (revokedAt != null) return false;
+    if (revokedAt != null && !at.isBefore(revokedAt!)) return false;
     if (expiresAt != null && !at.isBefore(expiresAt!)) return false;
     return true;
   }
