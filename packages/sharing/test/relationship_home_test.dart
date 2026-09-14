@@ -131,26 +131,24 @@ void main() {
   });
 
   test('surprises are sorted deterministically by score then id', () {
-    final cards = const RelationshipHomeOrchestrator()
-        .build(
-          surprises: const [
-            NoveltySuggestion(
-              candidateId: 'b',
-              category: 'date',
-              title: 'B',
-              score: 100,
-              reasonTags: [],
-            ),
-            NoveltySuggestion(
-              candidateId: 'a',
-              category: 'date',
-              title: 'A',
-              score: 100,
-              reasonTags: [],
-            ),
-          ],
-        )
-        .cardsFor(RelationshipHomeTab.surprise);
+    final cards = const RelationshipHomeOrchestrator().build(
+      surprises: const [
+        NoveltySuggestion(
+          candidateId: 'b',
+          category: 'date',
+          title: 'B',
+          score: 100,
+          reasonTags: [],
+        ),
+        NoveltySuggestion(
+          candidateId: 'a',
+          category: 'date',
+          title: 'A',
+          score: 100,
+          reasonTags: [],
+        ),
+      ],
+    ).cardsFor(RelationshipHomeTab.surprise);
     expect(cards.map((e) => e.id), ['surprise-a', 'surprise-b']);
   });
 }
