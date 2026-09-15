@@ -115,13 +115,15 @@ class SyntheticPatientTimeline {
     for (final observation in observations) {
       observation.validate();
       if (observation.patientId != patientId) {
-        throw ArgumentError('Timeline contains an observation for another patient');
+        throw ArgumentError(
+            'Timeline contains an observation for another patient');
       }
       if (!ids.add(observation.id)) {
         throw ArgumentError('Timeline observation IDs must be unique');
       }
       if (previous != null && observation.observedAt.isBefore(previous)) {
-        throw ArgumentError('Timeline observations must be chronologically ordered');
+        throw ArgumentError(
+            'Timeline observations must be chronologically ordered');
       }
       previous = observation.observedAt;
     }
@@ -163,21 +165,26 @@ class SyntheticHealthWorld {
     if (days <= 0) throw ArgumentError.value(days, 'days');
     final patientIds = timelines.map((item) => item.patientId).toSet();
     if (patientIds.length != timelines.length) {
-      throw ArgumentError('Health world cannot contain duplicate patient timelines');
+      throw ArgumentError(
+          'Health world cannot contain duplicate patient timelines');
     }
     for (final timeline in timelines) timeline.validate();
     if (cohort != null) {
       final cohortIds = cohort.patients.map((patient) => patient.id).toSet();
       if (patientIds.length != cohortIds.length ||
           !patientIds.containsAll(cohortIds)) {
-        throw ArgumentError('Health world must cover every cohort patient exactly once');
+        throw ArgumentError(
+            'Health world must cover every cohort patient exactly once');
       }
     }
     final observations = timelines.expand((item) => item.observations);
     if (!observations.any((item) => item.state == SyntheticDataState.missing) ||
-        !observations.any((item) => item.state == SyntheticDataState.estimated) ||
-        !observations.any((item) => item.state == SyntheticDataState.conflicting)) {
-      throw ArgumentError('Health world must exercise missing, estimated and conflicting data');
+        !observations
+            .any((item) => item.state == SyntheticDataState.estimated) ||
+        !observations
+            .any((item) => item.state == SyntheticDataState.conflicting)) {
+      throw ArgumentError(
+          'Health world must exercise missing, estimated and conflicting data');
     }
   }
 
@@ -245,7 +252,8 @@ class SyntheticHealthWorldGenerator {
     if (days <= 0) throw ArgumentError.value(days, 'days');
     final timelines = <SyntheticPatientTimeline>[];
     for (var index = 0; index < cohort.patients.length; index++) {
-      timelines.add(_timeline(cohort.patients[index], seed, index, start, days));
+      timelines
+          .add(_timeline(cohort.patients[index], seed, index, start, days));
     }
     final world = SyntheticHealthWorld(
       seed: seed,
@@ -269,10 +277,13 @@ class SyntheticHealthWorldGenerator {
     var sequence = 0;
     for (var day = 0; day < days; day++) {
       final at = start.add(Duration(days: day, hours: 8));
-      final sparseSkip = patient.core.loggingBehaviour == LoggingBehaviour.sparse &&
-          day % 3 != 0;
-      final prolongedMissing = patient.missingnessPattern == MissingnessPattern.prolonged &&
-          day >= days ~/ 3 && day < (days * 2) ~/ 3;
+      final sparseSkip =
+          patient.core.loggingBehaviour == LoggingBehaviour.sparse &&
+              day % 3 != 0;
+      final prolongedMissing =
+          patient.missingnessPattern == MissingnessPattern.prolonged &&
+              day >= days ~/ 3 &&
+              day < (days * 2) ~/ 3;
       if (sparseSkip || prolongedMissing) {
         observations.add(_observation(
           patient: patient,
@@ -285,13 +296,15 @@ class SyntheticHealthWorldGenerator {
         continue;
       }
 
-      final symptomState = patient.missingnessPattern == MissingnessPattern.conflicting &&
-              day % 11 == 0
-          ? SyntheticDataState.conflicting
-          : day % 19 == 0
-              ? SyntheticDataState.estimated
-              : SyntheticDataState.known;
-      final symptom = (patient.symptomBurden + random.nextInt(3) - 1).clamp(0, 10);
+      final symptomState =
+          patient.missingnessPattern == MissingnessPattern.conflicting &&
+                  day % 11 == 0
+              ? SyntheticDataState.conflicting
+              : day % 19 == 0
+                  ? SyntheticDataState.estimated
+                  : SyntheticDataState.known;
+      final symptom =
+          (patient.symptomBurden + random.nextInt(3) - 1).clamp(0, 10);
       observations.add(_observation(
         patient: patient,
         sequence: sequence++,
@@ -301,8 +314,9 @@ class SyntheticHealthWorldGenerator {
         source: SyntheticSourceKind.manual,
         value: symptom,
         unit: 'score',
-        conflictingValue:
-            symptomState == SyntheticDataState.conflicting ? (symptom + 2).clamp(0, 10) : null,
+        conflictingValue: symptomState == SyntheticDataState.conflicting
+            ? (symptom + 2).clamp(0, 10)
+            : null,
       ));
 
       if (patient.core.wearableUse != WearableUse.none) {
