@@ -5,12 +5,16 @@ on:
     paths:
       - 'packages/simulation_domain/**'
       - 'docs/SIMULATION_LAB.md'
+      - 'docs/SIMULATION_PERSONAS.md'
+      - 'docs/SIMULATION_COHORT.md'
       - '.github/workflows/simulation-lab.yml'
   push:
     branches: [main]
     paths:
       - 'packages/simulation_domain/**'
       - 'docs/SIMULATION_LAB.md'
+      - 'docs/SIMULATION_PERSONAS.md'
+      - 'docs/SIMULATION_COHORT.md'
       - '.github/workflows/simulation-lab.yml'
 
 jobs:
@@ -53,6 +57,10 @@ jobs:
         run: dart run bin/persona_smoke.dart --seed=20260915 > persona-fixtures.json
         working-directory: packages/simulation_domain
 
+      - name: Cohort smoke
+        run: dart run bin/cohort_smoke.dart --seed=20260915 > cohort-evidence.json
+        working-directory: packages/simulation_domain
+
       - name: Upload smoke report
         uses: actions/upload-artifact@v4
         with:
@@ -74,5 +82,13 @@ jobs:
         with:
           name: simulation-persona-fixtures
           path: packages/simulation_domain/persona-fixtures.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload cohort evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-cohort-evidence
+          path: packages/simulation_domain/cohort-evidence.json
           if-no-files-found: error
           retention-days: 7
