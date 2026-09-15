@@ -8,6 +8,7 @@ on:
       - 'docs/SIMULATION_PERSONAS.md'
       - 'docs/SIMULATION_COHORT.md'
       - 'docs/SIMULATION_HEALTH_WORLD.md'
+      - 'docs/SIMULATION_LONGITUDINAL.md'
       - '.github/workflows/simulation-lab.yml'
   push:
     branches: [main]
@@ -17,6 +18,7 @@ on:
       - 'docs/SIMULATION_PERSONAS.md'
       - 'docs/SIMULATION_COHORT.md'
       - 'docs/SIMULATION_HEALTH_WORLD.md'
+      - 'docs/SIMULATION_LONGITUDINAL.md'
       - '.github/workflows/simulation-lab.yml'
 
 jobs:
@@ -67,6 +69,10 @@ jobs:
         run: dart run bin/health_world_smoke.dart --seed=20260915 > health-world-evidence.json
         working-directory: packages/simulation_domain
 
+      - name: Longitudinal simulation smoke
+        run: dart run bin/longitudinal_smoke.dart --seed=20260915 > longitudinal-evidence.json
+        working-directory: packages/simulation_domain
+
       - name: Upload smoke report
         uses: actions/upload-artifact@v4
         with:
@@ -104,5 +110,13 @@ jobs:
         with:
           name: simulation-health-world-evidence
           path: packages/simulation_domain/health-world-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload longitudinal simulation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-longitudinal-evidence
+          path: packages/simulation_domain/longitudinal-evidence.json
           if-no-files-found: error
           retention-days: 7
