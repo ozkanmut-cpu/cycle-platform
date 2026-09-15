@@ -69,11 +69,13 @@ void main() {
         ],
       );
 
-      expect(report.findings.map((f) => f.category), containsAll([
-        OracleFindingCategory.missingCollapsedToKnown,
-        OracleFindingCategory.conflictCollapsedToCertain,
-        OracleFindingCategory.estimateCollapsedToKnown,
-      ]));
+      expect(
+          report.findings.map((f) => f.category),
+          containsAll([
+            OracleFindingCategory.missingCollapsedToKnown,
+            OracleFindingCategory.conflictCollapsedToCertain,
+            OracleFindingCategory.estimateCollapsedToKnown,
+          ]));
       expect(report.findings.every((f) => f.observedAt.isUtc), isTrue);
       expect(report.findings.every((f) => f.expectedState != f.actualState),
           isTrue);
@@ -110,7 +112,8 @@ void main() {
       expect(report.findings.single.relatedTruthClaimId, 'truth-b');
     });
 
-    test('canonical oracle covers 100 patients and round-trips deterministically',
+    test(
+        'canonical oracle covers 100 patients and round-trips deterministically',
         () {
       const seed = 20260916;
       final cohort = const CohortGenerator().canonical(seed);
@@ -147,8 +150,8 @@ void main() {
       expect(first.coverage.temporalChanges, greaterThan(0));
       expect(first.coverage.recoveries, greaterThan(0));
       expect(first.coverage.sourceTransitions, greaterThan(0));
-      final decoded = (jsonDecode(first.toNormalizedJson()) as Map)
-          .cast<String, Object?>();
+      final decoded =
+          (jsonDecode(first.toNormalizedJson()) as Map).cast<String, Object?>();
       final restored = GroundTruthReport.fromJson(decoded);
       expect(restored.toNormalizedJson(), first.toNormalizedJson());
     });
@@ -170,13 +173,15 @@ void main() {
         seed: 11,
       );
       final patterns = report.temporalTruth.map((e) => e.pattern).toSet();
-      expect(patterns, containsAll([
-        LongitudinalPattern.stable,
-        LongitudinalPattern.drift,
-        LongitudinalPattern.stepChange,
-        LongitudinalPattern.recovery,
-        LongitudinalPattern.regression,
-      ]));
+      expect(
+          patterns,
+          containsAll([
+            LongitudinalPattern.stable,
+            LongitudinalPattern.drift,
+            LongitudinalPattern.stepChange,
+            LongitudinalPattern.recovery,
+            LongitudinalPattern.regression,
+          ]));
     });
 
     test('malformed bundles fail safely', () {
