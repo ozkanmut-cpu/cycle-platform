@@ -315,7 +315,9 @@ class SyntheticHealthWorldGenerator {
         value: symptom,
         unit: 'score',
         conflictingValue: symptomState == SyntheticDataState.conflicting
-            ? (symptom + 2).clamp(0, 10)
+            ? symptom == 10
+                ? 8
+                : symptom + 2
             : null,
       ));
 
