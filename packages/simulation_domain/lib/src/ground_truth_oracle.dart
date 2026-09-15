@@ -122,9 +122,11 @@ class TemporalTruth {
         patientId: json['patientId'] as String,
         startsAt: DateTime.parse(json['startsAt'] as String).toUtc(),
         endsAt: DateTime.parse(json['endsAt'] as String).toUtc(),
-        pattern: _enumByName(LongitudinalPattern.values, json['pattern'], 'pattern'),
+        pattern:
+            _enumByName(LongitudinalPattern.values, json['pattern'], 'pattern'),
         state: _enumByName(SyntheticDataState.values, json['state'], 'state'),
-        source: _enumByName(SyntheticSourceKind.values, json['source'], 'source'),
+        source:
+            _enumByName(SyntheticSourceKind.values, json['source'], 'source'),
       );
 }
 
@@ -273,12 +275,12 @@ class GroundTruthReport {
         seed: json['seed'] as int,
         patientIds: (json['patientIds'] as List).cast<String>(),
         findings: (json['findings'] as List)
-            .map((item) => OracleFinding.fromJson(
-                (item as Map).cast<String, Object?>()))
+            .map((item) =>
+                OracleFinding.fromJson((item as Map).cast<String, Object?>()))
             .toList(),
         temporalTruth: (json['temporalTruth'] as List)
-            .map((item) => TemporalTruth.fromJson(
-                (item as Map).cast<String, Object?>()))
+            .map((item) =>
+                TemporalTruth.fromJson((item as Map).cast<String, Object?>()))
             .toList(),
         coverage: OracleCoverage.fromJson(
             (json['coverage'] as Map).cast<String, Object?>()),
@@ -363,7 +365,8 @@ class GroundTruthOracle {
             .where((item) => item.expectedState == SyntheticDataState.estimated)
             .length,
         conflicting: sortedTruth
-            .where((item) => item.expectedState == SyntheticDataState.conflicting)
+            .where(
+                (item) => item.expectedState == SyntheticDataState.conflicting)
             .length,
         temporalChanges: 0,
         recoveries: 0,
@@ -386,10 +389,12 @@ class GroundTruthOracle {
     healthWorld.validate(cohort: cohort);
     longitudinal.validate(cohort: cohort);
     final expected = cohort.patients.map((item) => item.id).toList()..sort();
-    final worldIds = healthWorld.timelines.map((item) => item.patientId).toList()
+    final worldIds =
+        healthWorld.timelines.map((item) => item.patientId).toList()..sort();
+    final longitudinalIds = longitudinal.trajectories
+        .map((item) => item.patientId)
+        .toList()
       ..sort();
-    final longitudinalIds =
-        longitudinal.trajectories.map((item) => item.patientId).toList()..sort();
     if (!_sameStrings(expected, worldIds) ||
         !_sameStrings(expected, longitudinalIds)) {
       throw ArgumentError('Oracle inputs must cover the canonical patients');
@@ -526,7 +531,8 @@ int _compareObserved(OracleObservation a, OracleObservation b) {
   return signal != 0 ? signal : a.id.compareTo(b.id);
 }
 
-String _findingId(int index, String patientId, OracleFindingCategory category) =>
+String _findingId(
+        int index, String patientId, OracleFindingCategory category) =>
     'oracle-${index.toString().padLeft(6, '0')}-$patientId-${category.name}';
 
 bool _sameStrings(List<String> left, List<String> right) {
