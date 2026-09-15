@@ -42,7 +42,8 @@ void main() {
   test('world round-trips without semantic loss', () {
     final cohort = cohortGenerator.canonical(7);
     final world = worldGenerator.generate(cohort: cohort, seed: 7, days: 14);
-    final decoded = jsonDecode(world.toNormalizedJson()) as Map<String, dynamic>;
+    final decoded =
+        jsonDecode(world.toNormalizedJson()) as Map<String, dynamic>;
     final restored =
         SyntheticHealthWorld.fromJson(decoded.cast<String, Object?>());
     restored.validate(cohort: cohort);
