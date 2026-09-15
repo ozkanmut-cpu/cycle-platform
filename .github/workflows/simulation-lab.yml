@@ -49,6 +49,10 @@ jobs:
         run: dart run bin/replay_failure.dart test/fixtures/missing_failure.json > replay-evidence.json
         working-directory: packages/simulation_domain
 
+      - name: Persona smoke
+        run: dart run bin/persona_smoke.dart --seed=20260915 > persona-fixtures.json
+        working-directory: packages/simulation_domain
+
       - name: Upload smoke report
         uses: actions/upload-artifact@v4
         with:
@@ -62,5 +66,13 @@ jobs:
         with:
           name: simulation-replay-evidence
           path: packages/simulation_domain/replay-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload persona fixtures
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-persona-fixtures
+          path: packages/simulation_domain/persona-fixtures.json
           if-no-files-found: error
           retention-days: 7
