@@ -84,7 +84,10 @@ class LongitudinalEpoch {
 }
 
 class LongitudinalPatientTrajectory {
-  const LongitudinalPatientTrajectory({required this.patientId, required this.epochs});
+  const LongitudinalPatientTrajectory({
+    required this.patientId,
+    required this.epochs,
+  });
 
   final String patientId;
   final List<LongitudinalEpoch> epochs;
@@ -117,7 +120,9 @@ class LongitudinalPatientTrajectory {
     final trajectory = LongitudinalPatientTrajectory(
       patientId: json['patientId'] as String,
       epochs: (json['epochs'] as List)
-          .map((item) => LongitudinalEpoch.fromJson((item as Map).cast<String, Object?>()))
+          .map((item) => LongitudinalEpoch.fromJson(
+                (item as Map).cast<String, Object?>(),
+              ))
           .toList(),
     );
     trajectory.validate();
@@ -145,11 +150,15 @@ class LongitudinalSimulation {
     if (ids.length != trajectories.length) {
       throw ArgumentError('Duplicate longitudinal patient trajectories');
     }
-    for (final trajectory in trajectories) trajectory.validate();
+    for (final trajectory in trajectories) {
+      trajectory.validate();
+    }
     if (cohort != null) {
       final cohortIds = cohort.patients.map((item) => item.id).toSet();
       if (ids.length != cohortIds.length || !ids.containsAll(cohortIds)) {
-        throw ArgumentError('Longitudinal simulation must cover every cohort patient');
+        throw ArgumentError(
+          'Longitudinal simulation must cover every cohort patient',
+        );
       }
     }
   }
@@ -162,7 +171,8 @@ class LongitudinalSimulation {
       'epochs': epochs.length,
     };
     for (final pattern in LongitudinalPattern.values) {
-      result[pattern.name] = epochs.where((item) => item.pattern == pattern).length;
+      result[pattern.name] =
+          epochs.where((item) => item.pattern == pattern).length;
     }
     for (final state in SyntheticDataState.values) {
       result[state.name] = epochs.where((item) => item.state == state).length;
@@ -170,7 +180,9 @@ class LongitudinalSimulation {
     var transitions = 0;
     for (final trajectory in trajectories) {
       for (var i = 1; i < trajectory.epochs.length; i++) {
-        if (trajectory.epochs[i - 1].source != trajectory.epochs[i].source) transitions++;
+        if (trajectory.epochs[i - 1].source != trajectory.epochs[i].source) {
+          transitions++;
+        }
       }
     }
     result['sourceTransitions'] = transitions;
@@ -190,14 +202,18 @@ class LongitudinalSimulation {
 
   factory LongitudinalSimulation.fromJson(Map<String, Object?> json) {
     if (json['schemaVersion'] != longitudinalSimulationSchemaVersion) {
-      throw FormatException('Unsupported longitudinal schemaVersion: ${json['schemaVersion']}');
+      throw FormatException(
+        'Unsupported longitudinal schemaVersion: ${json['schemaVersion']}',
+      );
     }
     final simulation = LongitudinalSimulation(
       seed: json['seed'] as int,
       startedAt: DateTime.parse(json['startedAt'] as String).toUtc(),
       years: json['years'] as int,
       trajectories: (json['trajectories'] as List)
-          .map((item) => LongitudinalPatientTrajectory.fromJson((item as Map).cast<String, Object?>()))
+          .map((item) => LongitudinalPatientTrajectory.fromJson(
+                (item as Map).cast<String, Object?>(),
+              ))
           .toList(),
     );
     simulation.validate();
@@ -225,9 +241,18 @@ class LongitudinalSimulationGenerator {
       final epochs = <LongitudinalEpoch>[];
       final epochCount = years * 6;
       for (var sequence = 0; sequence < epochCount; sequence++) {
-        final startsAt = DateTime.utc(start.year, start.month + sequence * 2, 1);
-        final endsAt = DateTime.utc(start.year, start.month + (sequence + 1) * 2, 1);
-        final pattern = LongitudinalPattern.values[(index + sequence) % LongitudinalPattern.values.length];
+        final startsAt = DateTime.utc(
+          start.year,
+          start.month + sequence * 2,
+          1,
+        );
+        final endsAt = DateTime.utc(
+          start.year,
+          start.month + (sequence + 1) * 2,
+          1,
+        );
+        final pattern = LongitudinalPattern
+            .values[(index + sequence) % LongitudinalPattern.values.length];
         final stateIndex = (index + sequence) % 17;
         final state = stateIndex == 0
             ? SyntheticDataState.missing
@@ -236,8 +261,10 @@ class LongitudinalSimulationGenerator {
                 : stateIndex == 2
                     ? SyntheticDataState.conflicting
                     : SyntheticDataState.known;
-        final source = SyntheticSourceKind.values[(index ~/ 3 + sequence) % SyntheticSourceKind.values.length];
-        final base = (patient.symptomBurden + random.nextInt(3) - 1).clamp(0, 10);
+        final source = SyntheticSourceKind.values[
+            (index ~/ 3 + sequence) % SyntheticSourceKind.values.length];
+        final base =
+            (patient.symptomBurden + random.nextInt(3) - 1).clamp(0, 10);
         epochs.add(LongitudinalEpoch(
           id: '${patient.id}-long-${sequence.toString().padLeft(3, '0')}',
           patientId: patient.id,
@@ -247,12 +274,21 @@ class LongitudinalSimulationGenerator {
           state: state,
           source: source,
           value: state == SyntheticDataState.missing ? null : base,
-          conflictingValue: state == SyntheticDataState.conflicting ? (base == 10 ? 8 : base + 2) : null,
+          conflictingValue: state == SyntheticDataState.conflicting
+              ? (base == 10 ? 8 : base + 2)
+              : null,
         ));
       }
-      trajectories.add(LongitudinalPatientTrajectory(patientId: patient.id, epochs: epochs));
+      trajectories.add(
+        LongitudinalPatientTrajectory(patientId: patient.id, epochs: epochs),
+      );
     }
-    final simulation = LongitudinalSimulation(seed: seed, startedAt: start, years: years, trajectories: trajectories);
+    final simulation = LongitudinalSimulation(
+      seed: seed,
+      startedAt: start,
+      years: years,
+      trajectories: trajectories,
+    );
     simulation.validate(cohort: cohort);
     return simulation;
   }
