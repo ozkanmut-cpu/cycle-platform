@@ -49,46 +49,52 @@ void main() {
         simulation.validate(cohort: cohort);
         expect(simulation.years, years);
         expect(simulation.trajectories, hasLength(cohort.patients.length));
-        expect(simulation.trajectories.every((item) => item.epochs.isNotEmpty),
-            isTrue);
+        expect(
+          simulation.trajectories.every((item) => item.epochs.isNotEmpty),
+          isTrue,
+        );
       }
     });
 
-    test('coverage exercises temporal patterns and uncertainty without collapse', () {
-      const seed = 20260915;
-      final cohort = const CohortGenerator().canonical(seed);
-      final world = const SyntheticHealthWorldGenerator().generate(
-        cohort: cohort,
-        seed: seed,
-      );
-      final simulation = const LongitudinalSimulationGenerator().generate(
-        cohort: cohort,
-        healthWorld: world,
-        seed: seed,
-        years: 5,
-      );
-      final coverage = simulation.coverageSummary();
+    test(
+      'coverage exercises temporal patterns and uncertainty without collapse',
+      () {
+        const seed = 20260915;
+        final cohort = const CohortGenerator().canonical(seed);
+        final world = const SyntheticHealthWorldGenerator().generate(
+          cohort: cohort,
+          seed: seed,
+        );
+        final simulation = const LongitudinalSimulationGenerator().generate(
+          cohort: cohort,
+          healthWorld: world,
+          seed: seed,
+          years: 5,
+        );
+        final coverage = simulation.coverageSummary();
 
-      for (final pattern in LongitudinalPattern.values) {
-        expect(coverage[pattern.name], greaterThan(0), reason: pattern.name);
-      }
-      expect(coverage['missing'], greaterThan(0));
-      expect(coverage['estimated'], greaterThan(0));
-      expect(coverage['conflicting'], greaterThan(0));
-      expect(coverage['sourceTransitions'], greaterThan(0));
+        for (final pattern in LongitudinalPattern.values) {
+          expect(coverage[pattern.name], greaterThan(0), reason: pattern.name);
+        }
+        expect(coverage['missing'], greaterThan(0));
+        expect(coverage['estimated'], greaterThan(0));
+        expect(coverage['conflicting'], greaterThan(0));
+        expect(coverage['sourceTransitions'], greaterThan(0));
 
-      for (final epoch in simulation.trajectories.expand((item) => item.epochs)) {
-        if (epoch.state == SyntheticDataState.missing) {
-          expect(epoch.value, isNull);
-          expect(epoch.conflictingValue, isNull);
+        for (final epoch
+            in simulation.trajectories.expand((item) => item.epochs)) {
+          if (epoch.state == SyntheticDataState.missing) {
+            expect(epoch.value, isNull);
+            expect(epoch.conflictingValue, isNull);
+          }
+          if (epoch.state == SyntheticDataState.conflicting) {
+            expect(epoch.value, isNotNull);
+            expect(epoch.conflictingValue, isNotNull);
+            expect(epoch.conflictingValue, isNot(epoch.value));
+          }
         }
-        if (epoch.state == SyntheticDataState.conflicting) {
-          expect(epoch.value, isNotNull);
-          expect(epoch.conflictingValue, isNotNull);
-          expect(epoch.conflictingValue, isNot(epoch.value));
-        }
-      }
-    });
+      },
+    );
 
     test('round trip preserves longitudinal semantics', () {
       const seed = 9;
