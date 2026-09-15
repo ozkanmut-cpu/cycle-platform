@@ -5,7 +5,7 @@ void main() {
   group('LongitudinalSimulationGenerator', () {
     test('same inputs and seed produce identical five-year trajectories', () {
       const seed = 20260915;
-      final cohort = const SimulationCohortGenerator().generate(seed: seed);
+      final cohort = const CohortGenerator().canonical(seed);
       final world = const SyntheticHealthWorldGenerator().generate(
         cohort: cohort,
         seed: seed,
@@ -32,7 +32,7 @@ void main() {
 
     test('supports deterministic one, three and five year horizons', () {
       const seed = 42;
-      final cohort = const SimulationCohortGenerator().generate(seed: seed);
+      final cohort = const CohortGenerator().canonical(seed);
       final world = const SyntheticHealthWorldGenerator().generate(
         cohort: cohort,
         seed: seed,
@@ -56,7 +56,7 @@ void main() {
 
     test('coverage exercises temporal patterns and uncertainty without collapse', () {
       const seed = 20260915;
-      final cohort = const SimulationCohortGenerator().generate(seed: seed);
+      final cohort = const CohortGenerator().canonical(seed);
       final world = const SyntheticHealthWorldGenerator().generate(
         cohort: cohort,
         seed: seed,
@@ -92,7 +92,7 @@ void main() {
 
     test('round trip preserves longitudinal semantics', () {
       const seed = 9;
-      final cohort = const SimulationCohortGenerator().generate(seed: seed);
+      final cohort = const CohortGenerator().canonical(seed);
       final world = const SyntheticHealthWorldGenerator().generate(
         cohort: cohort,
         seed: seed,
