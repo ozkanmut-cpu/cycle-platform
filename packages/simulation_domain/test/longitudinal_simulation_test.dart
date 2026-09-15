@@ -79,6 +79,10 @@ void main() {
         expect(coverage['missing'], greaterThan(0));
         expect(coverage['estimated'], greaterThan(0));
         expect(coverage['conflicting'], greaterThan(0));
+        expect(coverage['changes'], greaterThan(0));
+        expect(coverage['recoveries'], greaterThan(0));
+        expect(coverage['prolongedMissingness'], greaterThan(0));
+        expect(coverage['conflicts'], greaterThan(0));
         expect(coverage['sourceTransitions'], greaterThan(0));
 
         for (final epoch
@@ -95,6 +99,26 @@ void main() {
         }
       },
     );
+
+    test('preserves a custom health-world start instant', () {
+      const seed = 77;
+      final cohort = const CohortGenerator().canonical(seed);
+      final start = DateTime.utc(2026, 1, 31, 13, 45);
+      final world = const SyntheticHealthWorldGenerator().generate(
+        cohort: cohort,
+        seed: seed,
+        startedAt: start,
+      );
+      final simulation = const LongitudinalSimulationGenerator().generate(
+        cohort: cohort,
+        healthWorld: world,
+        seed: seed,
+        years: 1,
+      );
+
+      expect(simulation.startedAt, start);
+      expect(simulation.trajectories.first.epochs.first.startsAt, start);
+    });
 
     test('round trip preserves longitudinal semantics', () {
       const seed = 9;
