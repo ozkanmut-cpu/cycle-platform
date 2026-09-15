@@ -40,7 +40,8 @@ class LongitudinalEpoch {
     }
     if (state == SyntheticDataState.missing) {
       if (value != null || conflictingValue != null) {
-        throw ArgumentError('Missing longitudinal epochs cannot contain values');
+        throw ArgumentError(
+            'Missing longitudinal epochs cannot contain values');
       }
     } else if (value == null) {
       throw ArgumentError('Non-missing longitudinal epochs require a value');
@@ -72,7 +73,8 @@ class LongitudinalEpoch {
       patientId: json['patientId'] as String,
       startsAt: DateTime.parse(json['startsAt'] as String).toUtc(),
       endsAt: DateTime.parse(json['endsAt'] as String).toUtc(),
-      pattern: _enumByName(LongitudinalPattern.values, json['pattern'], 'pattern'),
+      pattern:
+          _enumByName(LongitudinalPattern.values, json['pattern'], 'pattern'),
       state: _enumByName(SyntheticDataState.values, json['state'], 'state'),
       source: _enumByName(SyntheticSourceKind.values, json['source'], 'source'),
       value: json['value'] as num?,
@@ -94,7 +96,8 @@ class LongitudinalPatientTrajectory {
 
   void validate() {
     if (patientId.trim().isEmpty || epochs.isEmpty) {
-      throw ArgumentError('Longitudinal trajectory requires patient and epochs');
+      throw ArgumentError(
+          'Longitudinal trajectory requires patient and epochs');
     }
     final ids = <String>{};
     DateTime? previousEnd;
