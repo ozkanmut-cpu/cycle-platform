@@ -11,19 +11,25 @@ class PartnerPatientLink {
   const PartnerPatientLink({required this.partnerId, required this.patientId});
   final String partnerId;
   final String patientId;
-  Map<String, Object?> toJson() => {'partnerId': partnerId, 'patientId': patientId};
+  Map<String, Object?> toJson() =>
+      {'partnerId': partnerId, 'patientId': patientId};
   factory PartnerPatientLink.fromJson(Map<String, Object?> json) =>
-      PartnerPatientLink(partnerId: json['partnerId'] as String, patientId: json['patientId'] as String);
+      PartnerPatientLink(
+          partnerId: json['partnerId'] as String,
+          patientId: json['patientId'] as String);
 }
 
 class DoctorPatientAssignment {
-  const DoctorPatientAssignment({required this.doctorId, required this.patientIds});
+  const DoctorPatientAssignment(
+      {required this.doctorId, required this.patientIds});
   final String doctorId;
   final List<String> patientIds;
-  Map<String, Object?> toJson() => {'doctorId': doctorId, 'patientIds': patientIds};
-  factory DoctorPatientAssignment.fromJson(Map<String, Object?> json) => DoctorPatientAssignment(
-      doctorId: json['doctorId'] as String,
-      patientIds: (json['patientIds'] as List).cast<String>());
+  Map<String, Object?> toJson() =>
+      {'doctorId': doctorId, 'patientIds': patientIds};
+  factory DoctorPatientAssignment.fromJson(Map<String, Object?> json) =>
+      DoctorPatientAssignment(
+          doctorId: json['doctorId'] as String,
+          patientIds: (json['patientIds'] as List).cast<String>());
 }
 
 class SimulationCohort {
@@ -46,47 +52,64 @@ class SimulationCohort {
     if (patients.length != canonicalPatientCount ||
         partners.length != canonicalPartnerCount ||
         doctors.length != canonicalDoctorCount) {
-      throw ArgumentError('Canonical cohort must contain exactly 100 patients, 50 partners and 5 doctors');
+      throw ArgumentError(
+          'Canonical cohort must contain exactly 100 patients, 50 partners and 5 doctors');
     }
     final all = <SimulationPersona>[...patients, ...partners, ...doctors];
     final ids = all.map((p) => p.id).toSet();
-    if (ids.length != all.length) throw ArgumentError('Cohort actor IDs must be globally unique');
+    if (ids.length != all.length)
+      throw ArgumentError('Cohort actor IDs must be globally unique');
     for (final persona in all) persona.validate();
-    if (partnerLinks.length != partners.length) throw ArgumentError('Every partner requires one patient link');
+    if (partnerLinks.length != partners.length)
+      throw ArgumentError('Every partner requires one patient link');
     final patientIds = patients.map((p) => p.id).toSet();
     final partnerIds = partners.map((p) => p.id).toSet();
-    if (partnerLinks.map((l) => l.partnerId).toSet().length != partners.length) {
-      throw ArgumentError('Every partner must have exactly one relationship link');
+    if (partnerLinks.map((l) => l.partnerId).toSet().length !=
+        partners.length) {
+      throw ArgumentError(
+          'Every partner must have exactly one relationship link');
     }
     for (final link in partnerLinks) {
-      if (!partnerIds.contains(link.partnerId) || !patientIds.contains(link.patientId)) {
+      if (!partnerIds.contains(link.partnerId) ||
+          !patientIds.contains(link.patientId)) {
         throw ArgumentError('Partner link contains a dangling actor ID');
       }
     }
-    if (doctorAssignments.length != doctors.length) throw ArgumentError('Every doctor requires an assignment');
+    if (doctorAssignments.length != doctors.length)
+      throw ArgumentError('Every doctor requires an assignment');
     final doctorIds = doctors.map((d) => d.id).toSet();
     final assigned = <String>{};
     for (final assignment in doctorAssignments) {
-      if (!doctorIds.contains(assignment.doctorId)) throw ArgumentError('Doctor assignment contains a dangling doctor ID');
+      if (!doctorIds.contains(assignment.doctorId))
+        throw ArgumentError('Doctor assignment contains a dangling doctor ID');
       for (final patientId in assignment.patientIds) {
-        if (!patientIds.contains(patientId)) throw ArgumentError('Doctor assignment contains a dangling patient ID');
-        if (!assigned.add(patientId)) throw ArgumentError('Patient assigned to multiple canonical doctors');
+        if (!patientIds.contains(patientId))
+          throw ArgumentError(
+              'Doctor assignment contains a dangling patient ID');
+        if (!assigned.add(patientId))
+          throw ArgumentError('Patient assigned to multiple canonical doctors');
       }
     }
-    if (assigned.length != patients.length) throw ArgumentError('Every patient requires deterministic doctor coverage');
+    if (assigned.length != patients.length)
+      throw ArgumentError(
+          'Every patient requires deterministic doctor coverage');
     _validateCoverage();
   }
 
   void _validateCoverage() {
-    bool anyPatient(bool Function(PatientPersona) predicate) => patients.any(predicate);
+    bool anyPatient(bool Function(PatientPersona) predicate) =>
+        patients.any(predicate);
     if (!anyPatient((p) => p.core.healthLiteracy == LiteracyLevel.low) ||
         !anyPatient((p) => p.core.digitalLiteracy == LiteracyLevel.low) ||
         !anyPatient((p) => p.core.accessibilityNeeds.isNotEmpty) ||
-        !anyPatient((p) => p.core.privacySensitivity == PrivacySensitivity.high) ||
+        !anyPatient(
+            (p) => p.core.privacySensitivity == PrivacySensitivity.high) ||
         !anyPatient((p) => p.core.wearableUse == WearableUse.heavy) ||
         !anyPatient((p) => p.core.wearableUse == WearableUse.none) ||
-        !anyPatient((p) => p.missingnessPattern == MissingnessPattern.conflicting) ||
-        !anyPatient((p) => p.missingnessPattern == MissingnessPattern.prolonged) ||
+        !anyPatient(
+            (p) => p.missingnessPattern == MissingnessPattern.conflicting) ||
+        !anyPatient(
+            (p) => p.missingnessPattern == MissingnessPattern.prolonged) ||
         !anyPatient((p) => p.symptomBurden >= 8)) {
       throw ArgumentError('Cohort is missing required high-risk coverage');
     }
@@ -109,21 +132,36 @@ class SimulationCohort {
         'patients': patients.length,
         'partners': partners.length,
         'doctors': doctors.length,
-        'lowHealthLiteracy': patients.where((p) => p.core.healthLiteracy == LiteracyLevel.low).length,
-        'accessibilityNeeds': patients.where((p) => p.core.accessibilityNeeds.isNotEmpty).length,
-        'highPrivacy': patients.where((p) => p.core.privacySensitivity == PrivacySensitivity.high).length,
-        'wearableHeavy': patients.where((p) => p.core.wearableUse == WearableUse.heavy).length,
-        'noWearable': patients.where((p) => p.core.wearableUse == WearableUse.none).length,
-        'conflictingData': patients.where((p) => p.missingnessPattern == MissingnessPattern.conflicting).length,
+        'lowHealthLiteracy': patients
+            .where((p) => p.core.healthLiteracy == LiteracyLevel.low)
+            .length,
+        'accessibilityNeeds':
+            patients.where((p) => p.core.accessibilityNeeds.isNotEmpty).length,
+        'highPrivacy': patients
+            .where((p) => p.core.privacySensitivity == PrivacySensitivity.high)
+            .length,
+        'wearableHeavy': patients
+            .where((p) => p.core.wearableUse == WearableUse.heavy)
+            .length,
+        'noWearable': patients
+            .where((p) => p.core.wearableUse == WearableUse.none)
+            .length,
+        'conflictingData': patients
+            .where(
+                (p) => p.missingnessPattern == MissingnessPattern.conflicting)
+            .length,
         'highSymptomBurden': patients.where((p) => p.symptomBurden >= 8).length,
       };
 
   factory SimulationCohort.fromJson(Map<String, Object?> json) {
     if (json['schemaVersion'] != cohortSchemaVersion) {
-      throw FormatException('Unsupported cohort schemaVersion: ${json['schemaVersion']}');
+      throw FormatException(
+          'Unsupported cohort schemaVersion: ${json['schemaVersion']}');
     }
-    List<T> personas<T extends SimulationPersona>(String field) => (json[field] as List)
-        .map((value) => SimulationPersona.fromJson((value as Map).cast<String, Object?>()))
+    List<T> personas<T extends SimulationPersona>(String field) => (json[field]
+            as List)
+        .map((value) =>
+            SimulationPersona.fromJson((value as Map).cast<String, Object?>()))
         .cast<T>()
         .toList();
     final cohort = SimulationCohort(
@@ -132,10 +170,12 @@ class SimulationCohort {
       partners: personas<PartnerPersona>('partners'),
       doctors: personas<DoctorPersona>('doctors'),
       partnerLinks: (json['partnerLinks'] as List)
-          .map((v) => PartnerPatientLink.fromJson((v as Map).cast<String, Object?>()))
+          .map((v) =>
+              PartnerPatientLink.fromJson((v as Map).cast<String, Object?>()))
           .toList(),
       doctorAssignments: (json['doctorAssignments'] as List)
-          .map((v) => DoctorPatientAssignment.fromJson((v as Map).cast<String, Object?>()))
+          .map((v) => DoctorPatientAssignment.fromJson(
+              (v as Map).cast<String, Object?>()))
           .toList(),
     );
     cohort.validate();
@@ -150,20 +190,23 @@ class CohortGenerator {
   SimulationCohort canonical(int seed) {
     final patients = List<PatientPersona>.generate(
         canonicalPatientCount, (i) => _patient(seed, i));
-    final partners = List<PartnerPersona>.generate(
-        canonicalPartnerCount, (i) => personaGenerator.partner(seed + 2000 + i));
+    final partners = List<PartnerPersona>.generate(canonicalPartnerCount,
+        (i) => personaGenerator.partner(seed + 2000 + i));
     final doctors = List<DoctorPersona>.generate(
         canonicalDoctorCount, (i) => personaGenerator.doctor(seed + 3000 + i));
     final links = List<PartnerPatientLink>.generate(
         partners.length,
         (i) => PartnerPatientLink(
-            partnerId: partners[i].id, patientId: patients[(i * 2) % patients.length].id));
-    final assignments = List<DoctorPatientAssignment>.generate(doctors.length, (doctorIndex) {
+            partnerId: partners[i].id,
+            patientId: patients[(i * 2) % patients.length].id));
+    final assignments =
+        List<DoctorPatientAssignment>.generate(doctors.length, (doctorIndex) {
       final patientIds = <String>[];
       for (var i = doctorIndex; i < patients.length; i += doctors.length) {
         patientIds.add(patients[i].id);
       }
-      return DoctorPatientAssignment(doctorId: doctors[doctorIndex].id, patientIds: patientIds);
+      return DoctorPatientAssignment(
+          doctorId: doctors[doctorIndex].id, patientIds: patientIds);
     });
     final cohort = SimulationCohort(
         seed: seed,
@@ -178,16 +221,26 @@ class CohortGenerator {
 
   PatientPersona _patient(int seed, int index) {
     final base = personaGenerator.patient(seed + 1000 + index);
-    final wearable = index % 10 == 0 ? WearableUse.heavy : base.core.wearableUse;
+    final wearable =
+        index % 10 == 0 ? WearableUse.heavy : base.core.wearableUse;
     final core = PersonaCore(
       age: 18 + ((index * 7 + seed.abs()) % 73),
-      healthLiteracy: index % 9 == 0 ? LiteracyLevel.low : base.core.healthLiteracy,
-      digitalLiteracy: index % 11 == 0 ? LiteracyLevel.low : base.core.digitalLiteracy,
-      accessibilityNeeds: index % 8 == 0 ? const ['largeText'] : base.core.accessibilityNeeds,
-      privacySensitivity: index % 7 == 0 ? PrivacySensitivity.high : base.core.privacySensitivity,
-      dataDensity: wearable == WearableUse.heavy ? DataDensity.high : base.core.dataDensity,
+      healthLiteracy:
+          index % 9 == 0 ? LiteracyLevel.low : base.core.healthLiteracy,
+      digitalLiteracy:
+          index % 11 == 0 ? LiteracyLevel.low : base.core.digitalLiteracy,
+      accessibilityNeeds:
+          index % 8 == 0 ? const ['largeText'] : base.core.accessibilityNeeds,
+      privacySensitivity: index % 7 == 0
+          ? PrivacySensitivity.high
+          : base.core.privacySensitivity,
+      dataDensity: wearable == WearableUse.heavy
+          ? DataDensity.high
+          : base.core.dataDensity,
       wearableUse: wearable,
-      loggingBehaviour: wearable == WearableUse.heavy ? LoggingBehaviour.regular : base.core.loggingBehaviour,
+      loggingBehaviour: wearable == WearableUse.heavy
+          ? LoggingBehaviour.regular
+          : base.core.loggingBehaviour,
       goals: base.core.goals,
       fears: base.core.fears,
       expectedMentalModel: base.core.expectedMentalModel,
@@ -195,16 +248,23 @@ class CohortGenerator {
     final patient = PatientPersona(
       id: base.id,
       core: core,
-      cycleLifeStage: CycleLifeStage.values[index % (CycleLifeStage.values.length - 1)],
-      conditions: index % 6 == 0 ? const ['complex-chronic-condition'] : base.conditions,
-      medications: index % 6 == 0 ? const ['maintenance-medication', 'second-medication'] : base.medications,
+      cycleLifeStage:
+          CycleLifeStage.values[index % (CycleLifeStage.values.length - 1)],
+      conditions: index % 6 == 0
+          ? const ['complex-chronic-condition']
+          : base.conditions,
+      medications: index % 6 == 0
+          ? const ['maintenance-medication', 'second-medication']
+          : base.medications,
       symptomBurden: index % 10 == 0 ? 9 : base.symptomBurden,
       missingnessPattern: index % 13 == 0
           ? MissingnessPattern.conflicting
           : index % 17 == 0
               ? MissingnessPattern.prolonged
               : base.missingnessPattern,
-      healthDataSources: wearable == WearableUse.heavy ? const ['wearable', 'manual'] : base.healthDataSources,
+      healthDataSources: wearable == WearableUse.heavy
+          ? const ['wearable', 'manual']
+          : base.healthDataSources,
     );
     patient.validate();
     return patient;

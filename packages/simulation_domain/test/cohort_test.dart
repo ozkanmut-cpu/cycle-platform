@@ -22,8 +22,10 @@ void main() {
         .toSet();
     expect(ids, hasLength(155));
     final patientIds = cohort.patients.map((p) => p.id).toSet();
-    expect(cohort.partnerLinks.every((l) => patientIds.contains(l.patientId)), isTrue);
-    expect(cohort.doctorAssignments.expand((a) => a.patientIds).toSet(), patientIds);
+    expect(cohort.partnerLinks.every((l) => patientIds.contains(l.patientId)),
+        isTrue);
+    expect(cohort.doctorAssignments.expand((a) => a.patientIds).toSet(),
+        patientIds);
   });
 
   test('required risk and accessibility coverage is represented', () {
@@ -44,7 +46,8 @@ void main() {
 
   test('cohort round-trips without semantic loss', () {
     final cohort = generator.canonical(7);
-    final decoded = jsonDecode(cohort.toNormalizedJson()) as Map<String, dynamic>;
+    final decoded =
+        jsonDecode(cohort.toNormalizedJson()) as Map<String, dynamic>;
     final restored = SimulationCohort.fromJson(decoded.cast<String, Object?>());
     expect(restored.toNormalizedJson(), cohort.toNormalizedJson());
   });
