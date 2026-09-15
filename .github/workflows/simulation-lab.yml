@@ -9,6 +9,7 @@ on:
       - 'docs/SIMULATION_COHORT.md'
       - 'docs/SIMULATION_HEALTH_WORLD.md'
       - 'docs/SIMULATION_LONGITUDINAL.md'
+      - 'docs/SIMULATION_GROUND_TRUTH_ORACLE.md'
       - '.github/workflows/simulation-lab.yml'
   push:
     branches: [main]
@@ -19,6 +20,7 @@ on:
       - 'docs/SIMULATION_COHORT.md'
       - 'docs/SIMULATION_HEALTH_WORLD.md'
       - 'docs/SIMULATION_LONGITUDINAL.md'
+      - 'docs/SIMULATION_GROUND_TRUTH_ORACLE.md'
       - '.github/workflows/simulation-lab.yml'
 
 jobs:
@@ -27,52 +29,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-
       - name: Dependencies
         run: dart pub get
         working-directory: packages/simulation_domain
-
       - name: Format check
         run: dart format --output=none --set-exit-if-changed lib test bin
         working-directory: packages/simulation_domain
-
       - name: Analyze
         run: dart analyze .
         working-directory: packages/simulation_domain
-
       - name: Test
         run: dart test
         working-directory: packages/simulation_domain
-
       - name: Foundation smoke
         run: dart run bin/foundation_smoke.dart --seed=20260914 > foundation-smoke.json
         working-directory: packages/simulation_domain
-
       - name: Replay failure smoke
         run: dart run bin/replay_failure.dart test/fixtures/missing_failure.json > replay-evidence.json
         working-directory: packages/simulation_domain
-
       - name: Persona smoke
         run: dart run bin/persona_smoke.dart --seed=20260915 > persona-fixtures.json
         working-directory: packages/simulation_domain
-
       - name: Cohort smoke
         run: dart run bin/cohort_smoke.dart --seed=20260915 > cohort-evidence.json
         working-directory: packages/simulation_domain
-
       - name: Synthetic health world smoke
         run: dart run bin/health_world_smoke.dart --seed=20260915 > health-world-evidence.json
         working-directory: packages/simulation_domain
-
       - name: Longitudinal simulation smoke
         run: dart run bin/longitudinal_smoke.dart --seed=20260915 > longitudinal-evidence.json
         working-directory: packages/simulation_domain
-
+      - name: Ground-truth oracle smoke
+        run: dart run bin/oracle_smoke.dart --seed=20260916 > oracle-evidence.json
+        working-directory: packages/simulation_domain
       - name: Upload smoke report
         uses: actions/upload-artifact@v4
         with:
@@ -80,7 +73,6 @@ jobs:
           path: packages/simulation_domain/foundation-smoke.json
           if-no-files-found: error
           retention-days: 7
-
       - name: Upload replay evidence
         uses: actions/upload-artifact@v4
         with:
@@ -88,7 +80,6 @@ jobs:
           path: packages/simulation_domain/replay-evidence.json
           if-no-files-found: error
           retention-days: 7
-
       - name: Upload persona fixtures
         uses: actions/upload-artifact@v4
         with:
@@ -96,7 +87,6 @@ jobs:
           path: packages/simulation_domain/persona-fixtures.json
           if-no-files-found: error
           retention-days: 7
-
       - name: Upload cohort evidence
         uses: actions/upload-artifact@v4
         with:
@@ -104,7 +94,6 @@ jobs:
           path: packages/simulation_domain/cohort-evidence.json
           if-no-files-found: error
           retention-days: 7
-
       - name: Upload synthetic health world evidence
         uses: actions/upload-artifact@v4
         with:
@@ -112,11 +101,17 @@ jobs:
           path: packages/simulation_domain/health-world-evidence.json
           if-no-files-found: error
           retention-days: 7
-
       - name: Upload longitudinal simulation evidence
         uses: actions/upload-artifact@v4
         with:
           name: simulation-longitudinal-evidence
           path: packages/simulation_domain/longitudinal-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload ground-truth oracle evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-oracle-evidence
+          path: packages/simulation_domain/oracle-evidence.json
           if-no-files-found: error
           retention-days: 7
