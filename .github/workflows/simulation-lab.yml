@@ -7,6 +7,7 @@ on:
       - 'docs/SIMULATION_LAB.md'
       - 'docs/SIMULATION_PERSONAS.md'
       - 'docs/SIMULATION_COHORT.md'
+      - 'docs/SIMULATION_HEALTH_WORLD.md'
       - '.github/workflows/simulation-lab.yml'
   push:
     branches: [main]
@@ -15,6 +16,7 @@ on:
       - 'docs/SIMULATION_LAB.md'
       - 'docs/SIMULATION_PERSONAS.md'
       - 'docs/SIMULATION_COHORT.md'
+      - 'docs/SIMULATION_HEALTH_WORLD.md'
       - '.github/workflows/simulation-lab.yml'
 
 jobs:
@@ -61,6 +63,10 @@ jobs:
         run: dart run bin/cohort_smoke.dart --seed=20260915 > cohort-evidence.json
         working-directory: packages/simulation_domain
 
+      - name: Synthetic health world smoke
+        run: dart run bin/health_world_smoke.dart --seed=20260915 > health-world-evidence.json
+        working-directory: packages/simulation_domain
+
       - name: Upload smoke report
         uses: actions/upload-artifact@v4
         with:
@@ -90,5 +96,13 @@ jobs:
         with:
           name: simulation-cohort-evidence
           path: packages/simulation_domain/cohort-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload synthetic health world evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-health-world-evidence
+          path: packages/simulation_domain/health-world-evidence.json
           if-no-files-found: error
           retention-days: 7
