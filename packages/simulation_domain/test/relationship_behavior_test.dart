@@ -79,6 +79,16 @@ void main() {
           seed: 20260916, scenarios: <RelationshipBehaviorScenario>[scenario]);
       expect(mismatch.passed, isFalse);
       expect(mismatch.results.single.reasonCode, 'contract_mismatch');
+
+      final malformed = RelationshipBehaviorSuite(
+        observer: const _ThrowingObserver(),
+      ).run(
+        seed: 20260916,
+        scenarios: <RelationshipBehaviorScenario>[scenario],
+      );
+      expect(malformed.passed, isFalse);
+      expect(malformed.results.single.reasonCode, 'malformed_input');
+      expect(malformed.coverage.malformedInputFailures, 1);
     });
   });
   group('production observer A-E', () {
@@ -215,6 +225,16 @@ void main() {
   _registerProductionObserverFITests();
   _registerCanonicalRelationshipBehaviorTests();
   _registerRelationshipBehaviorSmokeCliTests();
+}
+
+class _ThrowingObserver extends RelationshipBehaviorObserver {
+  const _ThrowingObserver();
+
+  @override
+  RelationshipBehaviorObservation observe(
+    RelationshipBehaviorScenario scenario,
+  ) =>
+      throw ArgumentError('synthetic malformed observer input');
 }
 
 class _StaticObserver extends RelationshipBehaviorObserver {
@@ -681,6 +701,23 @@ void _registerCanonicalRelationshipBehaviorTests() {
           .map((item) => item.id)
           .toList();
       expect(ids.toSet().length, ids.length);
+    });
+
+    test('canonical matrix covers reviewed acceptance boundaries', () {
+      final ids = buildCanonicalRelationshipBehaviorScenarios(20260916)
+          .map((item) => item.id)
+          .toSet();
+      expect(
+        ids,
+        containsAll(<String>[
+          'signal.lifecycle.expired',
+          'signal.supersession.version',
+          'memory.context.engine-only',
+          'novelty.constraints-and-ranking',
+          'partner-home.authorized-surfaces',
+          'notification.category-only',
+        ]),
+      );
     });
 
     test('mandatory coverage gaps fail with coverage_gap reason', () {
