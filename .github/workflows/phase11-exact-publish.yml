@@ -34,11 +34,15 @@ jobs:
           check_blob packages/simulation_domain/lib/src/privacy_attack.dart 55deda6cdb243a8c7dc87d9b8e9c3d8cacab04a1
           check_blob packages/simulation_domain/pubspec.yaml bfc2e683b74865f1f7ea94b8b2a4203e0ddff5b2
           check_blob packages/simulation_domain/test/privacy_attack_test.dart 0b7e5cd7846327465740e862f9b635f296c0a6a2
-          rm -rf .phase11-publish
+          cp .github/workflows/phase11-exact-publish.yml /tmp/phase11-exact-publish.yml
+          rm -rf .phase11-publish .github/workflows/phase11-exact-publish.yml
           git add -A
           tree=$(git write-tree)
-          echo "intermediate tree=$tree"
-          test "$tree" = e469d57e0be78e96a83691a6a0f2ec4cf5ae5f4a
+          echo "stable intermediate tree=$tree"
+          test "$tree" = 94ad6e0276e64f2a4748fd2616a15ca5409fe427
+          cp /tmp/phase11-exact-publish.yml .github/workflows/phase11-exact-publish.yml
+          git add .github/workflows/phase11-exact-publish.yml
+          test -z "$(git diff --cached --name-only -- .github/workflows/phase11-exact-publish.yml)"
       - name: Publish exact non-workflow candidate
         shell: bash
         run: |
