@@ -1083,7 +1083,7 @@ CoupleDna _coupleDna(
         : _enumByName(NoveltyEnergy.values, map['maxEnergy'], 'dna.maxEnergy'),
     setting: map['setting'] == null
         ? NoveltySetting.either
-        : _enumByName(NoveltyEnergy.values, map['setting'], 'dna.setting'),
+        : _enumByName(NoveltySetting.values, map['setting'], 'dna.setting'),
     allowIntimacySuggestions: map['allowIntimacySuggestions'] == true,
   );
 }
