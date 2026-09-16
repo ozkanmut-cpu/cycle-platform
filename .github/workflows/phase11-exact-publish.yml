@@ -25,6 +25,9 @@ jobs:
           { cat .phase11-publish/sourcex.00.b64 .phase11-publish/sourcex.01.b64 .phase11-publish/sourcex.02.b64 .phase11-publish/sourcex.03.b64 .phase11-publish/sourcex.04.b64 .phase11-publish/sourcex.05.b64 .phase11-publish/sourcey.00.b64 .phase11-publish/sourcey.01.b64; } | tr -d '[:space:]' | base64 -d > packages/simulation_domain/lib/src/privacy_attack.dart
           decode_one .phase11-publish/pubspec.00.b64 packages/simulation_domain/pubspec.yaml
           { cat .phase11-publish/testy.00.b64 .phase11-publish/testy.01.b64; } | tr -d '[:space:]' | base64 -d > packages/simulation_domain/test/privacy_attack_test.dart
+          sed -i "s/^       'attack-revoked-grant-reuse'/        'attack-revoked-grant-reuse'/" packages/simulation_domain/test/privacy_attack_test.dart
+          sed -i "s/^       'attack-relay-wrong-recipient'/        'attack-relay-wrong-recipient'/" packages/simulation_domain/test/privacy_attack_test.dart
+          sed -i "s/^       'attack-relay-associated-data-tamper'/        'attack-relay-associated-data-tamper'/" packages/simulation_domain/test/privacy_attack_test.dart
           check_blob() { actual=$(git hash-object "$1"); test "$actual" = "$2" || { echo "blob mismatch $1 actual=$actual expected=$2"; exit 1; }; }
           check_blob .github/workflows/simulation-lab.yml 50a5ffb2b0fa0682e144703239d0762e1021b90a
           check_blob docs/SIMULATION_PRIVACY_ATTACK.md 39d93a3e5207d4984b13ad1ed66f2d2f74e8678c
