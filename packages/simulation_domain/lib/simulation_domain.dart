@@ -9,6 +9,7 @@ export 'src/longitudinal.dart';
 export 'src/models.dart';
 export 'src/personas.dart';
 export 'src/permission_flow.dart';
+export 'src/relationship_behavior.dart';
 export 'src/random.dart';
 export 'src/replay.dart';
 export 'src/runner.dart';
