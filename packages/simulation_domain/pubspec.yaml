@@ -9,6 +9,12 @@ environment:
 dependencies:
   cycle_core_domain:
     path: ../core_domain
+  cycle_permissions:
+    path: ../permissions
+  cycle_sharing:
+    path: ../sharing
+  cycle_clinical_copilot:
+    path: ../clinical_copilot
 
 dev_dependencies:
   test: ^1.25.8
