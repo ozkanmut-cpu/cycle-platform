@@ -54,6 +54,19 @@ Expected new package dependencies:
 
 `cycle_core_domain` remains existing.
 
+## Adapter architecture
+
+Each cross-domain invariant is split into two pieces:
+
+1. a production adapter that invokes the authoritative engine and returns a small normalized observation; and
+2. a pure invariant evaluator that compares that observation with the hard contract and emits an S4 result.
+
+Default suite execution and CI smoke always use production adapters.
+
+For detector self-tests only, adapters are injectable. Deliberate-violation tests may inject a controlled malformed/unsafe observation to prove the evaluator itself fails closed. This is not a substitute production policy implementation: the injected adapter contains no policy logic and is never used by the smoke command.
+
+This separation avoids the false-positive pattern where an unsafe request is correctly rejected by production code and the test accidentally treats that rejection as a detector failure. A safe production rejection is a passing hard-safety result; an observed contract breach is a failing S4 result.
+
 ## Core model
 
 ### HardSafetyInvariantId
@@ -86,6 +99,12 @@ Fields:
 - structured case input
 
 Validation rejects blank IDs, non-UTC timestamps, unsupported invariant IDs, and malformed case payloads.
+
+### HardSafetyObservation
+
+A normalized adapter output. It contains only facts required to evaluate the contract, such as `allowed`, `modelInvoked`, validation disposition, review decision, oracle finding category, or rendered clinical-truth layer metadata.
+
+Production adapters create these observations from the authoritative engines. Test-only injected adapters may supply deliberately bad observations to prove detector behavior.
 
 ### HardSafetyResult
 
@@ -127,30 +146,32 @@ Hard failures:
 - conflicting truth surfaced as certain/resolved/known state;
 - estimated truth surfaced as known without preserving estimated status.
 
-The adapter must call the Ground Truth Oracle or use its findings rather than reimplementing uncertainty semantics independently.
+The production adapter calls the Ground Truth Oracle or consumes its deterministic findings rather than reimplementing uncertainty semantics independently.
 
 ### Permission revocation boundary
 
 Generic permission access before `revokedAt` may remain valid if the underlying grant permits it. Access at exactly `revokedAt` or later must be denied.
 
-The adapter invokes `PermissionEvaluator` using real `PermissionGrant` and `PermissionRequest` objects. The simulation result fails S4 if production permission logic returns access at or after the revocation boundary.
+The production adapter invokes `PermissionEvaluator` using real `PermissionGrant` and `PermissionRequest` objects. The hard-safety evaluator fails S4 only if the observed production decision permits access at or after the revocation boundary.
 
 ### AI context firewall
 
 Blocked or non-allowlisted context must cause fail-closed orchestration before model invocation.
 
-The adapter verifies:
+The production adapter invokes `AiOrchestrator` and normalizes whether:
 
 - validation disposition is fail;
-- model invocation did not occur;
-- audit terminates at the context-firewall stage;
-- no completed stage is emitted.
+- model invocation occurred;
+- audit terminated at the context-firewall stage;
+- a completed stage was emitted.
+
+The hard-safety evaluator fails if any blocked/disallowed-context case crosses the firewall boundary.
 
 ### Evidence validation
 
 Claims requiring evidence must fail if evidence is missing or references unavailable evidence IDs.
 
-The suite checks the production `AiEvidenceValidator` result and records deterministic reason codes.
+The production adapter invokes `AiEvidenceValidator`. A correct rejection is a passing hard-safety result; acceptance of unsupported evidence is an S4 failure.
 
 ### Autonomous clinical actions
 
@@ -161,13 +182,13 @@ The following candidate actions must fail production safety validation:
 - treatment change;
 - direct clinical-record write.
 
-Prompt text never overrides structured action policy.
+Prompt text never overrides structured action policy. A correct production rejection passes the hard-safety contract; an observed acceptance fails S4.
 
 ### Doctor review gate
 
 Clinical writes requiring review must not become commit-capable without an explicit approved `DoctorReviewRecord` matching the proposal ID.
 
-The safe control uses an explicit approved review. Deliberate violations cover absent, mismatched, and rejected review records.
+The safe production control includes an explicit approved review. Negative production cases cover absent, mismatched, and rejected review records and must remain non-committable. Detector self-tests additionally inject an impossible `commitAllowed: true` observation for an unapproved case and verify S4 failure.
 
 ### Clinical truth preserved through Playful Engine
 
@@ -183,16 +204,21 @@ Hard failures include:
 
 Playfulness may be omitted entirely without failing. Phase 8 protects clinical truth; it does not require playful output.
 
+Production controls use the real `PlayfulEngine`. Detector self-tests may inject a deliberately corrupted normalized composition to verify that the invariant evaluator catches omission, rewrite, reorder, or tone corruption.
+
 ## Safe controls and deliberate violations
 
-Every invariant has both:
+Every invariant has three layers of evidence where applicable:
 
-1. a safe control proving normal allowed behavior still passes; and
-2. a deliberate violation proving the hard gate detects the unsafe condition.
+1. a safe control proving allowed/normal production behavior passes;
+2. an unsafe request proving the authoritative production engine rejects or contains it safely; and
+3. a detector self-test with an injected bad observation proving a hypothetical contract breach produces S4 failure.
 
-Tests must verify exact invariant ID, S4 severity, reason code, evidence, ordering, and determinism.
+This distinction is required so tests validate both the real engine and the detector without duplicating production policy.
 
-The suite itself must fail closed on malformed case data. Unsupported case types, malformed timestamps, blank identifiers, or impossible payload combinations produce deterministic validation failure rather than being skipped.
+Tests verify exact invariant ID, S4 severity, reason code, evidence, ordering, and determinism.
+
+The suite itself fails closed on malformed case data. Unsupported case types, malformed timestamps, blank identifiers, or impossible payload combinations produce deterministic validation failure rather than being skipped.
 
 ## Determinism and provenance
 
@@ -220,7 +246,7 @@ All initial invariant IDs must be exercised in smoke evidence.
 
 `simulation-lab.yml` will run the hard-safety smoke command with a fixed seed after dependency resolution and tests.
 
-It will upload `simulation-hard-safety-evidence` containing canonical JSON evidence.
+It will upload `simulation-hard-safety-evidence` containing canonical JSON evidence produced only by production adapters.
 
 Phase 8 is not complete until both repository CI and Simulation Lab are `completed/success` on the exact feature HEAD, the PR is merged, and both workflows are `completed/success` on the merge SHA.
 
@@ -243,4 +269,4 @@ Issue #58 must remain open throughout Phase 8. Synthetic safety evidence may sup
 
 ## Acceptance mapping
 
-Issue #221 acceptance criteria map directly to deterministic tests, smoke evidence, CI artifact publication, exact-head workflow verification, post-merge verification, and final confirmation that Issue #58 remains open.
+Issue #221 acceptance criteria map directly to deterministic tests, production-adapter smoke evidence, detector self-tests, CI artifact publication, exact-head workflow verification, post-merge verification, and final confirmation that Issue #58 remains open.
