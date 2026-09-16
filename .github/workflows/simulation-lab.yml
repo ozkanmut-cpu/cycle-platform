@@ -11,6 +11,7 @@ on:
       - 'docs/SIMULATION_LONGITUDINAL.md'
       - 'docs/SIMULATION_GROUND_TRUTH_ORACLE.md'
       - 'docs/SIMULATION_HARD_SAFETY.md'
+      - 'docs/SIMULATION_PERMISSION_FLOW.md'
       - '.github/workflows/simulation-lab.yml'
   push:
     branches: [main]
@@ -23,6 +24,7 @@ on:
       - 'docs/SIMULATION_LONGITUDINAL.md'
       - 'docs/SIMULATION_GROUND_TRUTH_ORACLE.md'
       - 'docs/SIMULATION_HARD_SAFETY.md'
+      - 'docs/SIMULATION_PERMISSION_FLOW.md'
       - '.github/workflows/simulation-lab.yml'
 
 jobs:
@@ -70,6 +72,9 @@ jobs:
         working-directory: packages/simulation_domain
       - name: Hard safety smoke
         run: dart run bin/hard_safety_smoke.dart --seed=20260916 > hard-safety-evidence.json
+        working-directory: packages/simulation_domain
+      - name: Permission and information-flow smoke
+        run: dart run bin/permission_flow_smoke.dart --seed=20260916 > permission-flow-evidence.json
         working-directory: packages/simulation_domain
       - name: Upload smoke report
         uses: actions/upload-artifact@v4
@@ -125,5 +130,12 @@ jobs:
         with:
           name: simulation-hard-safety-evidence
           path: packages/simulation_domain/hard-safety-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload permission and information-flow evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-permission-flow-evidence
+          path: packages/simulation_domain/permission-flow-evidence.json
           if-no-files-found: error
           retention-days: 7
