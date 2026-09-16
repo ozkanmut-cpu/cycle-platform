@@ -13,6 +13,7 @@ on:
       - 'docs/SIMULATION_HARD_SAFETY.md'
       - 'docs/SIMULATION_PERMISSION_FLOW.md'
       - 'docs/SIMULATION_RELATIONSHIP_BEHAVIOR.md'
+      - 'docs/SIMULATION_PRIVACY_ATTACK.md'
       - '.github/workflows/simulation-lab.yml'
   push:
     branches: [main]
@@ -27,6 +28,7 @@ on:
       - 'docs/SIMULATION_HARD_SAFETY.md'
       - 'docs/SIMULATION_PERMISSION_FLOW.md'
       - 'docs/SIMULATION_RELATIONSHIP_BEHAVIOR.md'
+      - 'docs/SIMULATION_PRIVACY_ATTACK.md'
       - '.github/workflows/simulation-lab.yml'
 
 jobs:
@@ -80,6 +82,9 @@ jobs:
         working-directory: packages/simulation_domain
       - name: Relationship behavior smoke
         run: dart run bin/relationship_behavior_smoke.dart --seed=20260916 > relationship-behavior-evidence.json
+        working-directory: packages/simulation_domain
+      - name: Privacy attack smoke
+        run: dart run bin/privacy_attack_smoke.dart --seed=20260916 > privacy-attack-evidence.json
         working-directory: packages/simulation_domain
       - name: Upload smoke report
         uses: actions/upload-artifact@v4
@@ -149,5 +154,12 @@ jobs:
         with:
           name: simulation-relationship-behavior-evidence
           path: packages/simulation_domain/relationship-behavior-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload privacy attack evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-privacy-attack-evidence
+          path: packages/simulation_domain/privacy-attack-evidence.json
           if-no-files-found: error
           retention-days: 7
