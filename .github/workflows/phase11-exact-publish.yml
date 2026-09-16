@@ -1,0 +1,48 @@
+name: Phase 11 exact publish
+on:
+  push:
+    branches: [phase-11-privacy-attack-lab]
+    paths: [.github/workflows/phase11-exact-publish.yml]
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reconstruct exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          decode_one() { tr -d '[:space:]' < "$1" | base64 -d > "$2"; }
+          mkdir -p docs packages/simulation_domain/bin packages/simulation_domain/lib/src packages/simulation_domain/test
+          decode_one .phase11-publish/workflow.00.b64 .github/workflows/simulation-lab.yml
+          decode_one .phase11-publish/docs.00.b64 docs/SIMULATION_PRIVACY_ATTACK.md
+          decode_one .phase11-publish/smoke.00.b64 packages/simulation_domain/bin/privacy_attack_smoke.dart
+          decode_one .phase11-publish/export.00.b64 packages/simulation_domain/lib/simulation_domain.dart
+          { cat .phase11-publish/sourcex.00.b64 .phase11-publish/sourcex.01.b64 .phase11-publish/sourcex.02.b64 .phase11-publish/sourcex.03.b64 .phase11-publish/sourcex.04.b64 .phase11-publish/sourcex.05.b64 .phase11-publish/sourcey.00.b64 .phase11-publish/sourcey.01.b64; } | tr -d '[:space:]' | base64 -d > packages/simulation_domain/lib/src/privacy_attack.dart
+          decode_one .phase11-publish/pubspec.00.b64 packages/simulation_domain/pubspec.yaml
+          { cat .phase11-publish/testy.00.b64 .phase11-publish/testy.01.b64; } | tr -d '[:space:]' | base64 -d > packages/simulation_domain/test/privacy_attack_test.dart
+          check_blob() { actual=$(git hash-object "$1"); test "$actual" = "$2" || { echo "blob mismatch $1 actual=$actual expected=$2"; exit 1; }; }
+          check_blob .github/workflows/simulation-lab.yml 50a5ffb2b0fa0682e144703239d0762e1021b90a
+          check_blob docs/SIMULATION_PRIVACY_ATTACK.md 39d93a3e5207d4984b13ad1ed66f2d2f74e8678c
+          check_blob packages/simulation_domain/bin/privacy_attack_smoke.dart 95a4fd6168645282054ab35dd0787fad39ece878
+          check_blob packages/simulation_domain/lib/simulation_domain.dart a0571517a9f1dcdac520ec5f7af0c2ad6fde4c78
+          check_blob packages/simulation_domain/lib/src/privacy_attack.dart 55deda6cdb243a8c7dc87d9b8e9c3d8cacab04a1
+          check_blob packages/simulation_domain/pubspec.yaml bfc2e683b74865f1f7ea94b8b2a4203e0ddff5b2
+          check_blob packages/simulation_domain/test/privacy_attack_test.dart 0b7e5cd7846327465740e862f9b635f296c0a6a2
+          rm -rf .phase11-publish .github/workflows/phase11-exact-publish.yml
+          git add -A
+          tree=$(git write-tree)
+          echo "candidate tree=$tree"
+          test "$tree" = 42830266d11e21c87e594cccabfca4a3d2b8b1f6
+      - name: Publish exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git commit -m 'feat(simulation): add privacy attack lab'
+          git push origin HEAD:phase-11-privacy-attack-lab
