@@ -10,6 +10,7 @@ on:
       - 'docs/SIMULATION_HEALTH_WORLD.md'
       - 'docs/SIMULATION_LONGITUDINAL.md'
       - 'docs/SIMULATION_GROUND_TRUTH_ORACLE.md'
+      - 'docs/SIMULATION_HARD_SAFETY.md'
       - '.github/workflows/simulation-lab.yml'
   push:
     branches: [main]
@@ -21,6 +22,7 @@ on:
       - 'docs/SIMULATION_HEALTH_WORLD.md'
       - 'docs/SIMULATION_LONGITUDINAL.md'
       - 'docs/SIMULATION_GROUND_TRUTH_ORACLE.md'
+      - 'docs/SIMULATION_HARD_SAFETY.md'
       - '.github/workflows/simulation-lab.yml'
 
 jobs:
@@ -65,6 +67,9 @@ jobs:
         working-directory: packages/simulation_domain
       - name: Ground-truth oracle smoke
         run: dart run bin/oracle_smoke.dart --seed=20260916 > oracle-evidence.json
+        working-directory: packages/simulation_domain
+      - name: Hard safety smoke
+        run: dart run bin/hard_safety_smoke.dart --seed=20260916 > hard-safety-evidence.json
         working-directory: packages/simulation_domain
       - name: Upload smoke report
         uses: actions/upload-artifact@v4
@@ -113,5 +118,12 @@ jobs:
         with:
           name: simulation-oracle-evidence
           path: packages/simulation_domain/oracle-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload hard safety evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-hard-safety-evidence
+          path: packages/simulation_domain/hard-safety-evidence.json
           if-no-files-found: error
           retention-days: 7
