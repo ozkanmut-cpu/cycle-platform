@@ -67,10 +67,12 @@ void main() {
       expect(find.text('Headache'), findsOneWidget);
 
       final driver = PatientJourneyDriver(tester);
-      await driver.lifecycle(AppLifecycleState.paused);
+      await driver.lifecycle(AppLifecycleState.inactive);
       expect(find.text('Private health data is locked.'), findsOneWidget);
       expect(find.text('Headache').hitTestable(), findsNothing);
 
+      await driver.lifecycle(AppLifecycleState.paused);
+      expect(harness.session.lockCalls, greaterThanOrEqualTo(1));
       await driver.lifecycle(AppLifecycleState.resumed);
       expect(harness.appLock.authenticateCalls, 2);
       expect(find.text('Today'), findsOneWidget);

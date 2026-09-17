@@ -106,7 +106,7 @@ Future<PatientJourneyResult> runPrivacyLifecycleRelockJourney(
   final semantics = tester.ensureSemantics();
   final driver = PatientJourneyDriver(tester);
 
-  await driver.lifecycle(AppLifecycleState.paused);
+  await driver.lifecycle(AppLifecycleState.inactive);
   final privacyCoverVisible = find
       .text('Private health data is locked.')
       .evaluate()
@@ -120,6 +120,7 @@ Future<PatientJourneyResult> runPrivacyLifecycleRelockJourney(
       .bySemanticsLabel('Headache')
       .evaluate()
       .isNotEmpty;
+  await driver.lifecycle(AppLifecycleState.paused);
   await driver.lifecycle(AppLifecycleState.resumed);
   final surfaceReached = find.text('Today').evaluate().isNotEmpty
       ? 'today'
@@ -134,7 +135,12 @@ Future<PatientJourneyResult> runPrivacyLifecycleRelockJourney(
     fixtureId: 'P-005',
     locale: 'en',
     family: PatientJourneyFamily.privacyLifecycleRelock,
-    actions: const <String>['launch-home', 'pause-app', 'resume-app'],
+    actions: const <String>[
+      'launch-home',
+      'inactivate-app',
+      'pause-app',
+      'resume-app',
+    ],
     assertions: const <String>[
       'privacy-cover-active',
       'privacy-no-sensitive-content',
