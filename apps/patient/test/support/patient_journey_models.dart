@@ -403,7 +403,11 @@ class PatientJourneyReport {
   final int recoveryCount;
 
   bool get passed =>
-      findings.isEmpty && results.every((result) => result.passed);
+      findings.isEmpty &&
+      coverage.failed == 0 &&
+      coverage.malformed == 0 &&
+      coverage.configured == coverage.evaluated &&
+      coverage.evaluated == coverage.passed;
 
   String get failureSummary {
     final reasons = findings.map((finding) => finding.reasonCode).toList()
