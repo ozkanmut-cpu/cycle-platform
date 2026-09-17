@@ -111,8 +111,8 @@ void main() {
 
     test('rejects negative observation counters', () {
       expect(
-        () => const PatientJourneyObservation(actionCount: -1),
-        throwsArgumentError,
+        () => PatientJourneyObservation(actionCount: -1),
+        throwsA(isA<AssertionError>()),
       );
     });
   });
@@ -345,7 +345,9 @@ void main() {
         recoveryCount: 0,
       );
       final first = canonicalPatientJourneyJson(report);
-      final decoded = Map<String, Object?>.from(jsonDecode(first) as Map);
+      final decoded = Map<String, Object?>.from(
+        jsonDecode(first) as Map<Object?, Object?>,
+      );
       final restored = PatientJourneyReport.fromJson(decoded);
       expect(canonicalPatientJourneyJson(restored), first);
     });
