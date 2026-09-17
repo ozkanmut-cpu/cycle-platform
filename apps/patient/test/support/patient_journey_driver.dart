@@ -15,6 +15,21 @@ class PatientJourneyDriver {
     await tester.pumpAndSettle();
   }
 
+  Future<void> tapTooltip(String tooltip) async {
+    await tester.tap(find.byTooltip(tooltip));
+    actionCount += 1;
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> scrollUntilVisible(
+    Finder finder, {
+    double delta = 300,
+  }) async {
+    await tester.scrollUntilVisible(finder, delta);
+    actionCount += 1;
+    await tester.pumpAndSettle();
+  }
+
   Future<void> lifecycle(AppLifecycleState state) async {
     tester.binding.handleAppLifecycleStateChanged(state);
     actionCount += 1;

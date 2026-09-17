@@ -1,3 +1,4 @@
+import 'package:cycle_storage/cycle_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -285,4 +286,172 @@ Future<List<PatientJourneyResult>> runTodayComprehensionJourneys(
 
   await clearPatientJourneyWidgetTree(tester);
   return results;
+}
+
+Future<PatientJourneyResult> runQuickLogPersistenceJourney(
+  WidgetTester tester,
+) async {
+  final virtualNow = DateTime.utc(2026, 9, 17, 9);
+  final harness = PatientJourneyHarness(
+    virtualNow: virtualNow,
+    events: p001Events(virtualNow),
+    authenticationOutcomes: const <bool>[true],
+  );
+  await harness.pumpHome(tester);
+  final driver = PatientJourneyDriver(tester);
+  final beforeCount = harness.repository.events.length;
+
+  await driver.tapText('Quick Log');
+  driver.recordNavigation();
+  await driver.tapText('Headache');
+
+  final createdEvents = harness.repository.events
+      .where((event) => event.eventType == 'symptom.headache')
+      .toList();
+  final created = createdEvents.length == 1 ? createdEvents.single : null;
+  final repositoryEventDelta =
+      harness.repository.events.length - beforeCount;
+  final persistenceMatched =
+      repositoryEventDelta == 1 &&
+      created?.id == 'event-${virtualNow.microsecondsSinceEpoch}' &&
+      created?.temporal.observedAt == virtualNow &&
+      created?.temporal.recordedAt == virtualNow &&
+      created?.temporal.knownAt == virtualNow;
+  final auditMatched =
+      harness.audit.events.length == 1 &&
+      harness.audit.events.single.action == AuditAction.created &&
+      harness.audit.events.single.subjectType == 'health_event' &&
+      harness.audit.events.single.subjectId == created?.id;
+  final timelineRetrieved = find.text('Headache').evaluate().isNotEmpty;
+
+  final result = PatientJourneyDetector().evaluate(
+    scenario: PatientJourneyScenario(
+      id: 'quick-log-persistence',
+      schemaVersion: 1,
+      seed: _patientJourneySeed,
+      virtualNow: virtualNow,
+      fixtureId: 'P-001',
+      locale: 'en',
+      family: PatientJourneyFamily.quickLogPersistence,
+      actions: const <String>[
+        'launch-home',
+        'open-quick-log',
+        'log-headache',
+      ],
+      assertions: const <String>[
+        'quick-log-persisted',
+        'quick-log-audit-matched',
+        'timeline-event-visible',
+      ],
+      riskTags: const <String>['persistence', 'audit'],
+    ),
+    observation: PatientJourneyObservation(
+      surfaceReached: timelineRetrieved ? 'timeline' : null,
+      satisfiedAssertions: <String>[
+        if (persistenceMatched) 'quick-log-persisted',
+        if (auditMatched) 'quick-log-audit-matched',
+        if (timelineRetrieved) 'timeline-event-visible',
+      ],
+      repositoryEventDelta: repositoryEventDelta,
+      persistedEventType: created?.eventType,
+      auditActions: harness.audit.events
+          .map((event) => event.action.name)
+          .toList(),
+      timelineExpected: true,
+      timelineRetrieved: timelineRetrieved,
+      coreJourneyBlocked: !timelineRetrieved,
+      persistenceMatched: persistenceMatched,
+      auditMatched: auditMatched,
+      actionCount: driver.actionCount,
+      navigationCount: driver.navigationCount,
+      recoveryCount: driver.recoveryCount,
+    ),
+    coverageLabels: const <String>{
+      'family:quickLogPersistence',
+      'quick-log:persistence',
+      'quick-log:audit',
+      'quick-log:timeline-visible',
+      'fixture:P-001',
+      'control:positive',
+    },
+  );
+  await clearPatientJourneyWidgetTree(tester);
+  return result;
+}
+
+Future<PatientJourneyResult> runTimelineCalendarRetrievalJourney(
+  WidgetTester tester,
+) async {
+  final virtualNow = DateTime.utc(2026, 9, 17, 9);
+  final harness = PatientJourneyHarness(
+    virtualNow: virtualNow,
+    events: p001Events(virtualNow),
+    authenticationOutcomes: const <bool>[true],
+  );
+  await harness.pumpHome(tester);
+  final driver = PatientJourneyDriver(tester);
+
+  final timelineRetrieved = find.text('Period started').evaluate().isNotEmpty;
+  await driver.tapTooltip('Calendar');
+  driver.recordNavigation();
+  final monthVisible = find.text('2026-09').evaluate().isNotEmpty;
+  final eventDay = find.bySemanticsLabel('2026-9-5, 2 events');
+  final eventDayVisible = eventDay.evaluate().isNotEmpty;
+  if (eventDayVisible) {
+    await tester.tap(eventDay);
+    driver.actionCount += 1;
+    await tester.pumpAndSettle();
+  }
+  final calendarRetrieved =
+      monthVisible &&
+      eventDayVisible &&
+      find.text('05.09.2026').evaluate().isNotEmpty &&
+      find.text('2 logged event(s)').evaluate().isNotEmpty;
+
+  final result = PatientJourneyDetector().evaluate(
+    scenario: PatientJourneyScenario(
+      id: 'timeline-calendar-retrieval',
+      schemaVersion: 1,
+      seed: _patientJourneySeed,
+      virtualNow: virtualNow,
+      fixtureId: 'P-001',
+      locale: 'en',
+      family: PatientJourneyFamily.timelineCalendarRetrieval,
+      actions: const <String>[
+        'launch-home',
+        'inspect-timeline',
+        'open-calendar',
+        'select-prior-event-day',
+      ],
+      assertions: const <String>[
+        'timeline-event-visible',
+        'calendar-event-visible',
+      ],
+      riskTags: const <String>['retrieval'],
+    ),
+    observation: PatientJourneyObservation(
+      surfaceReached: calendarRetrieved ? 'calendar' : null,
+      satisfiedAssertions: <String>[
+        if (timelineRetrieved) 'timeline-event-visible',
+        if (calendarRetrieved) 'calendar-event-visible',
+      ],
+      timelineExpected: true,
+      timelineRetrieved: timelineRetrieved,
+      calendarExpected: true,
+      calendarRetrieved: calendarRetrieved,
+      coreJourneyBlocked: !timelineRetrieved || !calendarRetrieved,
+      actionCount: driver.actionCount,
+      navigationCount: driver.navigationCount,
+      recoveryCount: driver.recoveryCount,
+    ),
+    coverageLabels: const <String>{
+      'family:timelineCalendarRetrieval',
+      'history:timeline',
+      'history:calendar',
+      'fixture:P-001',
+      'control:positive',
+    },
+  );
+  await clearPatientJourneyWidgetTree(tester);
+  return result;
 }
