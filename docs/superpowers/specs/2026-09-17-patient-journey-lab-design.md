@@ -251,20 +251,20 @@ Phase 12 measures reachability and interaction cost. It does not infer human pre
 
 ### F. Connected Health states
 
-Use real `ConnectedHealthViewModelBuilder` and `ConnectedHealthScreen` through the Patient home route where feasible.
-
-Canonical states:
+The canonical home-route journeys use the real `ConnectedHealthViewModelBuilder` and `ConnectedHealthScreen` through `PatientHomePage` for states that the current builder actually emits:
 
 - observed value with provenance/source label;
 - missing/empty data;
-- stale data where production model supports it;
 - conflicting sources;
 - provenance/source visibility.
+
+`ConnectedHealthMetricState.stale` is a real production presentation state in `ConnectedHealthScreen`, but the current `ConnectedHealthViewModelBuilder` does not emit it. Phase 12 therefore validates stale presentation directly against the real production `ConnectedHealthScreen` with a deterministic `ConnectedHealthViewModel`; it must not change the production builder merely to manufacture stale coverage.
 
 Hard containment:
 
 - absence must never become numeric `0` or a fabricated normal value;
 - conflicting sources must remain visibly conflicting;
+- stale presentation must remain visibly stale when that production state is supplied;
 - privacy-covered state must not expose connected-health detail.
 
 Missing-as-zero or fabricated certainty is S4.
@@ -349,11 +349,11 @@ Mandatory positive coverage:
 - post-log timeline visibility;
 - prior-event timeline retrieval;
 - prior-event calendar retrieval;
-- Connected Health observed;
-- Connected Health missing;
-- Connected Health stale where production supports it;
-- Connected Health conflicting;
-- Connected Health provenance/source visibility;
+- Connected Health observed via the real home route;
+- Connected Health missing via the real home route;
+- Connected Health conflicting via the real home route;
+- Connected Health provenance/source visibility via the real home route;
+- Connected Health stale presentation via the real production screen state;
 - safe controls and negative controls;
 - P-001, P-002, and P-005 synthetic fixture coverage.
 
@@ -387,13 +387,15 @@ Add a dedicated smoke/evidence test, for example:
 
 The exact implementation name may differ, but the contract is fixed:
 
-- it executes only production-UI Patient journeys;
+- it executes production-UI Patient journeys;
 - it builds the canonical report from actual widget observations;
 - it writes canonical JSON to a deterministic repository-relative path such as `patient-journey-evidence.json`;
 - it fails the Flutter test process on S3/S4 findings, malformed input, coverage gaps, or unexpected execution failure;
 - it never writes human-usability claims.
 
 A separate test-only evidence writer may be used to avoid mixing file I/O with journey observation logic.
+
+The stale Connected Health presentation control remains a real production-widget observation even though it is not currently reachable from the builder-generated home-route dataset. That distinction must be visible in coverage metadata rather than hidden.
 
 ## 15. Simulation Lab CI
 
@@ -436,7 +438,7 @@ The artifact contains canonical JSON with at least:
 - journey-family coverage;
 - fixture coverage;
 - privacy/recovery coverage;
-- Connected Health state coverage;
+- Connected Health state coverage with route-vs-direct-widget distinction;
 - ordered result summaries;
 - soft interaction metrics;
 - stable findings.
