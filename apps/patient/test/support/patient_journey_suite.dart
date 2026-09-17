@@ -1,0 +1,267 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'patient_journey_driver.dart';
+import 'patient_journey_fixtures.dart';
+import 'patient_journey_harness.dart';
+import 'patient_journey_models.dart';
+
+const int _patientJourneySeed = 20260917;
+
+Future<PatientJourneyResult> runPrivacyUnlockRecoveryJourney(
+  WidgetTester tester,
+) async {
+  final virtualNow = DateTime.utc(2026, 9, 17, 9);
+  final harness = PatientJourneyHarness(
+    virtualNow: virtualNow,
+    events: p005Events(virtualNow),
+    authenticationOutcomes: const <bool>[false, true],
+  );
+  await harness.pumpHome(tester);
+  final semantics = tester.ensureSemantics();
+  final driver = PatientJourneyDriver(tester);
+  final privacyCoverVisible =
+      find.text('Authentication required').evaluate().isNotEmpty;
+  final recoveryAffordanceVisible = find.text('Unlock').evaluate().isNotEmpty;
+  final privacyCoverBypassed =
+      find.text('Headache').hitTestable().evaluate().isNotEmpty;
+  final sensitiveMarkerVisible =
+      find.bySemanticsLabel('Headache').evaluate().isNotEmpty;
+
+  await driver.tapText('Unlock');
+  driver.recordRecovery();
+  final surfaceReached = find.text('Today').evaluate().isNotEmpty
+      ? 'today'
+      : null;
+  semantics.dispose();
+
+  final scenario = PatientJourneyScenario(
+    id: 'privacy-unlock-recovery',
+    schemaVersion: 1,
+    seed: _patientJourneySeed,
+    virtualNow: virtualNow,
+    fixtureId: 'P-005',
+    locale: 'en',
+    family: PatientJourneyFamily.privacyUnlockRecovery,
+    actions: const <String>['launch-home', 'retry-unlock'],
+    assertions: const <String>[
+      'privacy-cover-active',
+      'privacy-no-sensitive-content',
+      'recovery-affordance-visible',
+      'today-visible-after-recovery',
+    ],
+    expectedRecoveryAffordances: const <String>['unlock'],
+    riskTags: const <String>['privacy', 'authentication'],
+  );
+  final result = PatientJourneyDetector().evaluate(
+    scenario: scenario,
+    observation: PatientJourneyObservation(
+      surfaceReached: surfaceReached,
+      satisfiedAssertions: <String>[
+        if (privacyCoverVisible) 'privacy-cover-active',
+        if (!sensitiveMarkerVisible) 'privacy-no-sensitive-content',
+        if (recoveryAffordanceVisible) 'recovery-affordance-visible',
+        if (surfaceReached == 'today') 'today-visible-after-recovery',
+      ],
+      privacyCoverVisible: privacyCoverVisible,
+      privacyCoverBypassed: privacyCoverBypassed,
+      sensitiveMarkerVisible: sensitiveMarkerVisible,
+      coreJourneyBlocked: surfaceReached != 'today',
+      recoveryAffordanceVisible: recoveryAffordanceVisible,
+      actionCount: driver.actionCount,
+      navigationCount: driver.navigationCount,
+      recoveryCount: driver.recoveryCount,
+    ),
+    coverageLabels: const <String>{
+      'family:privacyUnlockRecovery',
+      'privacy:unlock-success',
+      'privacy:auth-failure-recovery',
+      'privacy:locked-negative-assertion',
+      'fixture:P-005',
+      'control:positive',
+      'control:negative',
+    },
+  );
+  await clearPatientJourneyWidgetTree(tester);
+  return result;
+}
+
+Future<PatientJourneyResult> runPrivacyLifecycleRelockJourney(
+  WidgetTester tester,
+) async {
+  final virtualNow = DateTime.utc(2026, 9, 17, 9);
+  final harness = PatientJourneyHarness(
+    virtualNow: virtualNow,
+    events: p005Events(virtualNow),
+    authenticationOutcomes: const <bool>[true, true],
+  );
+  await harness.pumpHome(tester);
+  final semantics = tester.ensureSemantics();
+  final driver = PatientJourneyDriver(tester);
+
+  await driver.lifecycle(AppLifecycleState.paused);
+  final privacyCoverVisible =
+      find.text('Private data locked').evaluate().isNotEmpty;
+  final privacyCoverBypassed =
+      find.text('Headache').hitTestable().evaluate().isNotEmpty;
+  final sensitiveMarkerVisible =
+      find.bySemanticsLabel('Headache').evaluate().isNotEmpty;
+  await driver.lifecycle(AppLifecycleState.resumed);
+  final surfaceReached = find.text('Today').evaluate().isNotEmpty
+      ? 'today'
+      : null;
+  semantics.dispose();
+
+  final scenario = PatientJourneyScenario(
+    id: 'privacy-lifecycle-relock',
+    schemaVersion: 1,
+    seed: _patientJourneySeed,
+    virtualNow: virtualNow,
+    fixtureId: 'P-005',
+    locale: 'en',
+    family: PatientJourneyFamily.privacyLifecycleRelock,
+    actions: const <String>['launch-home', 'pause-app', 'resume-app'],
+    assertions: const <String>[
+      'privacy-cover-active',
+      'privacy-no-sensitive-content',
+      'today-visible-after-resume',
+    ],
+    riskTags: const <String>['privacy', 'lifecycle'],
+  );
+  final result = PatientJourneyDetector().evaluate(
+    scenario: scenario,
+    observation: PatientJourneyObservation(
+      surfaceReached: surfaceReached,
+      satisfiedAssertions: <String>[
+        if (privacyCoverVisible) 'privacy-cover-active',
+        if (!sensitiveMarkerVisible) 'privacy-no-sensitive-content',
+        if (surfaceReached == 'today') 'today-visible-after-resume',
+      ],
+      privacyCoverVisible: privacyCoverVisible,
+      privacyCoverBypassed: privacyCoverBypassed,
+      sensitiveMarkerVisible: sensitiveMarkerVisible,
+      coreJourneyBlocked:
+          surfaceReached != 'today' || harness.appLock.authenticateCalls != 2,
+      actionCount: driver.actionCount,
+      navigationCount: driver.navigationCount,
+      recoveryCount: driver.recoveryCount,
+    ),
+    coverageLabels: const <String>{
+      'family:privacyLifecycleRelock',
+      'privacy:lifecycle-relock',
+      'privacy:locked-negative-assertion',
+      'fixture:P-005',
+      'control:positive',
+      'control:negative',
+    },
+  );
+  await clearPatientJourneyWidgetTree(tester);
+  return result;
+}
+
+Future<List<PatientJourneyResult>> runTodayComprehensionJourneys(
+  WidgetTester tester,
+) async {
+  final virtualNow = DateTime.utc(2026, 9, 17, 9);
+  final detector = PatientJourneyDetector();
+  final results = <PatientJourneyResult>[];
+
+  final known = PatientJourneyHarness(
+    virtualNow: virtualNow,
+    events: p001Events(virtualNow),
+    authenticationOutcomes: const <bool>[true],
+  );
+  await known.pumpHome(tester);
+  final knownToday = find.text('Today').evaluate().isNotEmpty;
+  final knownQuickLog = find.text('Quick Log').evaluate().isNotEmpty;
+  final knownConnectedHealth =
+      find.text('Connected Health').evaluate().isNotEmpty;
+  final knownCycleDay = find.text('Cycle day 13').evaluate().isNotEmpty;
+  results.add(
+    detector.evaluate(
+      scenario: PatientJourneyScenario(
+        id: 'today-known-cycle-day',
+        schemaVersion: 1,
+        seed: _patientJourneySeed,
+        virtualNow: virtualNow,
+        fixtureId: 'P-001',
+        locale: 'en',
+        family: PatientJourneyFamily.todayComprehensionSurface,
+        actions: const <String>['launch-home'],
+        assertions: const <String>[
+          'today-visible',
+          'quick-log-visible',
+          'connected-health-visible',
+          'known-cycle-day-visible',
+        ],
+      ),
+      observation: PatientJourneyObservation(
+        surfaceReached: knownToday ? 'today' : null,
+        satisfiedAssertions: <String>[
+          if (knownToday) 'today-visible',
+          if (knownQuickLog) 'quick-log-visible',
+          if (knownConnectedHealth) 'connected-health-visible',
+          if (knownCycleDay) 'known-cycle-day-visible',
+        ],
+        coreJourneyBlocked:
+            !knownToday ||
+            !knownQuickLog ||
+            !knownConnectedHealth ||
+            !knownCycleDay,
+      ),
+      coverageLabels: const <String>{
+        'family:todayComprehensionSurface',
+        'today:known-cycle-day',
+        'fixture:P-001',
+        'control:positive',
+      },
+    ),
+  );
+
+  await clearPatientJourneyWidgetTree(tester);
+  final unknown = PatientJourneyHarness(
+    virtualNow: virtualNow,
+    events: p002Events(virtualNow),
+    authenticationOutcomes: const <bool>[true],
+  );
+  await unknown.pumpHome(tester);
+  final unknownCycleDay =
+      find.text('Cycle day unknown').evaluate().isNotEmpty;
+  final cycleDayZero = find.textContaining('Cycle day 0').evaluate().isNotEmpty;
+  results.add(
+    detector.evaluate(
+      scenario: PatientJourneyScenario(
+        id: 'today-unknown-cycle-day',
+        schemaVersion: 1,
+        seed: _patientJourneySeed,
+        virtualNow: virtualNow,
+        fixtureId: 'P-002',
+        locale: 'en',
+        family: PatientJourneyFamily.todayComprehensionSurface,
+        actions: const <String>['launch-home'],
+        assertions: const <String>[
+          'unknown-cycle-day-visible',
+          'unknown-cycle-day-not-zero',
+        ],
+      ),
+      observation: PatientJourneyObservation(
+        surfaceReached: unknownCycleDay ? 'today' : null,
+        satisfiedAssertions: <String>[
+          if (unknownCycleDay) 'unknown-cycle-day-visible',
+          if (!cycleDayZero) 'unknown-cycle-day-not-zero',
+        ],
+        missingDisplayedAsZero: cycleDayZero,
+        coreJourneyBlocked: !unknownCycleDay,
+      ),
+      coverageLabels: const <String>{
+        'family:todayComprehensionSurface',
+        'today:unknown-cycle-day',
+        'fixture:P-002',
+        'control:negative',
+      },
+    ),
+  );
+
+  await clearPatientJourneyWidgetTree(tester);
+  return results;
+}
