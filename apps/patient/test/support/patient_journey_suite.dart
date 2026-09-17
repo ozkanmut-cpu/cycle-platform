@@ -1,3 +1,4 @@
+import 'package:cycle_patient/month_calendar.dart';
 import 'package:cycle_storage/cycle_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -398,11 +399,18 @@ Future<PatientJourneyResult> runTimelineCalendarRetrievalJourney(
     driver.actionCount += 1;
     await tester.pumpAndSettle();
   }
+  final calendar = find.byType(MonthCalendar);
   final calendarRetrieved =
       monthVisible &&
       eventDayVisible &&
-      find.text('05.09.2026').evaluate().isNotEmpty &&
-      find.text('2 logged event(s)').evaluate().isNotEmpty;
+      find
+          .descendant(of: calendar, matching: find.text('05.09.2026'))
+          .evaluate()
+          .isNotEmpty &&
+      find
+          .descendant(of: calendar, matching: find.text('2 logged event(s)'))
+          .evaluate()
+          .isNotEmpty;
   semantics.dispose();
 
   final result = PatientJourneyDetector().evaluate(

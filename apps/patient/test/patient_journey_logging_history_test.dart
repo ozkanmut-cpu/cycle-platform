@@ -1,3 +1,4 @@
+import 'package:cycle_patient/month_calendar.dart';
 import 'package:cycle_storage/cycle_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -68,8 +69,15 @@ void main() {
       expect(find.text('2026-09'), findsOneWidget);
       await tester.tap(find.bySemanticsLabel(RegExp(r'^2026-9-5, 2 events')));
       await tester.pumpAndSettle();
-      expect(find.text('05.09.2026'), findsOneWidget);
-      expect(find.text('2 logged event(s)'), findsOneWidget);
+      final calendar = find.byType(MonthCalendar);
+      expect(
+        find.descendant(of: calendar, matching: find.text('05.09.2026')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: calendar, matching: find.text('2 logged event(s)')),
+        findsOneWidget,
+      );
     } finally {
       semantics.dispose();
     }
