@@ -604,10 +604,7 @@ Future<List<PatientJourneyResult>> runConnectedHealthJourneys(
   final conflictDisplayedAsCertain = find.text('94.5 %').evaluate().isNotEmpty;
   final conflictingMatched =
       find.text('Sources conflict').evaluate().isNotEmpty &&
-      find
-          .textContaining('Health Connect + HealthKit')
-          .evaluate()
-          .isNotEmpty &&
+      find.textContaining('Health Connect + HealthKit').evaluate().isNotEmpty &&
       !conflictDisplayedAsCertain &&
       find.text('0').evaluate().isEmpty;
   results.add(
