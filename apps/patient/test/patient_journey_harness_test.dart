@@ -34,26 +34,26 @@ void main() {
     final p002 = p002Events(fixedNow);
     final p005 = p005Events(fixedNow);
 
-    expect(
-      p001.map((event) => event.id),
-      <String>[
-        'P-001-period-start-20260905',
-        'P-001-cramps-20260905',
-      ],
-    );
-    expect(
-      p002.map((event) => event.id),
-      <String>['P-002-spo2-health-connect', 'P-002-spo2-healthkit'],
-    );
+    expect(p001.map((event) => event.id), <String>[
+      'P-001-period-start-20260905',
+      'P-001-cramps-20260905',
+    ]);
+    expect(p002.map((event) => event.id), <String>[
+      'P-002-spo2-health-connect',
+      'P-002-spo2-healthkit',
+    ]);
     expect(p002.map((event) => event.value), <num>[98, 91]);
-    expect(
-      p002.map((event) => event.provenance.sourceKind),
-      <SourceKind>[SourceKind.healthConnect, SourceKind.healthKit],
-    );
+    expect(p002.map((event) => event.provenance.sourceKind), <SourceKind>[
+      SourceKind.healthConnect,
+      SourceKind.healthKit,
+    ]);
     expect(p005.single.id, 'P-005-sensitive-headache');
     expect(
-      <HealthEvent>[...p001, ...p002, ...p005]
-          .every((event) => event.subjectId == 'local-owner'),
+      <HealthEvent>[
+        ...p001,
+        ...p002,
+        ...p005,
+      ].every((event) => event.subjectId == 'local-owner'),
       isTrue,
     );
   });
@@ -75,35 +75,38 @@ void main() {
     expect(events.map((event) => event.id), containsAllInOrder(expectedIds));
   });
 
-  test('journey repository replaces, filters, and deletes deterministically', () async {
-    final original = patientJourneyEvent(
-      id: 'stable-id',
-      eventType: 'symptom.headache',
-      observedAt: fixedNow,
-      severity: 1,
-    );
-    final replacement = patientJourneyEvent(
-      id: 'stable-id',
-      eventType: 'symptom.headache',
-      observedAt: fixedNow,
-      severity: 3,
-    );
-    final repository = JourneyHealthEventRepository(<HealthEvent>[original]);
+  test(
+    'journey repository replaces, filters, and deletes deterministically',
+    () async {
+      final original = patientJourneyEvent(
+        id: 'stable-id',
+        eventType: 'symptom.headache',
+        observedAt: fixedNow,
+        severity: 1,
+      );
+      final replacement = patientJourneyEvent(
+        id: 'stable-id',
+        eventType: 'symptom.headache',
+        observedAt: fixedNow,
+        severity: 3,
+      );
+      final repository = JourneyHealthEventRepository(<HealthEvent>[original]);
 
-    await repository.upsert(replacement);
-    expect(repository.events, hasLength(1));
-    expect((await repository.getById('stable-id'))!.severity, 3);
-    expect(
-      await repository.query(
-        subjectId: 'local-owner',
-        eventType: 'symptom.cramps',
-      ),
-      isEmpty,
-    );
-    await repository.markDeleted(eventId: 'stable-id', deletedAt: fixedNow);
-    expect(await repository.getById('stable-id'), isNull);
-    expect(await repository.query(subjectId: 'local-owner'), isEmpty);
-  });
+      await repository.upsert(replacement);
+      expect(repository.events, hasLength(1));
+      expect((await repository.getById('stable-id'))!.severity, 3);
+      expect(
+        await repository.query(
+          subjectId: 'local-owner',
+          eventType: 'symptom.cramps',
+        ),
+        isEmpty,
+      );
+      await repository.markDeleted(eventId: 'stable-id', deletedAt: fixedNow);
+      expect(await repository.getById('stable-id'), isNull);
+      expect(await repository.query(subjectId: 'local-owner'), isEmpty);
+    },
+  );
 
   test('journey session records deterministic state transitions', () async {
     final repository = JourneyHealthEventRepository(const <HealthEvent>[]);
@@ -122,33 +125,36 @@ void main() {
     expect(session.unlockCalls, 1);
   });
 
-  test('journey audit log preserves append order and subject filtering', () async {
-    final audit = JourneyAuditLogRepository();
-    final first = AuditEvent(
-      id: 'audit-1',
-      action: AuditAction.created,
-      occurredAt: fixedNow,
-      actorId: 'local-owner',
-      subjectType: 'health_event',
-      subjectId: 'local-owner',
-    );
-    final second = AuditEvent(
-      id: 'audit-2',
-      action: AuditAction.updated,
-      occurredAt: fixedNow.add(const Duration(minutes: 1)),
-      actorId: 'local-owner',
-      subjectType: 'health_event',
-      subjectId: 'local-owner',
-    );
-    await audit.append(first);
-    await audit.append(second);
+  test(
+    'journey audit log preserves append order and subject filtering',
+    () async {
+      final audit = JourneyAuditLogRepository();
+      final first = AuditEvent(
+        id: 'audit-1',
+        action: AuditAction.created,
+        occurredAt: fixedNow,
+        actorId: 'local-owner',
+        subjectType: 'health_event',
+        subjectId: 'local-owner',
+      );
+      final second = AuditEvent(
+        id: 'audit-2',
+        action: AuditAction.updated,
+        occurredAt: fixedNow.add(const Duration(minutes: 1)),
+        actorId: 'local-owner',
+        subjectType: 'health_event',
+        subjectId: 'local-owner',
+      );
+      await audit.append(first);
+      await audit.append(second);
 
-    expect(
-      (await audit.listForSubject('local-owner')).map((event) => event.id),
-      <String>['audit-1', 'audit-2'],
-    );
-    expect(await audit.listForSubject('other-owner'), isEmpty);
-  });
+      expect(
+        (await audit.listForSubject('local-owner')).map((event) => event.id),
+        <String>['audit-1', 'audit-2'],
+      );
+      expect(await audit.listForSubject('other-owner'), isEmpty);
+    },
+  );
 
   testWidgets('localized bootstrap and cleanup isolate fresh harnesses', (
     tester,
