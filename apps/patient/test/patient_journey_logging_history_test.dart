@@ -60,14 +60,19 @@ void main() {
     );
     await harness.pumpHome(tester);
     final driver = PatientJourneyDriver(tester);
+    final semantics = tester.ensureSemantics();
 
-    expect(find.text('Period started'), findsOneWidget);
-    await driver.tapTooltip('Calendar');
-    expect(find.text('2026-09'), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel('2026-9-5, 2 events'));
-    await tester.pumpAndSettle();
-    expect(find.text('05.09.2026'), findsOneWidget);
-    expect(find.text('2 logged event(s)'), findsOneWidget);
+    try {
+      expect(find.text('Period started'), findsOneWidget);
+      await driver.tapTooltip('Calendar');
+      expect(find.text('2026-09'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('2026-9-5, 2 events'));
+      await tester.pumpAndSettle();
+      expect(find.text('05.09.2026'), findsOneWidget);
+      expect(find.text('2 logged event(s)'), findsOneWidget);
+    } finally {
+      semantics.dispose();
+    }
 
     await clearPatientJourneyWidgetTree(tester);
     final result = await runTimelineCalendarRetrievalJourney(tester);

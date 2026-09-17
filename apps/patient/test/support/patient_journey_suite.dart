@@ -385,6 +385,7 @@ Future<PatientJourneyResult> runTimelineCalendarRetrievalJourney(
   );
   await harness.pumpHome(tester);
   final driver = PatientJourneyDriver(tester);
+  final semantics = tester.ensureSemantics();
 
   final timelineRetrieved = find.text('Period started').evaluate().isNotEmpty;
   await driver.tapTooltip('Calendar');
@@ -402,6 +403,7 @@ Future<PatientJourneyResult> runTimelineCalendarRetrievalJourney(
       eventDayVisible &&
       find.text('05.09.2026').evaluate().isNotEmpty &&
       find.text('2 logged event(s)').evaluate().isNotEmpty;
+  semantics.dispose();
 
   final result = PatientJourneyDetector().evaluate(
     scenario: PatientJourneyScenario(
