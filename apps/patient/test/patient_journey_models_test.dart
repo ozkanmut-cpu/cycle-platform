@@ -7,10 +7,16 @@ import 'support/patient_journey_models.dart';
 const int _seed = 20260917;
 final DateTime _virtualNow = DateTime.utc(2026, 9, 17, 9);
 
+typedef _DetectorCase = ({
+  PatientJourneyObservation observation,
+  String category,
+  PatientJourneySeverity severity,
+  String reasonCode,
+});
+
 PatientJourneyScenario _scenario({
   String id = 'journey-a',
-  PatientJourneyFamily family =
-      PatientJourneyFamily.todayComprehensionSurface,
+  PatientJourneyFamily family = PatientJourneyFamily.todayComprehensionSurface,
   List<String> actions = const <String>['open-home'],
   List<String> assertions = const <String>['today-visible'],
 }) => PatientJourneyScenario(
@@ -113,12 +119,7 @@ void main() {
 
   group('PatientJourneyDetector', () {
     test('maps normalized failures to exact severities and reason codes', () {
-      const cases = <({
-        PatientJourneyObservation observation,
-        String category,
-        PatientJourneySeverity severity,
-        String reasonCode,
-      })>[
+      const cases = <_DetectorCase>[
         (
           observation: PatientJourneyObservation(
             privacyCoverVisible: true,
