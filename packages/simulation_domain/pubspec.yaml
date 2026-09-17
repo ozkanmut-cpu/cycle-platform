@@ -9,6 +9,8 @@ environment:
 dependencies:
   cycle_core_domain:
     path: ../core_domain
+  cycle_crypto:
+    path: ../crypto
   cycle_permissions:
     path: ../permissions
   cycle_sharing:
