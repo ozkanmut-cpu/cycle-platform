@@ -202,6 +202,9 @@ class PatientJourneyHarness {
   late final QueuedJourneyAppLock appLock;
 
   Future<void> pumpHome(WidgetTester tester) async {
+    if (tester.binding.lifecycleState != AppLifecycleState.resumed) {
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    }
     await tester.pumpWidget(
       buildPatientJourneyApp(
         home: PatientHomePage(
