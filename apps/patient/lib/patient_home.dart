@@ -14,15 +14,19 @@ import 'quick_log.dart';
 import 'timeline_view.dart';
 import 'vault_session.dart';
 
+DateTime _patientSystemNow() => DateTime.now();
+
 class PatientHomePage extends StatefulWidget {
   const PatientHomePage({
     required this.session,
     required this.appLock,
+    this.now = _patientSystemNow,
     super.key,
   });
 
   final PatientVaultSession session;
   final AppLockService appLock;
+  final DateTime Function() now;
 
   @override
   State<PatientHomePage> createState() => _PatientHomePageState();
@@ -147,7 +151,7 @@ class _PatientHomePageState extends State<PatientHomePage>
           heightFactor: 0.88,
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            child: MonthCalendar(events: _events),
+            child: MonthCalendar(events: _events, initialMonth: widget.now()),
           ),
         );
       },
@@ -165,7 +169,7 @@ class _PatientHomePageState extends State<PatientHomePage>
   }
 
   Future<void> _logSelection(QuickLogSelection selection) async {
-    final now = DateTime.now().toUtc();
+    final now = widget.now().toUtc();
     final event = HealthEvent(
       id: 'event-${now.microsecondsSinceEpoch}',
       subjectId: _subjectId,
@@ -270,7 +274,7 @@ class _PatientHomePageState extends State<PatientHomePage>
         ? strings.opening
         : strings.vaultSummary(_events.length, _vaultState.name);
     final timeline = CycleTimeline(_events);
-    final cycleDay = timeline.cycleDayFor(DateTime.now());
+    final cycleDay = timeline.cycleDayFor(widget.now());
 
     final content = Scaffold(
       appBar: AppBar(
