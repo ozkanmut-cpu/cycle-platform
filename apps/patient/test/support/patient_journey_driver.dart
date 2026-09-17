@@ -18,7 +18,7 @@ class PatientJourneyDriver {
   Future<void> lifecycle(AppLifecycleState state) async {
     tester.binding.handleAppLifecycleStateChanged(state);
     actionCount += 1;
-    await tester.pump();
+    await tester.pumpAndSettle();
   }
 
   void recordNavigation() => navigationCount += 1;

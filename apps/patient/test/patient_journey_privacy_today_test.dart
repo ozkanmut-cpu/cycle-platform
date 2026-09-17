@@ -13,7 +13,6 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
     final harness = PatientJourneyHarness(
       virtualNow: virtualNow,
       events: p005Events(virtualNow),
@@ -26,9 +25,13 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Unlock'), findsOneWidget);
-    expect(find.text('Headache').hitTestable(), findsNothing);
-    expect(find.bySemanticsLabel('Headache'), findsNothing);
-    expect(find.bySemanticsLabel('P-005-sensitive-headache'), findsNothing);
+    try {
+      expect(find.text('Headache').hitTestable(), findsNothing);
+      expect(find.bySemanticsLabel('Headache'), findsNothing);
+      expect(find.bySemanticsLabel('P-005-sensitive-headache'), findsNothing);
+    } finally {
+      semantics.dispose();
+    }
 
     final driver = PatientJourneyDriver(tester);
     await driver.tapText('Unlock');
