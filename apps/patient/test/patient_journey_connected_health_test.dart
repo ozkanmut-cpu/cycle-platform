@@ -95,15 +95,12 @@ void main() {
   testWidgets('suite normalizes all Connected Health states', (tester) async {
     final results = await runConnectedHealthJourneys(tester);
 
-    expect(
-      results.map((result) => result.scenario.id),
-      <String>[
-        'connected-health-observed-provenance-home',
-        'connected-health-missing-home',
-        'connected-health-conflicting-home',
-        'connected-health-stale-direct-widget',
-      ],
-    );
+    expect(results.map((result) => result.scenario.id), <String>[
+      'connected-health-observed-provenance-home',
+      'connected-health-missing-home',
+      'connected-health-conflicting-home',
+      'connected-health-stale-direct-widget',
+    ]);
     expect(results.expand((result) => result.findings), isEmpty);
   });
 }
