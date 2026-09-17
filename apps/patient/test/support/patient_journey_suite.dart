@@ -20,13 +20,20 @@ Future<PatientJourneyResult> runPrivacyUnlockRecoveryJourney(
   await harness.pumpHome(tester);
   final semantics = tester.ensureSemantics();
   final driver = PatientJourneyDriver(tester);
-  final privacyCoverVisible =
-      find.text('Authentication required').evaluate().isNotEmpty;
+  final privacyCoverVisible = find
+      .text('Authentication required')
+      .evaluate()
+      .isNotEmpty;
   final recoveryAffordanceVisible = find.text('Unlock').evaluate().isNotEmpty;
-  final privacyCoverBypassed =
-      find.text('Headache').hitTestable().evaluate().isNotEmpty;
-  final sensitiveMarkerVisible =
-      find.bySemanticsLabel('Headache').evaluate().isNotEmpty;
+  final privacyCoverBypassed = find
+      .text('Headache')
+      .hitTestable()
+      .evaluate()
+      .isNotEmpty;
+  final sensitiveMarkerVisible = find
+      .bySemanticsLabel('Headache')
+      .evaluate()
+      .isNotEmpty;
 
   await driver.tapText('Unlock');
   driver.recordRecovery();
@@ -100,12 +107,19 @@ Future<PatientJourneyResult> runPrivacyLifecycleRelockJourney(
   final driver = PatientJourneyDriver(tester);
 
   await driver.lifecycle(AppLifecycleState.paused);
-  final privacyCoverVisible =
-      find.text('Private data locked').evaluate().isNotEmpty;
-  final privacyCoverBypassed =
-      find.text('Headache').hitTestable().evaluate().isNotEmpty;
-  final sensitiveMarkerVisible =
-      find.bySemanticsLabel('Headache').evaluate().isNotEmpty;
+  final privacyCoverVisible = find
+      .text('Private data locked')
+      .evaluate()
+      .isNotEmpty;
+  final privacyCoverBypassed = find
+      .text('Headache')
+      .hitTestable()
+      .evaluate()
+      .isNotEmpty;
+  final sensitiveMarkerVisible = find
+      .bySemanticsLabel('Headache')
+      .evaluate()
+      .isNotEmpty;
   await driver.lifecycle(AppLifecycleState.resumed);
   final surfaceReached = find.text('Today').evaluate().isNotEmpty
       ? 'today'
@@ -174,8 +188,10 @@ Future<List<PatientJourneyResult>> runTodayComprehensionJourneys(
   await known.pumpHome(tester);
   final knownToday = find.text('Today').evaluate().isNotEmpty;
   final knownQuickLog = find.text('Quick Log').evaluate().isNotEmpty;
-  final knownConnectedHealth =
-      find.text('Connected Health').evaluate().isNotEmpty;
+  final knownConnectedHealth = find
+      .text('Connected Health')
+      .evaluate()
+      .isNotEmpty;
   final knownCycleDay = find.text('Cycle day 13').evaluate().isNotEmpty;
   results.add(
     detector.evaluate(
@@ -225,8 +241,7 @@ Future<List<PatientJourneyResult>> runTodayComprehensionJourneys(
     authenticationOutcomes: const <bool>[true],
   );
   await unknown.pumpHome(tester);
-  final unknownCycleDay =
-      find.text('Cycle day unknown').evaluate().isNotEmpty;
+  final unknownCycleDay = find.text('Cycle day unknown').evaluate().isNotEmpty;
   final cycleDayZero = find.textContaining('Cycle day 0').evaluate().isNotEmpty;
   results.add(
     detector.evaluate(
