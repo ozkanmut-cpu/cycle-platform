@@ -309,8 +309,7 @@ Future<PatientJourneyResult> runQuickLogPersistenceJourney(
       .where((event) => event.eventType == 'symptom.headache')
       .toList();
   final created = createdEvents.length == 1 ? createdEvents.single : null;
-  final repositoryEventDelta =
-      harness.repository.events.length - beforeCount;
+  final repositoryEventDelta = harness.repository.events.length - beforeCount;
   final persistenceMatched =
       repositoryEventDelta == 1 &&
       created?.id == 'event-${virtualNow.microsecondsSinceEpoch}' &&
@@ -333,11 +332,7 @@ Future<PatientJourneyResult> runQuickLogPersistenceJourney(
       fixtureId: 'P-001',
       locale: 'en',
       family: PatientJourneyFamily.quickLogPersistence,
-      actions: const <String>[
-        'launch-home',
-        'open-quick-log',
-        'log-headache',
-      ],
+      actions: const <String>['launch-home', 'open-quick-log', 'log-headache'],
       assertions: const <String>[
         'quick-log-persisted',
         'quick-log-audit-matched',

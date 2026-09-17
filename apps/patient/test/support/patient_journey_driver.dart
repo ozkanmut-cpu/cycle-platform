@@ -21,10 +21,7 @@ class PatientJourneyDriver {
     await tester.pumpAndSettle();
   }
 
-  Future<void> scrollUntilVisible(
-    Finder finder, {
-    double delta = 300,
-  }) async {
+  Future<void> scrollUntilVisible(Finder finder, {double delta = 300}) async {
     await tester.scrollUntilVisible(finder, delta);
     actionCount += 1;
     await tester.pumpAndSettle();
