@@ -30,6 +30,7 @@ void main() {
     );
     await harness.pumpHome(tester);
     await PatientJourneyDriver(tester).tapText('Connected Health');
+    await tester.scrollUntilVisible(find.text('SpO2'), 300);
 
     expect(find.text('SpO2'), findsOneWidget);
     expect(find.text('98.0 %'), findsOneWidget);
