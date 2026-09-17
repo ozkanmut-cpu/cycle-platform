@@ -351,5 +351,29 @@ void main() {
       final restored = PatientJourneyReport.fromJson(decoded);
       expect(canonicalPatientJourneyJson(restored), first);
     });
+
+    test('report fails when coverage counts are inconsistent', () {
+      final report = PatientJourneyReport(
+        schemaVersion: 1,
+        seed: _seed,
+        virtualNow: _virtualNow,
+        syntheticEvidenceOnly: true,
+        results: const <PatientJourneyResult>[],
+        findings: const <PatientJourneyFinding>[],
+        coverage: const PatientJourneyCoverage(
+          configured: 1,
+          evaluated: 0,
+          passed: 0,
+          failed: 0,
+          malformed: 0,
+          labels: <String, int>{},
+        ),
+        actionCount: 0,
+        navigationCount: 0,
+        recoveryCount: 0,
+      );
+
+      expect(report.passed, isFalse);
+    });
   });
 }
