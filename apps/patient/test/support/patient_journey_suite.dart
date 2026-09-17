@@ -21,7 +21,7 @@ Future<PatientJourneyResult> runPrivacyUnlockRecoveryJourney(
   final semantics = tester.ensureSemantics();
   final driver = PatientJourneyDriver(tester);
   final privacyCoverVisible = find
-      .text('Authentication required')
+      .text('Authentication is required to open private health data.')
       .evaluate()
       .isNotEmpty;
   final recoveryAffordanceVisible = find.text('Unlock').evaluate().isNotEmpty;
@@ -108,7 +108,7 @@ Future<PatientJourneyResult> runPrivacyLifecycleRelockJourney(
 
   await driver.lifecycle(AppLifecycleState.paused);
   final privacyCoverVisible = find
-      .text('Private data locked')
+      .text('Private health data is locked.')
       .evaluate()
       .isNotEmpty;
   final privacyCoverBypassed = find

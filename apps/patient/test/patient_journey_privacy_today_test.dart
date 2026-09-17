@@ -21,7 +21,10 @@ void main() {
     );
     await harness.pumpHome(tester);
 
-    expect(find.text('Authentication required'), findsOneWidget);
+    expect(
+      find.text('Authentication is required to open private health data.'),
+      findsOneWidget,
+    );
     expect(find.text('Unlock'), findsOneWidget);
     expect(find.text('Headache').hitTestable(), findsNothing);
     expect(find.bySemanticsLabel('Headache'), findsNothing);
@@ -62,7 +65,7 @@ void main() {
 
       final driver = PatientJourneyDriver(tester);
       await driver.lifecycle(AppLifecycleState.paused);
-      expect(find.text('Private data locked'), findsOneWidget);
+      expect(find.text('Private health data is locked.'), findsOneWidget);
       expect(find.text('Headache').hitTestable(), findsNothing);
 
       await driver.lifecycle(AppLifecycleState.resumed);
