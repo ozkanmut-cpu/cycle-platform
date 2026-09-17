@@ -12,6 +12,36 @@ import 'patient_journey_models.dart';
 
 const int _patientJourneySeed = 20260917;
 
+Future<PatientJourneyReport> runCanonicalPatientJourneySuite(
+  WidgetTester tester, {
+  int seed = _patientJourneySeed,
+}) async {
+  final results = <PatientJourneyResult>[];
+
+  results.add(await runPrivacyUnlockRecoveryJourney(tester));
+  await clearPatientJourneyWidgetTree(tester);
+
+  results.add(await runPrivacyLifecycleRelockJourney(tester));
+  await clearPatientJourneyWidgetTree(tester);
+
+  results.addAll(await runTodayComprehensionJourneys(tester));
+  await clearPatientJourneyWidgetTree(tester);
+
+  results.add(await runQuickLogPersistenceJourney(tester));
+  await clearPatientJourneyWidgetTree(tester);
+
+  results.add(await runTimelineCalendarRetrievalJourney(tester));
+  await clearPatientJourneyWidgetTree(tester);
+
+  results.addAll(await runConnectedHealthJourneys(tester));
+  await clearPatientJourneyWidgetTree(tester);
+
+  return PatientJourneyReportBuilder(
+    seed: seed,
+    virtualNow: DateTime.utc(2026, 9, 17, 9),
+  ).build(results: results);
+}
+
 Future<PatientJourneyResult> runPrivacyUnlockRecoveryJourney(
   WidgetTester tester,
 ) async {
