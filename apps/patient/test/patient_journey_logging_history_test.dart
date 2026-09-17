@@ -66,7 +66,9 @@ void main() {
       expect(find.text('Period started'), findsOneWidget);
       await driver.tapTooltip('Calendar');
       expect(find.text('2026-09'), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel('2026-9-5, 2 events'));
+      await tester.tap(
+        find.bySemanticsLabel(RegExp(r'^2026-9-5, 2 events')),
+      );
       await tester.pumpAndSettle();
       expect(find.text('05.09.2026'), findsOneWidget);
       expect(find.text('2 logged event(s)'), findsOneWidget);

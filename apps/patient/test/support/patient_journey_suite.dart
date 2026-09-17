@@ -391,7 +391,7 @@ Future<PatientJourneyResult> runTimelineCalendarRetrievalJourney(
   await driver.tapTooltip('Calendar');
   driver.recordNavigation();
   final monthVisible = find.text('2026-09').evaluate().isNotEmpty;
-  final eventDay = find.bySemanticsLabel('2026-9-5, 2 events');
+  final eventDay = find.bySemanticsLabel(RegExp(r'^2026-9-5, 2 events'));
   final eventDayVisible = eventDay.evaluate().isNotEmpty;
   if (eventDayVisible) {
     await tester.tap(eventDay);
