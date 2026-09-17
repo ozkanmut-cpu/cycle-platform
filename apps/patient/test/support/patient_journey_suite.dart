@@ -1,3 +1,5 @@
+import 'package:cycle_core_domain/cycle_core_domain.dart';
+import 'package:cycle_patient/connected_health_screen.dart';
 import 'package:cycle_patient/month_calendar.dart';
 import 'package:cycle_storage/cycle_storage.dart';
 import 'package:flutter/material.dart';
@@ -459,4 +461,257 @@ Future<PatientJourneyResult> runTimelineCalendarRetrievalJourney(
   );
   await clearPatientJourneyWidgetTree(tester);
   return result;
+}
+
+Future<List<PatientJourneyResult>> runConnectedHealthJourneys(
+  WidgetTester tester,
+) async {
+  final virtualNow = DateTime.utc(2026, 9, 17, 9);
+  final detector = PatientJourneyDetector();
+  final results = <PatientJourneyResult>[];
+
+  final observedHarness = PatientJourneyHarness(
+    virtualNow: virtualNow,
+    events: <HealthEvent>[
+      patientJourneyEvent(
+        id: 'P-002-observed-spo2-health-connect',
+        eventType: 'vital.oxygen_saturation',
+        observedAt: DateTime.utc(2026, 9, 17, 8),
+        value: 98,
+        unit: '%',
+        sourceKind: SourceKind.healthConnect,
+        privacyClass: 'health',
+      ),
+    ],
+    authenticationOutcomes: const <bool>[true],
+  );
+  await observedHarness.pumpHome(tester);
+  final observedDriver = PatientJourneyDriver(tester);
+  await observedDriver.tapText('Connected Health');
+  observedDriver.recordNavigation();
+  await observedDriver.scrollUntilVisible(find.text('SpO2'));
+  final observedMatched =
+      find.text('SpO2').evaluate().isNotEmpty &&
+      find.text('98.0 %').evaluate().isNotEmpty &&
+      find.textContaining('Observed · Health Connect').evaluate().isNotEmpty;
+  results.add(
+    detector.evaluate(
+      scenario: PatientJourneyScenario(
+        id: 'connected-health-observed-provenance-home',
+        schemaVersion: 1,
+        seed: _patientJourneySeed,
+        virtualNow: virtualNow,
+        fixtureId: 'P-002',
+        locale: 'en',
+        family: PatientJourneyFamily.connectedHealthStates,
+        actions: const <String>['launch-home', 'open-connected-health'],
+        assertions: const <String>[
+          'connected-health-observed-visible',
+          'connected-health-provenance-visible',
+        ],
+        riskTags: const <String>['connected-health', 'provenance'],
+      ),
+      observation: PatientJourneyObservation(
+        surfaceReached: observedMatched ? 'connected-health' : null,
+        satisfiedAssertions: <String>[
+          if (observedMatched) 'connected-health-observed-visible',
+          if (observedMatched) 'connected-health-provenance-visible',
+        ],
+        connectedHealthStateMatched: observedMatched,
+        connectedHealthStates: const <String>['observed', 'provenance'],
+        connectedHealthCoverageSource: 'home-route',
+        coreJourneyBlocked: !observedMatched,
+        actionCount: observedDriver.actionCount,
+        navigationCount: observedDriver.navigationCount,
+        recoveryCount: observedDriver.recoveryCount,
+      ),
+      coverageLabels: const <String>{
+        'family:connectedHealthStates',
+        'connected-health:observed-home',
+        'connected-health:provenance-home',
+        'fixture:P-002',
+        'control:positive',
+      },
+    ),
+  );
+
+  await clearPatientJourneyWidgetTree(tester);
+  final missingHarness = PatientJourneyHarness(
+    virtualNow: virtualNow,
+    events: const <HealthEvent>[],
+    authenticationOutcomes: const <bool>[true],
+  );
+  await missingHarness.pumpHome(tester);
+  final missingDriver = PatientJourneyDriver(tester);
+  await missingDriver.tapText('Connected Health');
+  missingDriver.recordNavigation();
+  final missingAsZero = find.text('0').evaluate().isNotEmpty;
+  final missingMatched =
+      find.text('No connected health data yet.').evaluate().isNotEmpty &&
+      !missingAsZero;
+  results.add(
+    detector.evaluate(
+      scenario: PatientJourneyScenario(
+        id: 'connected-health-missing-home',
+        schemaVersion: 1,
+        seed: _patientJourneySeed,
+        virtualNow: virtualNow,
+        fixtureId: 'P-002',
+        locale: 'en',
+        family: PatientJourneyFamily.connectedHealthStates,
+        actions: const <String>['launch-home', 'open-connected-health'],
+        assertions: const <String>[
+          'connected-health-missing-visible',
+          'connected-health-missing-not-zero',
+        ],
+        riskTags: const <String>['connected-health', 'missing-data'],
+      ),
+      observation: PatientJourneyObservation(
+        surfaceReached: missingMatched ? 'connected-health' : null,
+        satisfiedAssertions: <String>[
+          if (missingMatched) 'connected-health-missing-visible',
+          if (!missingAsZero) 'connected-health-missing-not-zero',
+        ],
+        missingDisplayedAsZero: missingAsZero,
+        connectedHealthStateMatched: missingMatched,
+        connectedHealthStates: const <String>['missing'],
+        connectedHealthCoverageSource: 'home-route',
+        coreJourneyBlocked: !missingMatched,
+        actionCount: missingDriver.actionCount,
+        navigationCount: missingDriver.navigationCount,
+        recoveryCount: missingDriver.recoveryCount,
+      ),
+      coverageLabels: const <String>{
+        'family:connectedHealthStates',
+        'connected-health:missing-home',
+        'fixture:P-002',
+        'control:negative',
+      },
+    ),
+  );
+
+  await clearPatientJourneyWidgetTree(tester);
+  final conflictingHarness = PatientJourneyHarness(
+    virtualNow: virtualNow,
+    events: p002Events(virtualNow),
+    authenticationOutcomes: const <bool>[true],
+  );
+  await conflictingHarness.pumpHome(tester);
+  final conflictingDriver = PatientJourneyDriver(tester);
+  await conflictingDriver.tapText('Connected Health');
+  conflictingDriver.recordNavigation();
+  await conflictingDriver.scrollUntilVisible(find.text('SpO2'));
+  final conflictDisplayedAsCertain = find.text('94.5 %').evaluate().isNotEmpty;
+  final conflictingMatched =
+      find.text('Sources conflict').evaluate().isNotEmpty &&
+      find
+          .textContaining('Health Connect + HealthKit')
+          .evaluate()
+          .isNotEmpty &&
+      !conflictDisplayedAsCertain &&
+      find.text('0').evaluate().isEmpty;
+  results.add(
+    detector.evaluate(
+      scenario: PatientJourneyScenario(
+        id: 'connected-health-conflicting-home',
+        schemaVersion: 1,
+        seed: _patientJourneySeed,
+        virtualNow: virtualNow,
+        fixtureId: 'P-002',
+        locale: 'en',
+        family: PatientJourneyFamily.connectedHealthStates,
+        actions: const <String>['launch-home', 'open-connected-health'],
+        assertions: const <String>[
+          'connected-health-conflict-visible',
+          'connected-health-conflict-not-certain',
+        ],
+        riskTags: const <String>['connected-health', 'conflict'],
+      ),
+      observation: PatientJourneyObservation(
+        surfaceReached: conflictingMatched ? 'connected-health' : null,
+        satisfiedAssertions: <String>[
+          if (conflictingMatched) 'connected-health-conflict-visible',
+          if (!conflictDisplayedAsCertain)
+            'connected-health-conflict-not-certain',
+        ],
+        conflictDisplayedAsCertain: conflictDisplayedAsCertain,
+        connectedHealthStateMatched: conflictingMatched,
+        connectedHealthStates: const <String>['conflicting'],
+        connectedHealthCoverageSource: 'home-route',
+        coreJourneyBlocked: !conflictingMatched,
+        actionCount: conflictingDriver.actionCount,
+        navigationCount: conflictingDriver.navigationCount,
+        recoveryCount: conflictingDriver.recoveryCount,
+      ),
+      coverageLabels: const <String>{
+        'family:connectedHealthStates',
+        'connected-health:conflicting-home',
+        'fixture:P-002',
+        'control:negative',
+      },
+    ),
+  );
+
+  await clearPatientJourneyWidgetTree(tester);
+  await tester.pumpWidget(
+    buildPatientJourneyApp(
+      home: const ConnectedHealthScreen(
+        viewModel: ConnectedHealthViewModel(
+          metrics: <ConnectedHealthMetricSummary>[
+            ConnectedHealthMetricSummary(
+              label: 'SpO2',
+              state: ConnectedHealthMetricState.stale,
+              sourceLabel: 'Health Connect',
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  final staleAsZero = find.text('0').evaluate().isNotEmpty;
+  final staleMatched =
+      find.text('Data stale').evaluate().isNotEmpty &&
+      find.textContaining('Health Connect').evaluate().isNotEmpty &&
+      !staleAsZero;
+  results.add(
+    detector.evaluate(
+      scenario: PatientJourneyScenario(
+        id: 'connected-health-stale-direct-widget',
+        schemaVersion: 1,
+        seed: _patientJourneySeed,
+        virtualNow: virtualNow,
+        fixtureId: 'P-002',
+        locale: 'en',
+        family: PatientJourneyFamily.connectedHealthStates,
+        actions: const <String>['pump-connected-health-screen'],
+        assertions: const <String>[
+          'connected-health-stale-visible',
+          'connected-health-stale-not-zero',
+        ],
+        riskTags: const <String>['connected-health', 'stale-data'],
+      ),
+      observation: PatientJourneyObservation(
+        surfaceReached: staleMatched ? 'connected-health' : null,
+        satisfiedAssertions: <String>[
+          if (staleMatched) 'connected-health-stale-visible',
+          if (!staleAsZero) 'connected-health-stale-not-zero',
+        ],
+        missingDisplayedAsZero: staleAsZero,
+        connectedHealthStateMatched: staleMatched,
+        connectedHealthStates: const <String>['stale'],
+        connectedHealthCoverageSource: 'direct-production-widget',
+        coreJourneyBlocked: !staleMatched,
+      ),
+      coverageLabels: const <String>{
+        'family:connectedHealthStates',
+        'connected-health:stale-direct-widget',
+        'fixture:P-002',
+        'control:negative',
+      },
+    ),
+  );
+
+  await clearPatientJourneyWidgetTree(tester);
+  return results;
 }
