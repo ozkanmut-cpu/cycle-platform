@@ -49,42 +49,45 @@ void main() {
     );
   });
 
-  testWidgets('lifecycle pause relocks and resume authenticates before restore', (
+  testWidgets(
+    'lifecycle pause relocks and resume authenticates before restore',
+    (tester) async {
+      final harness = PatientJourneyHarness(
+        virtualNow: virtualNow,
+        events: p005Events(virtualNow),
+        authenticationOutcomes: const <bool>[true, true],
+      );
+      await harness.pumpHome(tester);
+      expect(find.text('Headache'), findsOneWidget);
+
+      final driver = PatientJourneyDriver(tester);
+      await driver.lifecycle(AppLifecycleState.paused);
+      expect(find.text('Private data locked'), findsOneWidget);
+      expect(find.text('Headache').hitTestable(), findsNothing);
+
+      await driver.lifecycle(AppLifecycleState.resumed);
+      expect(harness.appLock.authenticateCalls, 2);
+      expect(find.text('Today'), findsOneWidget);
+      expect(find.text('Headache'), findsOneWidget);
+
+      await clearPatientJourneyWidgetTree(tester);
+      final result = await runPrivacyLifecycleRelockJourney(tester);
+      expect(result.scenario.id, 'privacy-lifecycle-relock');
+      expect(result.passed, isTrue);
+      expect(
+        result.coverageLabels,
+        containsAll(<String>[
+          'family:privacyLifecycleRelock',
+          'privacy:lifecycle-relock',
+          'privacy:locked-negative-assertion',
+        ]),
+      );
+    },
+  );
+
+  testWidgets('Today distinguishes known and unknown cycle day', (
     tester,
   ) async {
-    final harness = PatientJourneyHarness(
-      virtualNow: virtualNow,
-      events: p005Events(virtualNow),
-      authenticationOutcomes: const <bool>[true, true],
-    );
-    await harness.pumpHome(tester);
-    expect(find.text('Headache'), findsOneWidget);
-
-    final driver = PatientJourneyDriver(tester);
-    await driver.lifecycle(AppLifecycleState.paused);
-    expect(find.text('Private data locked'), findsOneWidget);
-    expect(find.text('Headache').hitTestable(), findsNothing);
-
-    await driver.lifecycle(AppLifecycleState.resumed);
-    expect(harness.appLock.authenticateCalls, 2);
-    expect(find.text('Today'), findsOneWidget);
-    expect(find.text('Headache'), findsOneWidget);
-
-    await clearPatientJourneyWidgetTree(tester);
-    final result = await runPrivacyLifecycleRelockJourney(tester);
-    expect(result.scenario.id, 'privacy-lifecycle-relock');
-    expect(result.passed, isTrue);
-    expect(
-      result.coverageLabels,
-      containsAll(<String>[
-        'family:privacyLifecycleRelock',
-        'privacy:lifecycle-relock',
-        'privacy:locked-negative-assertion',
-      ]),
-    );
-  });
-
-  testWidgets('Today distinguishes known and unknown cycle day', (tester) async {
     final known = PatientJourneyHarness(
       virtualNow: virtualNow,
       events: p001Events(virtualNow),
