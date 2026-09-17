@@ -67,9 +67,7 @@ class PatientJourneyScenario {
     'family': family.name,
     'actions': actions,
     'assertions': _sortedStrings(assertions),
-    'expectedRecoveryAffordances': _sortedStrings(
-      expectedRecoveryAffordances,
-    ),
+    'expectedRecoveryAffordances': _sortedStrings(expectedRecoveryAffordances),
     'riskTags': _sortedStrings(riskTags),
   };
 
@@ -195,11 +193,9 @@ class PatientJourneyObservation {
         privacyCoverBypassed: json['privacyCoverBypassed']! as bool,
         sensitiveMarkerVisible: json['sensitiveMarkerVisible']! as bool,
         missingDisplayedAsZero: json['missingDisplayedAsZero']! as bool,
-        conflictDisplayedAsCertain:
-            json['conflictDisplayedAsCertain']! as bool,
+        conflictDisplayedAsCertain: json['conflictDisplayedAsCertain']! as bool,
         coreJourneyBlocked: json['coreJourneyBlocked']! as bool,
-        recoveryAffordanceVisible:
-            json['recoveryAffordanceVisible'] as bool?,
+        recoveryAffordanceVisible: json['recoveryAffordanceVisible'] as bool?,
         persistenceMatched: json['persistenceMatched'] as bool?,
         auditMatched: json['auditMatched'] as bool?,
         connectedHealthStateMatched:
@@ -283,15 +279,13 @@ class PatientJourneyResult {
 
   factory PatientJourneyResult.fromJson(Map<String, Object?> json) =>
       PatientJourneyResult(
-        scenario: PatientJourneyScenario.fromJson(
-          _objectMap(json['scenario']),
-        ),
+        scenario: PatientJourneyScenario.fromJson(_objectMap(json['scenario'])),
         observation: PatientJourneyObservation.fromJson(
           _objectMap(json['observation']),
         ),
-        findings: _objectList(json['findings'])
-            .map(PatientJourneyFinding.fromJson)
-            .toList(),
+        findings: _objectList(
+          json['findings'],
+        ).map(PatientJourneyFinding.fromJson).toList(),
         coverageLabels: _stringList(json['coverageLabels']).toSet(),
       );
 }
@@ -449,9 +443,7 @@ class PatientJourneyReport {
         findings: _objectList(
           json['findings'],
         ).map(PatientJourneyFinding.fromJson).toList(),
-        coverage: PatientJourneyCoverage.fromJson(
-          _objectMap(json['coverage']),
-        ),
+        coverage: PatientJourneyCoverage.fromJson(_objectMap(json['coverage'])),
         actionCount: json['actionCount']! as int,
         navigationCount: json['navigationCount']! as int,
         recoveryCount: json['recoveryCount']! as int,
@@ -491,8 +483,7 @@ class PatientJourneyDetector {
         reasonCode: 'privacy_cover_bypassed',
       );
     }
-    if (observation.privacyCoverVisible &&
-        observation.sensitiveMarkerVisible) {
+    if (observation.privacyCoverVisible && observation.sensitiveMarkerVisible) {
       add(
         category: 'sensitive_content_exposed_while_locked',
         severity: PatientJourneySeverity.s4,
@@ -522,8 +513,7 @@ class PatientJourneyDetector {
         category: 'core_journey_blocked',
         severity: PatientJourneySeverity.s3,
         assertionId: 'core-journey-complete',
-        reasonCode:
-            observation.executionFailureCode ?? 'core_journey_blocked',
+        reasonCode: observation.executionFailureCode ?? 'core_journey_blocked',
       );
     }
     if (observation.recoveryAffordanceVisible == false) {
@@ -618,13 +608,12 @@ class PatientJourneyReportBuilder {
       }
     }
 
-    final findings = sortedResults
-        .expand((result) => result.findings)
-        .toList();
-    final missingLabels = PatientJourneyCoverage.mandatoryLabels
-        .where((label) => !labelCounts.containsKey(label))
-        .toList()
-      ..sort();
+    final findings = sortedResults.expand((result) => result.findings).toList();
+    final missingLabels =
+        PatientJourneyCoverage.mandatoryLabels
+            .where((label) => !labelCounts.containsKey(label))
+            .toList()
+          ..sort();
     for (final label in missingLabels) {
       findings.add(
         PatientJourneyFinding(
@@ -744,9 +733,7 @@ List<String> _stringList(Object? value) =>
 List<Map<String, Object?>> _objectList(Object? value) =>
     (value! as List<Object?>)
         .map(
-          (entry) => Map<String, Object?>.from(
-            entry! as Map<Object?, Object?>,
-          ),
+          (entry) => Map<String, Object?>.from(entry! as Map<Object?, Object?>),
         )
         .toList();
 
