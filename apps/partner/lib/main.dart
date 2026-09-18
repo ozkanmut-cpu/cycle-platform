@@ -1,6 +1,9 @@
 import 'package:cycle_sharing/cycle_sharing.dart';
 import 'package:flutter/material.dart';
 
+import 'notification_privacy_preview.dart';
+import 'partner_session.dart';
+
 void main() {
   runApp(const CyclePartnerApp());
 }
@@ -11,11 +14,13 @@ class CyclePartnerApp extends StatelessWidget {
     this.experienceInput,
     this.homeModel,
     this.coordinator = const PartnerExperienceCoordinator(),
+    this.sessionController,
   });
 
   final PartnerExperienceInput? experienceInput;
   final RelationshipHomeModel? homeModel;
   final PartnerExperienceCoordinator coordinator;
+  final PartnerSessionController? sessionController;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +32,7 @@ class CyclePartnerApp extends StatelessWidget {
         experienceInput: experienceInput,
         homeModel: homeModel,
         coordinator: coordinator,
+        sessionController: sessionController,
       ),
     );
   }
@@ -38,11 +44,13 @@ class PartnerHomePage extends StatefulWidget {
     this.experienceInput,
     this.homeModel,
     this.coordinator = const PartnerExperienceCoordinator(),
+    this.sessionController,
   });
 
   final PartnerExperienceInput? experienceInput;
   final RelationshipHomeModel? homeModel;
   final PartnerExperienceCoordinator coordinator;
+  final PartnerSessionController? sessionController;
 
   @override
   State<PartnerHomePage> createState() => _PartnerHomePageState();
@@ -50,8 +58,44 @@ class PartnerHomePage extends StatefulWidget {
 
 class _PartnerHomePageState extends State<PartnerHomePage> {
   int _selectedIndex = 0;
-  bool _paired = false;
-  NotificationPrivacyMode _privacyMode = NotificationPrivacyMode.generic;
+  late PartnerSessionController _sessionController;
+  late bool _ownsSessionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _attachSessionController(widget.sessionController);
+  }
+
+  @override
+  void didUpdateWidget(covariant PartnerHomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sessionController != widget.sessionController) {
+      _detachSessionController();
+      _attachSessionController(widget.sessionController);
+    }
+  }
+
+  @override
+  void dispose() {
+    _detachSessionController();
+    super.dispose();
+  }
+
+  void _attachSessionController(PartnerSessionController? controller) {
+    _ownsSessionController = controller == null;
+    _sessionController = controller ?? _productionSessionController();
+    _sessionController.addListener(_onSessionChanged);
+  }
+
+  void _detachSessionController() {
+    _sessionController.removeListener(_onSessionChanged);
+    if (_ownsSessionController) _sessionController.dispose();
+  }
+
+  void _onSessionChanged() {
+    if (mounted) setState(() {});
+  }
 
   RelationshipHomeModel get _model {
     final input = widget.experienceInput;
@@ -61,8 +105,11 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final session = _sessionController.state;
     final tab = RelationshipHomeTab.values[_selectedIndex];
-    final cards = _model.cardsFor(tab).where(_partnerVisibleCard).toList();
+    final cards = session.paired
+        ? _model.cardsFor(tab).where(_partnerVisibleCard).toList()
+        : <RelationshipHomeCard>[];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cycle Partner'),
@@ -77,8 +124,11 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           children: [
-            if (!_paired) ...[
-              _PairingBanner(onPair: () => setState(() => _paired = true)),
+            if (!session.paired) ...[
+              _PairingBanner(
+                errorMessage: _pairingRecoveryMessage(session.errorCode),
+                onPair: () async => _sessionController.pair(),
+              ),
               const SizedBox(height: 16),
             ],
             Text(
@@ -95,12 +145,20 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
             if (tab == RelationshipHomeTab.us) ...[
               const SizedBox(height: 8),
               _SharingControls(
-                paired: _paired,
-                privacyMode: _privacyMode,
-                onPrivacyChanged: (mode) => setState(() => _privacyMode = mode),
-                onDisconnect:
-                    _paired ? () => setState(() => _paired = false) : null,
+                paired: session.paired,
+                privacyMode: session.privacyMode,
+                onPrivacyChanged: _sessionController.setPrivacyMode,
+                onPreview: session.paired
+                    ? _sessionController.previewNotification
+                    : null,
+                onDisconnect: session.paired
+                    ? () async => _sessionController.disconnect()
+                    : null,
               ),
+              if (session.preview != null) ...[
+                const SizedBox(height: 8),
+                NotificationPrivacyPreview(notification: session.preview!),
+              ],
             ],
           ],
         ),
@@ -127,9 +185,10 @@ class _PartnerHomePageState extends State<PartnerHomePage> {
 }
 
 class _PairingBanner extends StatelessWidget {
-  const _PairingBanner({required this.onPair});
+  const _PairingBanner({required this.onPair, this.errorMessage});
 
   final VoidCallback onPair;
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -146,6 +205,10 @@ class _PairingBanner extends StatelessWidget {
               const Text(
                 'Scan a time-limited pairing QR. Only explicitly shared information can appear here.',
               ),
+              if (errorMessage != null) ...[
+                const SizedBox(height: 8),
+                Text(errorMessage!),
+              ],
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: onPair,
@@ -204,12 +267,14 @@ class _SharingControls extends StatelessWidget {
     required this.paired,
     required this.privacyMode,
     required this.onPrivacyChanged,
+    this.onPreview,
     this.onDisconnect,
   });
 
   final bool paired;
   final NotificationPrivacyMode privacyMode;
   final ValueChanged<NotificationPrivacyMode> onPrivacyChanged;
+  final VoidCallback? onPreview;
   final VoidCallback? onDisconnect;
 
   @override
@@ -249,12 +314,18 @@ class _SharingControls extends StatelessWidget {
                   if (mode != null) onPrivacyChanged(mode);
                 },
               ),
-              if (paired)
+              if (paired) ...[
+                TextButton.icon(
+                  onPressed: onPreview,
+                  icon: const Icon(Icons.notifications_outlined),
+                  label: const Text('Preview notification'),
+                ),
                 TextButton.icon(
                   onPressed: onDisconnect,
                   icon: const Icon(Icons.link_off),
-                  label: const Text('Disconnect demo'),
+                  label: const Text('Disconnect'),
                 ),
+              ],
             ],
           ),
         ),
@@ -328,6 +399,40 @@ String _privacyLabel(NotificationPrivacyMode mode) => switch (mode) {
       NotificationPrivacyMode.categoryOnly => 'Category only',
       NotificationPrivacyMode.detailedWhenUnlocked => 'Detailed when unlocked',
     };
+
+String? _pairingRecoveryMessage(String? errorCode) => switch (errorCode) {
+      pairingUnavailable =>
+        'Pairing scanner is unavailable. Try again when scanning is available.',
+      pairingMalformed =>
+        'That pairing QR could not be read. Try scanning it again.',
+      pairingExpired => 'That pairing QR has expired. Ask for a new code.',
+      pairingUnsupportedVersion =>
+        'This pairing QR is not supported. Update Cycle and try again.',
+      pairingScopeMismatch =>
+        'That pairing QR is for a different relationship. Try another code.',
+      _ => null,
+    };
+
+PartnerSessionController _productionSessionController() =>
+    PartnerSessionController(
+      ownerId: 'unavailable-owner',
+      recipientId: 'unavailable-recipient',
+      payloadSource: const UnavailablePairingPayloadSource(),
+      revocationGrant: null,
+      keyRotator: const _UnavailableRecipientKeyRotator(),
+    );
+
+class _UnavailableRecipientKeyRotator implements RecipientKeyRotator {
+  const _UnavailableRecipientKeyRotator();
+
+  @override
+  Future<String> rotate({
+    required String ownerId,
+    required String recipientId,
+    required DateTime at,
+  }) =>
+      throw StateError('Recipient key rotation is unavailable before pairing.');
+}
 
 bool _partnerVisibleCard(RelationshipHomeCard card) {
   if (card.kind != RelationshipHomeCardKind.memory &&
