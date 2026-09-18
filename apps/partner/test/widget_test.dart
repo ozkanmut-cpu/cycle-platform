@@ -276,7 +276,8 @@ void main() {
     expect(find.text('No shared health details to show'), findsOneWidget);
   });
 
-  testWidgets('pairing, malformed retry, and disconnect update card visibility', (
+  testWidgets('pairing, malformed retry, and disconnect update card visibility',
+      (
     tester,
   ) async {
     final malformed = _sessionController(payload: 'not-a-pairing-payload');
