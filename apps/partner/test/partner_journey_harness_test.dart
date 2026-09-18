@@ -40,7 +40,10 @@ void main() {
       );
       expect(
         fixture.keyRegistry
-            .activeFor(ownerId: fixture.ownerId, recipientId: fixture.recipientId)!
+            .activeFor(
+              ownerId: fixture.ownerId,
+              recipientId: fixture.recipientId,
+            )!
             .version,
         1,
       );
@@ -75,14 +78,18 @@ void main() {
       <String>['SYNTHETIC_PRIVATE_MARKER_RP_005'],
     );
     expect(
-      rp001Fixture().experienceInput.grants
+      rp001Fixture()
+          .experienceInput
+          .grants
           .where((grant) => grant.category == 'health.energy')
           .single
           .visibility,
       RelationshipVisibility.fullyShared,
     );
     expect(
-      rp002Fixture().experienceInput.grants
+      rp002Fixture()
+          .experienceInput
+          .grants
           .where((grant) => grant.category == 'health.energy')
           .single
           .visibility,
@@ -110,7 +117,8 @@ void main() {
       visibleAssertions: const <String, String>{
         'home:shared-health': 'Shared Health',
         'safety:read-only': 'Read-only',
-        'visibility:fully-shared': 'health.energy: SYNTHETIC_SHARED_MARKER_RP_001',
+        'visibility:fully-shared':
+            'health.energy: SYNTHETIC_SHARED_MARKER_RP_001',
       },
       forbiddenMarkers: const <String, String>{
         'private-detail-hidden': 'SYNTHETIC_PRIVATE_MARKER_RP_001',
@@ -160,33 +168,34 @@ void main() {
     );
   });
 
-  testWidgets('RP-005 disconnect rotates the recipient key from version one to two', (
-    tester,
-  ) async {
-    final harness = PartnerJourneyHarness(
-      tester: tester,
-      fixture: rp005Fixture(),
-    );
-    addTearDown(harness.cleanup);
+  testWidgets(
+    'RP-005 disconnect rotates the recipient key from version one to two',
+    (tester) async {
+      final harness = PartnerJourneyHarness(
+        tester: tester,
+        fixture: rp005Fixture(),
+      );
+      addTearDown(harness.cleanup);
 
-    await harness.pump();
-    await harness.pair();
-    await harness.tapTab('Us');
-    await harness.disconnect();
+      await harness.pump();
+      await harness.pair();
+      await harness.tapTab('Us');
+      await harness.disconnect();
 
-    final observation = harness.observe(
-      visibleAssertions: const <String, String>{
-        'recovery:pairing': 'Scan pairing QR',
-      },
-      forbiddenMarkers: const <String, String>{
-        'revoked-private-hidden': 'SYNTHETIC_PRIVATE_MARKER_RP_005',
-      },
-    );
+      final observation = harness.observe(
+        visibleAssertions: const <String, String>{
+          'recovery:pairing': 'Scan pairing QR',
+        },
+        forbiddenMarkers: const <String, String>{
+          'revoked-private-hidden': 'SYNTHETIC_PRIVATE_MARKER_RP_005',
+        },
+      );
 
-    expect(observation.recipientKeyVersionBefore, 1);
-    expect(observation.recipientKeyVersionAfter, 2);
-    expect(observation.notificationStopped, isTrue);
-    expect(observation.pairedAfterAction, isFalse);
-    expect(observation.recoveryCount, 1);
-  });
+      expect(observation.recipientKeyVersionBefore, 1);
+      expect(observation.recipientKeyVersionAfter, 2);
+      expect(observation.notificationStopped, isTrue);
+      expect(observation.pairedAfterAction, isFalse);
+      expect(observation.recoveryCount, 1);
+    },
+  );
 }
