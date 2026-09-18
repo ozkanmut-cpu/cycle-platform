@@ -221,6 +221,41 @@ void main() {
   });
 
   test(
+    'disconnect revokes a validated relationship after a failed re-pair',
+    () async {
+      final registry = keyRegistry();
+      final controller = controllerFor(
+        source: _QueuePayloadSource(<String?>[
+          invitationPayload(),
+          'not-a-valid-pairing-payload',
+        ]),
+        registry: registry,
+      );
+
+      await controller.pair();
+      expect(controller.state.paired, isTrue);
+
+      await controller.pair();
+      expect(controller.state.paired, isFalse);
+      expect(controller.state.errorCode, 'pairing_malformed');
+      expect(registry.all(), hasLength(1));
+
+      await controller.disconnect();
+
+      expect(controller.state.paired, isFalse);
+      expect(controller.state.notificationsStopped, isTrue);
+      expect(
+        registry.all().map((state) => state.version),
+        containsAll(<int>[1, 2]),
+      );
+      expect(
+        registry.activeFor(ownerId: ownerId, recipientId: recipientId)!.version,
+        2,
+      );
+    },
+  );
+
+  test(
     'pairing rejects cross-relationship dependencies without side effects',
     () async {
       final cases = <({
