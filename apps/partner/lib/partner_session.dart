@@ -83,6 +83,7 @@ class PartnerSessionController extends ChangeNotifier {
   final PartnerNow _now;
 
   PartnerSessionState _state = const PartnerSessionState();
+  bool _hasValidatedRelationship = false;
 
   PartnerSessionState get state => _state;
 
@@ -109,6 +110,7 @@ class PartnerSessionController extends ChangeNotifier {
       return;
     }
 
+    _hasValidatedRelationship = true;
     _state = PartnerSessionState(
       paired: true,
       invitation: invitation,
@@ -167,7 +169,7 @@ class PartnerSessionController extends ChangeNotifier {
   }
 
   Future<void> disconnect() async {
-    if (!_state.paired) return;
+    if (!_hasValidatedRelationship) return;
 
     final grant = _revocationGrant;
     final result = grant == null
@@ -177,6 +179,7 @@ class PartnerSessionController extends ChangeNotifier {
             keyRotator: _keyRotator,
             at: _now().toUtc(),
           );
+    _hasValidatedRelationship = false;
     _state = PartnerSessionState(
       privacyMode: _state.privacyMode,
       deviceUnlocked: _state.deviceUnlocked,
