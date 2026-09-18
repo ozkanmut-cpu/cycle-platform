@@ -44,8 +44,7 @@ PartnerJourneyResult _result(
           coverageLabels ?? const <String>{'home:now', 'control:positive'},
     );
 
-List<PartnerJourneyResult> _completeCoverageResults() =>
-    <PartnerJourneyResult>[
+List<PartnerJourneyResult> _completeCoverageResults() => <PartnerJourneyResult>[
       _result(
         'pairing',
         family: PartnerJourneyFamily.pairingLifecycle,
@@ -225,7 +224,8 @@ void main() {
       cards.add('card-b');
 
       expect(jsonEncode(observation.toJson()), before);
-      expect(() => observation.visibleAssertionIds.add('x'), throwsUnsupportedError);
+      expect(() => observation.visibleAssertionIds.add('x'),
+          throwsUnsupportedError);
       expect(
         () => observation.forbiddenMarkerAbsenceAssertionIds.add('x'),
         throwsUnsupportedError,
@@ -262,16 +262,17 @@ void main() {
 
     test('finding rejects hostile noncanonical diagnostics', () {
       PartnerJourneyFinding finding(Object? value) => PartnerJourneyFinding(
-        category: 'production_ui_mismatch',
-        severity: PartnerJourneySeverity.s3,
-        journeyId: 'journey-a',
-        assertionId: 'home-visible',
-        reasonCode: 'production_ui_mismatch',
-        diagnostics: <String, Object?>{'detail': value},
-      );
+            category: 'production_ui_mismatch',
+            severity: PartnerJourneySeverity.s3,
+            journeyId: 'journey-a',
+            assertionId: 'home-visible',
+            reasonCode: 'production_ui_mismatch',
+            diagnostics: <String, Object?>{'detail': value},
+          );
 
       expect(() => finding('/tmp/host/secret'), throwsArgumentError);
-      expect(() => finding(StateError('framework exception')), throwsArgumentError);
+      expect(() => finding(StateError('framework exception')),
+          throwsArgumentError);
       expect(() => finding(Object()), throwsArgumentError);
       expect(
         () => finding('550e8400-e29b-41d4-a716-446655440000'),
@@ -451,7 +452,8 @@ void main() {
       expect(result.findings.single.category, 'assertion_missing');
       expect(result.findings.single.severity, PartnerJourneySeverity.s3);
       expect(result.findings.single.assertionId, 'read-only-visible');
-      expect(result.findings.single.reasonCode, 'assertion_missing:read-only-visible');
+      expect(result.findings.single.reasonCode,
+          'assertion_missing:read-only-visible');
     });
 
     test('S3 fallback findings are suppressed by an S4 exposure', () {
