@@ -310,7 +310,10 @@ void main() {
 
     await tester.tap(find.text('Us'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Disconnect'));
+    final disconnectButton = find.widgetWithText(TextButton, 'Disconnect');
+    await tester.ensureVisible(disconnectButton);
+    await tester.pumpAndSettle();
+    await tester.tap(disconnectButton);
     await tester.pumpAndSettle();
     await tester.tap(_navigationLabel('Shared Health'));
     await tester.pumpAndSettle();
@@ -358,6 +361,7 @@ void main() {
       'Preview notification',
     );
     await tester.ensureVisible(previewButton);
+    await tester.pumpAndSettle();
     await tester.tap(previewButton);
     await tester.pumpAndSettle();
 
