@@ -1,3 +1,4 @@
+import 'package:cycle_permissions/cycle_permissions.dart';
 import 'package:cycle_sharing/cycle_sharing.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,30 +24,66 @@ void main() {
       expect(fixture.experienceInput.ownerId, fixture.ownerId);
       expect(fixture.experienceInput.partnerId, fixture.recipientId);
       expect(fixture.experienceInput.at, fixture.virtualNow);
+      for (final grant in fixture.experienceInput.grants) {
+        expect(grant.ownerId, fixture.ownerId);
+        expect(grant.recipientId, fixture.recipientId);
+        expect(grant.createdAt, DateTime.utc(2026, 9, 17, 9));
+        expect(grant.isActiveAt(fixture.virtualNow), isTrue);
+      }
       expect(fixture.revocationGrant.id, 'permission-${fixture.id}');
       expect(fixture.revocationGrant.ownerId, fixture.ownerId);
       expect(fixture.revocationGrant.recipientId, fixture.recipientId);
+      expect(
+        fixture.revocationGrant.recipientKind,
+        RecipientKind.partner,
+      );
+      expect(
+        fixture.revocationGrant.actions,
+        const <PermissionAction>{
+          PermissionAction.view,
+          PermissionAction.notify,
+        },
+      );
+      expect(
+        fixture.revocationGrant.scope.categories,
+        const <String>{'cycle', 'health.energy'},
+      );
       expect(fixture.revocationGrant.isActiveAt(fixture.virtualNow), isTrue);
       expect(fixture.notificationRequest.ownerId, fixture.ownerId);
       expect(fixture.notificationRequest.recipientId, fixture.recipientId);
+      expect(fixture.notificationRequest.category, 'cycle');
+      expect(fixture.notificationRequest.categoryLabel, 'Cycle');
+      expect(
+        fixture.notificationRequest.detail,
+        'SYNTHETIC_PRIVATE_MARKER_${fixture.id.replaceAll('-', '_')}',
+      );
       expect(fixture.notificationRequest.at, fixture.virtualNow);
       expect(
-        fixture.notificationGrants.map((grant) => grant.ownerId),
-        everyElement(fixture.ownerId),
+        fixture.notificationGrants,
+        hasLength(1),
       );
+      final notificationGrant = fixture.notificationGrants.single;
+      expect(notificationGrant.id, 'notify-cycle-${fixture.id}');
+      expect(notificationGrant.ownerId, fixture.ownerId);
+      expect(notificationGrant.recipientId, fixture.recipientId);
+      expect(notificationGrant.category, 'cycle');
       expect(
-        fixture.notificationGrants.map((grant) => grant.recipientId),
-        everyElement(fixture.recipientId),
+        notificationGrant.capabilities,
+        const <RelationshipCapability>{RelationshipCapability.notify},
       );
-      expect(
-        fixture.keyRegistry
-            .activeFor(
-              ownerId: fixture.ownerId,
-              recipientId: fixture.recipientId,
-            )!
-            .version,
-        1,
+      expect(notificationGrant.visibility, RelationshipVisibility.private);
+      expect(notificationGrant.isActiveAt(fixture.virtualNow), isTrue);
+      final initialKey = fixture.keyRegistry.activeFor(
+        ownerId: fixture.ownerId,
+        recipientId: fixture.recipientId,
       );
+      expect(initialKey, isNotNull);
+      expect(initialKey!.ownerId, fixture.ownerId);
+      expect(initialKey.recipientId, fixture.recipientId);
+      expect(initialKey.keyEnvelopeId, 'envelope-${fixture.id}-v1');
+      expect(initialKey.version, 1);
+      expect(initialKey.createdAt, DateTime.utc(2026, 9, 17, 9));
+      expect(fixture.invitationPayloads, hasLength(1));
 
       final invitation = const PairingQrCodec().decode(
         fixture.invitationPayloads.single!,
@@ -127,6 +164,7 @@ void main() {
 
     expect(observation.surfaceReached, 'Shared Health');
     expect(observation.pairedAfterAction, isTrue);
+    expect(observation.cardSummaries, <String>['Shared health']);
     expect(observation.visibleAssertionIds, <String>[
       'home:shared-health',
       'safety:read-only',
