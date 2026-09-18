@@ -132,6 +132,19 @@ void main() {
           .visibility,
       RelationshipVisibility.abstractShared,
     );
+    final rp005HealthEntry = rp005Fixture()
+        .experienceInput
+        .sharedHealthEntries
+        .single;
+    expect(rp005HealthEntry.category, 'health.energy');
+    expect(
+      rp005HealthEntry.visibility,
+      RelationshipVisibility.private,
+    );
+    expect(
+      rp005HealthEntry.value,
+      'SYNTHETIC_PRIVATE_MARKER_RP_005',
+    );
     expect(
       rp005Fixture()
           .experienceInput
@@ -152,9 +165,18 @@ void main() {
 
     await harness.pump();
     await harness.pair();
+    final reachedSurfaces = <String>[];
     for (final tab in <String>['Now', 'Us', 'Surprise', 'Shared Health']) {
       await harness.tapTab(tab);
+      final observation = harness.observe();
+      reachedSurfaces.add(observation.surfaceReached!);
     }
+    expect(reachedSurfaces, <String>[
+      'Now',
+      'Us',
+      'Surprise',
+      'Shared Health',
+    ]);
 
     final observation = harness.observe(
       visibleAssertions: const <String, String>{
@@ -170,7 +192,10 @@ void main() {
 
     expect(observation.surfaceReached, 'Shared Health');
     expect(observation.pairedAfterAction, isTrue);
-    expect(observation.cardSummaries, <String>['Shared health']);
+    expect(
+      observation.cardSummaries,
+      <String>['sharedHealth|health.energy|fullyShared'],
+    );
     expect(observation.visibleAssertionIds, <String>[
       'home:shared-health',
       'safety:read-only',
@@ -207,6 +232,10 @@ void main() {
 
     expect(observation.pairedAfterAction, isTrue);
     expect(
+      observation.cardSummaries,
+      <String>['sharedHealth|health.energy|abstractShared'],
+    );
+    expect(
       observation.forbiddenMarkerAbsenceAssertionIds,
       <String>['abstract-detail-hidden'],
     );
@@ -224,6 +253,17 @@ void main() {
       await harness.pump();
       await harness.pair();
       await harness.tapTab('Us');
+      await harness.previewNotification();
+
+      final beforeDisconnect = harness.observe(
+        forbiddenMarkers: const <String, String>{
+          'private-health-hidden-before-disconnect':
+              'SYNTHETIC_PRIVATE_MARKER_RP_005',
+        },
+      );
+      expect(beforeDisconnect.pairedAfterAction, isTrue);
+      expect(beforeDisconnect.notificationPreviewClass, 'redacted');
+
       await harness.disconnect();
 
       final observation = harness.observe(
@@ -239,6 +279,7 @@ void main() {
       expect(observation.recipientKeyVersionAfter, 2);
       expect(observation.notificationStopped, isTrue);
       expect(observation.pairedAfterAction, isFalse);
+      expect(observation.notificationPreviewClass, isNull);
       expect(observation.recoveryCount, 1);
     },
   );
