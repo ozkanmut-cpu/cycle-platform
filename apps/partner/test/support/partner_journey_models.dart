@@ -383,7 +383,7 @@ class PartnerJourneyCoverage {
     required this.malformed,
     required Map<String, int> labels,
   }) : labels = Map<String, int>.unmodifiable(
-         SplayTreeMap<String, int>.from(labels)) {
+           SplayTreeMap<String, int>.from(labels)) {
     _requireNonnegative('configured', configured);
     _requireNonnegative('evaluated', evaluated);
     _requireNonnegative('passed', passed);
