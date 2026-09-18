@@ -132,10 +132,8 @@ void main() {
           .visibility,
       RelationshipVisibility.abstractShared,
     );
-    final rp005HealthEntry = rp005Fixture()
-        .experienceInput
-        .sharedHealthEntries
-        .single;
+    final rp005HealthEntry =
+        rp005Fixture().experienceInput.sharedHealthEntries.single;
     expect(rp005HealthEntry.category, 'health.energy');
     expect(
       rp005HealthEntry.visibility,
