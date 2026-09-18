@@ -289,7 +289,7 @@ void main() {
     );
     await tester.tap(find.text('Scan pairing QR'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Shared Health'));
+    await tester.tap(_navigationLabel('Shared Health'));
     await tester.pumpAndSettle();
     expect(find.text('health.energy: steady'), findsNothing);
     expect(
@@ -304,7 +304,7 @@ void main() {
         sessionController: paired,
       ),
     );
-    await tester.tap(find.text('Shared Health'));
+    await tester.tap(_navigationLabel('Shared Health'));
     await tester.pumpAndSettle();
     expect(find.text('health.energy: steady'), findsOneWidget);
 
@@ -312,7 +312,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Disconnect'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Shared Health'));
+    await tester.tap(_navigationLabel('Shared Health'));
     await tester.pumpAndSettle();
     expect(find.text('health.energy: steady'), findsNothing);
   });
@@ -353,7 +353,12 @@ void main() {
     await tester.tap(find.text('Us'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Preview notification'));
+    final previewButton = find.widgetWithText(
+      TextButton,
+      'Preview notification',
+    );
+    await tester.ensureVisible(previewButton);
+    await tester.tap(previewButton);
     await tester.pumpAndSettle();
 
     expect(find.text('Cycle'), findsOneWidget);
@@ -411,3 +416,8 @@ class _SinglePayloadSource implements PairingPayloadSource {
   @override
   Future<String?> acquire() async => payload;
 }
+
+Finder _navigationLabel(String label) => find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text(label),
+    );
