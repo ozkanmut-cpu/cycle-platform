@@ -667,6 +667,7 @@ class PartnerJourneyDetector {
         assertion: 'consent-not-inferred',
       ),
     ];
+    var hasS4 = false;
     for (final finding in s4.where((finding) => finding.active)) {
       add(
         finding.category,
@@ -674,9 +675,9 @@ class PartnerJourneyDetector {
         finding.assertion,
         finding.category,
       );
+      hasS4 = true;
     }
 
-    final hasS4 = findings.isNotEmpty;
     final s3 = <({bool active, String category, String assertion})>[
       (
         active: observation.coreJourneyBlocked ||
