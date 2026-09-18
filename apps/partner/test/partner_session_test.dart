@@ -26,16 +26,52 @@ void main() {
         ),
       );
 
-  PermissionGrant revocationGrant() => PermissionGrant(
+  PermissionGrant revocationGrant({
+    String owner = ownerId,
+    String recipient = recipientId,
+    DateTime? revokedAt,
+  }) =>
+      PermissionGrant(
         id: 'permission-RP-001',
-        ownerId: ownerId,
-        recipientId: recipientId,
+        ownerId: owner,
+        recipientId: recipient,
         recipientKind: RecipientKind.partner,
         actions: const <PermissionAction>{
           PermissionAction.view,
           PermissionAction.notify,
         },
         scope: const PermissionScope(categories: <String>{'cycle'}),
+        createdAt: now.subtract(const Duration(days: 1)),
+        revokedAt: revokedAt,
+      );
+
+  RelationshipNotificationRequest notificationRequest({
+    String owner = ownerId,
+    String recipient = recipientId,
+  }) =>
+      RelationshipNotificationRequest(
+        ownerId: owner,
+        recipientId: recipient,
+        category: 'cycle',
+        categoryLabel: 'Cycle',
+        detail: 'SYNTHETIC_PRIVATE_DETAIL_RP_001',
+        kind: RelationshipNotificationKind.relationship,
+        at: now,
+      );
+
+  RelationshipCategoryGrant notificationGrant({
+    String owner = ownerId,
+    String recipient = recipientId,
+  }) =>
+      RelationshipCategoryGrant(
+        id: 'notify-RP-001',
+        ownerId: owner,
+        recipientId: recipient,
+        category: 'cycle',
+        capabilities: const <RelationshipCapability>{
+          RelationshipCapability.notify,
+        },
+        visibility: RelationshipVisibility.private,
         createdAt: now.subtract(const Duration(days: 1)),
       );
 
@@ -54,6 +90,7 @@ void main() {
   PartnerSessionController controllerFor({
     required PairingPayloadSource source,
     RecipientKeyRegistry? registry,
+    PermissionGrant? configuredRevocationGrant,
     Iterable<RelationshipCategoryGrant> notificationGrants = const [],
     RelationshipNotificationRequest? notificationRequest,
   }) {
@@ -62,7 +99,7 @@ void main() {
       ownerId: ownerId,
       recipientId: recipientId,
       payloadSource: source,
-      revocationGrant: revocationGrant(),
+      revocationGrant: configuredRevocationGrant ?? revocationGrant(),
       keyRotator: RegistryRecipientKeyRotator(
         registry: keys,
         keyEnvelopeIdFactory: () => 'envelope-RP-001-v2',
@@ -111,25 +148,25 @@ void main() {
         (
           name: 'malformed',
           payload: 'not-a-valid-pairing-payload',
-          expected: pairingMalformed,
+          expected: 'pairing_malformed',
         ),
         (
           name: 'expired',
           payload: invitationPayload(
             expiresAt: now.subtract(const Duration(seconds: 1)),
           ),
-          expected: pairingExpired,
+          expected: 'pairing_expired',
         ),
         (
           name: 'unsupported version',
           payload: unsupported,
-          expected: pairingUnsupportedVersion,
+          expected: 'pairing_unsupported_version',
         ),
-        (name: 'unavailable', payload: null, expected: pairingUnavailable),
+        (name: 'unavailable', payload: null, expected: 'pairing_unavailable'),
         (
           name: 'wrong scope',
           payload: invitationPayload(owner: 'different-owner'),
-          expected: pairingScopeMismatch,
+          expected: 'pairing_scope_mismatch',
         ),
       ];
 
@@ -171,7 +208,7 @@ void main() {
 
     await controller.pair();
     expect(controller.state.paired, isFalse);
-    expect(controller.state.errorCode, pairingMalformed);
+    expect(controller.state.errorCode, 'pairing_malformed');
 
     await controller.pair();
     expect(controller.state.paired, isTrue);
@@ -184,34 +221,109 @@ void main() {
   });
 
   test(
-    'notification preview and disconnect delegate to production engines',
+    'pairing rejects cross-relationship dependencies without side effects',
+    () async {
+      final cases = <({
+        String name,
+        PermissionGrant revocationGrant,
+        RelationshipNotificationRequest notificationRequest,
+        List<RelationshipCategoryGrant> notificationGrants,
+      })>[
+        (
+          name: 'revocation grant',
+          revocationGrant: revocationGrant(recipient: 'other-recipient'),
+          notificationRequest: notificationRequest(),
+          notificationGrants: <RelationshipCategoryGrant>[
+            notificationGrant(),
+          ],
+        ),
+        (
+          name: 'notification request',
+          revocationGrant: revocationGrant(),
+          notificationRequest: notificationRequest(
+            recipient: 'other-recipient',
+          ),
+          notificationGrants: <RelationshipCategoryGrant>[
+            notificationGrant(),
+          ],
+        ),
+        (
+          name: 'notification grant',
+          revocationGrant: revocationGrant(),
+          notificationRequest: notificationRequest(),
+          notificationGrants: <RelationshipCategoryGrant>[
+            notificationGrant(recipient: 'other-recipient'),
+          ],
+        ),
+      ];
+
+      for (final testCase in cases) {
+        final registry = keyRegistry();
+        final controller = controllerFor(
+          source: _QueuePayloadSource(<String?>[invitationPayload()]),
+          registry: registry,
+          configuredRevocationGrant: testCase.revocationGrant,
+          notificationRequest: testCase.notificationRequest,
+          notificationGrants: testCase.notificationGrants,
+        );
+
+        await controller.pair();
+
+        expect(controller.state.paired, isFalse, reason: testCase.name);
+        expect(
+          controller.state.errorCode,
+          'pairing_scope_mismatch',
+          reason: testCase.name,
+        );
+
+        controller.previewNotification();
+        expect(controller.state.preview, isNull, reason: testCase.name);
+
+        await controller.disconnect();
+
+        expect(registry.all(), hasLength(1), reason: testCase.name);
+        expect(registry.all().single.version, 1, reason: testCase.name);
+        expect(registry.all().single.isRevoked, isFalse, reason: testCase.name);
+      }
+    },
+  );
+
+  test(
+    'pairing rejects an inactive revocation grant without key rotation',
     () async {
       final registry = keyRegistry();
-      final request = RelationshipNotificationRequest(
-        ownerId: ownerId,
-        recipientId: recipientId,
-        category: 'cycle',
-        categoryLabel: 'Cycle',
-        detail: 'SYNTHETIC_PRIVATE_DETAIL_RP_001',
-        kind: RelationshipNotificationKind.relationship,
-        at: now,
-      );
-      final notificationGrant = RelationshipCategoryGrant(
-        id: 'notify-RP-001',
-        ownerId: ownerId,
-        recipientId: recipientId,
-        category: 'cycle',
-        capabilities: const <RelationshipCapability>{
-          RelationshipCapability.notify,
-        },
-        visibility: RelationshipVisibility.private,
-        createdAt: now.subtract(const Duration(days: 1)),
-      );
       final controller = controllerFor(
         source: _QueuePayloadSource(<String?>[invitationPayload()]),
         registry: registry,
-        notificationRequest: request,
-        notificationGrants: <RelationshipCategoryGrant>[notificationGrant],
+        configuredRevocationGrant: revocationGrant(
+          revokedAt: now.subtract(const Duration(minutes: 1)),
+        ),
+      );
+
+      await controller.pair();
+
+      expect(controller.state.paired, isFalse);
+      expect(controller.state.errorCode, 'pairing_scope_mismatch');
+
+      await controller.disconnect();
+
+      expect(registry.all(), hasLength(1));
+      expect(registry.all().single.version, 1);
+      expect(registry.all().single.isRevoked, isFalse);
+    },
+  );
+
+  test(
+    'notification preview and disconnect delegate to production engines',
+    () async {
+      final registry = keyRegistry();
+      final controller = controllerFor(
+        source: _QueuePayloadSource(<String?>[invitationPayload()]),
+        registry: registry,
+        notificationRequest: notificationRequest(),
+        notificationGrants: <RelationshipCategoryGrant>[
+          notificationGrant(),
+        ],
       );
       await controller.pair();
 
