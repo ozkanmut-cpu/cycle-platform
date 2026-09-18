@@ -63,48 +63,48 @@ const Set<String> _canonicalPartnerJourneyFixtureIds = <String>{
 
 const Map<PartnerJourneyFamily, Set<String>> _familyCoverageLabels =
     <PartnerJourneyFamily, Set<String>>{
-      PartnerJourneyFamily.pairingLifecycle: <String>{
-        'pairing:valid',
-        'pairing:malformed',
-        'pairing:expired',
-        'pairing:unsupported-version',
-        'pairing:scope-mismatch',
-        'pairing:retry-recovery',
-      },
-      PartnerJourneyFamily.partnerHomeNavigation: <String>{
-        'home:unpaired-negative',
-        'home:now',
-        'home:us',
-        'home:surprise',
-        'home:shared-health',
-      },
-      PartnerJourneyFamily.permissionScopedVisibility: <String>{
-        'visibility:fully-shared',
-        'visibility:abstract-shared',
-        'visibility:engine-only-hidden',
-        'visibility:private-hidden',
-        'visibility:wrong-recipient-hidden',
-      },
-      PartnerJourneyFamily.notificationPrivacy: <String>{
-        'notification:generic',
-        'notification:category-only',
-        'notification:detailed-unlocked',
-        'notification:detailed-locked-redacted',
-        'notification:no-notify-suppressed',
-        'notification:content-capability-suppressed',
-      },
-      PartnerJourneyFamily.revocationDisconnect: <String>{
-        'revocation:key-rotation',
-        'revocation:notifications-stopped',
-        'revocation:content-cleared',
-        'revocation:unpaired',
-      },
-      PartnerJourneyFamily.relationshipSafetySurface: <String>{
-        'safety:no-consent-inference',
-        'safety:no-invented-fallback',
-        'safety:read-only',
-      },
-    };
+  PartnerJourneyFamily.pairingLifecycle: <String>{
+    'pairing:valid',
+    'pairing:malformed',
+    'pairing:expired',
+    'pairing:unsupported-version',
+    'pairing:scope-mismatch',
+    'pairing:retry-recovery',
+  },
+  PartnerJourneyFamily.partnerHomeNavigation: <String>{
+    'home:unpaired-negative',
+    'home:now',
+    'home:us',
+    'home:surprise',
+    'home:shared-health',
+  },
+  PartnerJourneyFamily.permissionScopedVisibility: <String>{
+    'visibility:fully-shared',
+    'visibility:abstract-shared',
+    'visibility:engine-only-hidden',
+    'visibility:private-hidden',
+    'visibility:wrong-recipient-hidden',
+  },
+  PartnerJourneyFamily.notificationPrivacy: <String>{
+    'notification:generic',
+    'notification:category-only',
+    'notification:detailed-unlocked',
+    'notification:detailed-locked-redacted',
+    'notification:no-notify-suppressed',
+    'notification:content-capability-suppressed',
+  },
+  PartnerJourneyFamily.revocationDisconnect: <String>{
+    'revocation:key-rotation',
+    'revocation:notifications-stopped',
+    'revocation:content-cleared',
+    'revocation:unpaired',
+  },
+  PartnerJourneyFamily.relationshipSafetySurface: <String>{
+    'safety:no-consent-inference',
+    'safety:no-invented-fallback',
+    'safety:read-only',
+  },
+};
 
 class PartnerJourneyScenario {
   PartnerJourneyScenario({
@@ -942,7 +942,8 @@ Object? _canonicalDiagnosticValue(Object? value) {
     final map = SplayTreeMap<String, Object?>();
     for (final entry in value.entries) {
       if (entry.key is! String) {
-        throw ArgumentError.value(entry.key, 'diagnostics', 'keys must be strings');
+        throw ArgumentError.value(
+            entry.key, 'diagnostics', 'keys must be strings');
       }
       map[_stableDiagnosticToken(entry.key as String)] =
           _canonicalDiagnosticValue(entry.value);
@@ -954,7 +955,8 @@ Object? _canonicalDiagnosticValue(Object? value) {
       ..sort((a, b) => jsonEncode(a).compareTo(jsonEncode(b)));
     return List<Object?>.unmodifiable(values);
   }
-  throw ArgumentError.value(value, 'diagnostics', 'must contain stable JSON values');
+  throw ArgumentError.value(
+      value, 'diagnostics', 'must contain stable JSON values');
 }
 
 String _stableDiagnosticToken(String value) {
