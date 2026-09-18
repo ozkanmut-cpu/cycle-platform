@@ -114,17 +114,15 @@ PartnerJourneyFixture _fixture({
       partnerId: recipientId,
       at: now,
       grants: List<RelationshipCategoryGrant>.unmodifiable(grants),
-      sharedHealthEntries: includeHealthGrant
-          ? <CoupleContextEntry<Object?>>[
-              CoupleContextEntry<Object?>(
-                ownerId: ownerId,
-                category: 'health.energy',
-                observedAt: now,
-                visibility: healthVisibility,
-                value: healthMarker,
-              ),
-            ]
-          : const <CoupleContextEntry<Object?>>[],
+      sharedHealthEntries: <CoupleContextEntry<Object?>>[
+        CoupleContextEntry<Object?>(
+          ownerId: ownerId,
+          category: 'health.energy',
+          observedAt: now,
+          visibility: healthVisibility,
+          value: healthMarker,
+        ),
+      ],
     ),
     revocationGrant: PermissionGrant(
       id: 'permission-$id',

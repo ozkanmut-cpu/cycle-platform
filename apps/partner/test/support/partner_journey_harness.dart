@@ -74,7 +74,6 @@ class PartnerJourneyHarness {
   int _actionCount = 0;
   int _navigationCount = 0;
   int _recoveryCount = 0;
-  String? _surfaceReached;
 
   int? get _activeKeyVersion => _registry
       .activeFor(ownerId: fixture.ownerId, recipientId: fixture.recipientId)
@@ -89,7 +88,6 @@ class PartnerJourneyHarness {
       ),
     );
     await tester.pumpAndSettle();
-    _surfaceReached = 'Now';
   }
 
   Future<void> pair() async {
@@ -99,15 +97,14 @@ class PartnerJourneyHarness {
   }
 
   Future<void> tapTab(String label) async {
-    await _tapVisible(
-      find.descendant(
-        of: find.byType(NavigationBar),
-        matching: find.text(label),
-      ),
-    );
+    final destination = _navigationDestination(label);
+    await _tapVisible(destination);
     _actionCount++;
     _navigationCount++;
-    _surfaceReached = label;
+    final renderedSurface = _renderedSurface();
+    if (renderedSurface != label) {
+      throw StateError('partner_surface_unreachable');
+    }
   }
 
   Future<void> previewNotification() async {
@@ -119,6 +116,7 @@ class PartnerJourneyHarness {
   Future<void> disconnect() async {
     await _tapVisible(find.widgetWithText(TextButton, 'Disconnect'));
     _actionCount++;
+    _notificationSink.record(controller.state.preview);
     if (find.text('Scan pairing QR').evaluate().isNotEmpty) _recoveryCount++;
   }
 
@@ -130,7 +128,7 @@ class PartnerJourneyHarness {
         ? null
         : _notificationSink.notifications.last;
     return PartnerJourneyObservation(
-      surfaceReached: _surfaceReached,
+      surfaceReached: _renderedSurface(),
       pairingOutcomeCode: controller.state.errorCode,
       retryAffordanceObserved:
           find.text('Scan pairing QR').evaluate().isNotEmpty,
@@ -175,11 +173,66 @@ class PartnerJourneyHarness {
     await tester.pumpAndSettle();
   }
 
+  Finder _navigationDestination(String label) {
+    final destination = find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text(label),
+    );
+    if (destination.evaluate().length != 1) {
+      throw StateError('partner_navigation_destination_unreachable');
+    }
+    return destination;
+  }
+
+  String? _renderedSurface() {
+    final listViews = find.byType(ListView);
+    if (listViews.evaluate().length != 1) return null;
+    for (final label in const <String>[
+      'Now',
+      'Us',
+      'Surprise',
+      'Shared Health',
+    ]) {
+      final marker = find.descendant(
+        of: listViews,
+        matching: find.text(label),
+      );
+      if (marker.evaluate().length == 1) return label;
+    }
+    return null;
+  }
+
   List<String> _visibleCardSummaries() => tester
       .widgetList<ListTile>(find.byType(ListTile))
-      .map((tile) => tile.title)
-      .whereType<Text>()
-      .map((title) => title.data)
+      .map(_cardSummary)
       .whereType<String>()
       .toList();
+
+  String? _cardSummary(ListTile tile) {
+    final title = tile.title;
+    final subtitle = tile.subtitle;
+    if (title is! Text || subtitle is! Text) return null;
+    final titleText = title.data;
+    final bodyText = subtitle.data;
+    if (titleText == null || bodyText == null) return null;
+
+    final kind = switch (titleText) {
+      'Right now' => 'roomAction',
+      'Relationship weather' => 'weather',
+      'Small moment' => 'microMoment',
+      'Shared with you' => 'memory',
+      'Surprise idea' => 'surprise',
+      'Shared health' => 'sharedHealth',
+      _ => 'unknown',
+    };
+    final abstractSeparator = bodyText.indexOf(' · ');
+    if (abstractSeparator >= 0) {
+      return '$kind|${bodyText.substring(0, abstractSeparator)}|abstractShared';
+    }
+    final rawSeparator = bodyText.indexOf(': ');
+    if (rawSeparator >= 0) {
+      return '$kind|${bodyText.substring(0, rawSeparator)}|fullyShared';
+    }
+    return '$kind|$bodyText|unspecified';
+  }
 }
