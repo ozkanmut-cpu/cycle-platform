@@ -118,7 +118,9 @@ class PartnerJourneyHarness {
     await tester.pumpAndSettle();
     _actionCount++;
     _notificationSink.record(controller.state.preview);
-    if (find.text('Scan pairing QR').evaluate().isNotEmpty) _recoveryCount++;
+    if (await _waitUntilVisible(find.text('Scan pairing QR'))) {
+      _recoveryCount++;
+    }
   }
 
   PartnerJourneyObservation observe({
@@ -172,6 +174,14 @@ class PartnerJourneyHarness {
     await tester.pumpAndSettle();
     await tester.tap(finder);
     await tester.pumpAndSettle();
+  }
+
+  Future<bool> _waitUntilVisible(Finder finder) async {
+    for (var attempt = 0; attempt < 10; attempt++) {
+      if (finder.evaluate().isNotEmpty) return true;
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    return finder.evaluate().isNotEmpty;
   }
 
   Finder _navigationDestination(String label) {
