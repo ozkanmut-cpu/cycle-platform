@@ -38,10 +38,19 @@ harness, and canonical-constant symbols in the RED test.
 
 ## GREEN evidence
 
-The three files are implemented and committed locally as `c3cbcc5`. Local
-format/test execution cannot run because Flutter/Dart are unavailable in the
-workspace. Exact-SHA GREEN CI must be run through PR #233 after this commit is
-made available on the feature branch; no direct push was performed.
+The three files were published to PR #233 through the approved GitHub
+connector. The first published attempt reached exact SHA
+`4edd699e01148043e149e5831cd22860ba02e4ed` and run `35321817985` failed only
+the formatter gate. After the formatter correction, exact SHA
+`fefbb5545f4e4379a939f97131404fcb8acb7935` and run `35322038484` passed format
+and analysis but exposed two focused test failures. The test-first fixes
+addressed the RP-005 grant assertion and the required settle after
+`ensureVisible` before tapping Disconnect.
+
+The reconciled feature branch terminal SHA is
+`7bb9008ad3af2eb7443428f31ff400837e43c157`. PR CI run `35322498229` completed
+`success`; its format check, Partner analysis, Partner tests, and all other
+workflow gates passed. No direct push was performed.
 
 Local static verification completed with:
 
@@ -53,6 +62,9 @@ git diff --cached --check  # passed before commit
 
 ```text
 c3cbcc5 test(partner): add deterministic journey harness
+ac6f253 style(partner): format journey harness observation
+f90d5e2 test(partner): stabilize journey harness controls
+4652bdb docs(partner): record task 4 recovery
 ```
 
 ## Self-review
