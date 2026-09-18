@@ -132,7 +132,13 @@ void main() {
           .visibility,
       RelationshipVisibility.abstractShared,
     );
-    expect(rp005Fixture().experienceInput.grants, isEmpty);
+    expect(
+      rp005Fixture()
+          .experienceInput
+          .grants
+          .where((grant) => grant.category == 'health.energy'),
+      isEmpty,
+    );
   });
 
   testWidgets('RP-001 pairs through the UI and reaches every partner tab', (

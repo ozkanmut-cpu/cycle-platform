@@ -170,6 +170,7 @@ class PartnerJourneyHarness {
 
   Future<void> _tapVisible(Finder finder) async {
     await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
     await tester.tap(finder);
     await tester.pumpAndSettle();
   }
