@@ -9,6 +9,7 @@ final DateTime _virtualNow = DateTime.utc(2026, 9, 18, 9);
 
 PartnerJourneyScenario _scenario({
   String id = 'journey-a',
+  String fixtureId = 'RP-001',
   PartnerJourneyFamily family = PartnerJourneyFamily.partnerHomeNavigation,
   List<String> actions = const <String>['open-home'],
   List<String> assertions = const <String>['home-visible'],
@@ -18,7 +19,7 @@ PartnerJourneyScenario _scenario({
       schemaVersion: 1,
       seed: _seed,
       virtualNow: _virtualNow,
-      fixtureId: 'RP-001',
+      fixtureId: fixtureId,
       locale: 'en',
       family: family,
       actions: actions,
@@ -27,18 +28,96 @@ PartnerJourneyScenario _scenario({
 
 PartnerJourneyResult _result(
   String id, {
+  String fixtureId = 'RP-001',
+  PartnerJourneyFamily family = PartnerJourneyFamily.partnerHomeNavigation,
   Set<String>? coverageLabels,
 }) =>
     PartnerJourneyResult(
-      scenario: _scenario(id: id),
-      observation: const PartnerJourneyObservation(
+      scenario: _scenario(id: id, fixtureId: fixtureId, family: family),
+      observation: PartnerJourneyObservation(
         surfaceReached: 'now',
         visibleAssertionIds: <String>['home-visible'],
         actionCount: 1,
       ),
       findings: const <PartnerJourneyFinding>[],
-      coverageLabels: coverageLabels ?? mandatoryPartnerJourneyCoverageLabels,
+      coverageLabels:
+          coverageLabels ?? const <String>{'home:now', 'control:positive'},
     );
+
+List<PartnerJourneyResult> _completeCoverageResults() =>
+    <PartnerJourneyResult>[
+      _result(
+        'pairing',
+        family: PartnerJourneyFamily.pairingLifecycle,
+        coverageLabels: const <String>{
+          'pairing:valid',
+          'pairing:malformed',
+          'pairing:expired',
+          'pairing:unsupported-version',
+          'pairing:scope-mismatch',
+          'pairing:retry-recovery',
+          'control:positive',
+        },
+      ),
+      _result(
+        'home',
+        family: PartnerJourneyFamily.partnerHomeNavigation,
+        coverageLabels: const <String>{
+          'home:unpaired-negative',
+          'home:now',
+          'home:us',
+          'home:surprise',
+          'home:shared-health',
+          'control:negative',
+        },
+      ),
+      _result(
+        'visibility',
+        fixtureId: 'RP-002',
+        family: PartnerJourneyFamily.permissionScopedVisibility,
+        coverageLabels: const <String>{
+          'visibility:fully-shared',
+          'visibility:abstract-shared',
+          'visibility:engine-only-hidden',
+          'visibility:private-hidden',
+          'visibility:wrong-recipient-hidden',
+        },
+      ),
+      _result(
+        'notification',
+        fixtureId: 'RP-002',
+        family: PartnerJourneyFamily.notificationPrivacy,
+        coverageLabels: const <String>{
+          'notification:generic',
+          'notification:category-only',
+          'notification:detailed-unlocked',
+          'notification:detailed-locked-redacted',
+          'notification:no-notify-suppressed',
+          'notification:content-capability-suppressed',
+        },
+      ),
+      _result(
+        'revocation',
+        fixtureId: 'RP-005',
+        family: PartnerJourneyFamily.revocationDisconnect,
+        coverageLabels: const <String>{
+          'revocation:key-rotation',
+          'revocation:notifications-stopped',
+          'revocation:content-cleared',
+          'revocation:unpaired',
+        },
+      ),
+      _result(
+        'safety',
+        fixtureId: 'RP-005',
+        family: PartnerJourneyFamily.relationshipSafetySurface,
+        coverageLabels: const <String>{
+          'safety:no-consent-inference',
+          'safety:no-invented-fallback',
+          'safety:read-only',
+        },
+      ),
+    ];
 
 typedef _DetectorCase = ({
   PartnerJourneyObservation observation,
@@ -129,11 +208,81 @@ void main() {
         const <String>['a-assertion', 'z-assertion'],
       );
     });
+
+    test('observation owns collection inputs for canonical evidence', () {
+      final visible = <String>['visible-a'];
+      final absent = <String>['absent-a'];
+      final cards = <String>['card-a'];
+      final observation = PartnerJourneyObservation(
+        visibleAssertionIds: visible,
+        forbiddenMarkerAbsenceAssertionIds: absent,
+        cardSummaries: cards,
+      );
+      final before = jsonEncode(observation.toJson());
+
+      visible.add('visible-b');
+      absent.add('absent-b');
+      cards.add('card-b');
+
+      expect(jsonEncode(observation.toJson()), before);
+      expect(() => observation.visibleAssertionIds.add('x'), throwsUnsupportedError);
+      expect(
+        () => observation.forbiddenMarkerAbsenceAssertionIds.add('x'),
+        throwsUnsupportedError,
+      );
+      expect(() => observation.cardSummaries.add('x'), throwsUnsupportedError);
+    });
+
+    test('finding owns recursively canonical diagnostics', () {
+      final nested = <String, Object?>{'zeta': 2, 'alpha': 1};
+      final diagnostics = <String, Object?>{
+        'zeta': nested,
+        'alpha': <Object?>['zulu', 'alpha'],
+      };
+      final finding = PartnerJourneyFinding(
+        category: 'production_ui_mismatch',
+        severity: PartnerJourneySeverity.s3,
+        journeyId: 'journey-a',
+        assertionId: 'home-visible',
+        reasonCode: 'production_ui_mismatch',
+        diagnostics: diagnostics,
+      );
+      final before = jsonEncode(finding.toJson());
+
+      nested['beta'] = 3;
+      diagnostics['beta'] = 'beta';
+
+      expect(jsonEncode(finding.toJson()), before);
+      expect(finding.toJson()['diagnostics'], <String, Object?>{
+        'alpha': <Object?>['alpha', 'zulu'],
+        'zeta': <String, Object?>{'alpha': 1, 'zeta': 2},
+      });
+      expect(() => finding.diagnostics['x'] = 'x', throwsUnsupportedError);
+    });
+
+    test('finding rejects hostile noncanonical diagnostics', () {
+      PartnerJourneyFinding finding(Object? value) => PartnerJourneyFinding(
+        category: 'production_ui_mismatch',
+        severity: PartnerJourneySeverity.s3,
+        journeyId: 'journey-a',
+        assertionId: 'home-visible',
+        reasonCode: 'production_ui_mismatch',
+        diagnostics: <String, Object?>{'detail': value},
+      );
+
+      expect(() => finding('/tmp/host/secret'), throwsArgumentError);
+      expect(() => finding(StateError('framework exception')), throwsArgumentError);
+      expect(() => finding(Object()), throwsArgumentError);
+      expect(
+        () => finding('550e8400-e29b-41d4-a716-446655440000'),
+        throwsArgumentError,
+      );
+    });
   });
 
   group('PartnerJourneyDetector', () {
     test('maps every S4 and S3 contract finding exactly', () {
-      const cases = <_DetectorCase>[
+      final cases = <_DetectorCase>[
         (
           observation: PartnerJourneyObservation(
             unpairedSensitiveContentExposed: true,
@@ -274,7 +423,7 @@ void main() {
     test('soft metrics do not produce findings', () {
       final result = PartnerJourneyDetector().evaluate(
         scenario: _scenario(),
-        observation: const PartnerJourneyObservation(
+        observation: PartnerJourneyObservation(
           actionCount: 99,
           navigationCount: 99,
           recoveryCount: 99,
@@ -284,6 +433,41 @@ void main() {
 
       expect(result.findings, isEmpty);
       expect(result.passed, isTrue);
+    });
+
+    test('fails when a required scenario assertion was not observed', () {
+      final result = PartnerJourneyDetector().evaluate(
+        scenario: _scenario(
+          assertions: const <String>['home-visible', 'read-only-visible'],
+        ),
+        observation: PartnerJourneyObservation(
+          visibleAssertionIds: const <String>['home-visible'],
+        ),
+        coverageLabels: const <String>{'home:now'},
+      );
+
+      expect(result.passed, isFalse);
+      expect(result.findings, hasLength(1));
+      expect(result.findings.single.category, 'assertion_missing');
+      expect(result.findings.single.severity, PartnerJourneySeverity.s3);
+      expect(result.findings.single.assertionId, 'read-only-visible');
+      expect(result.findings.single.reasonCode, 'assertion_missing:read-only-visible');
+    });
+
+    test('S3 fallback findings are suppressed by an S4 exposure', () {
+      final result = PartnerJourneyDetector().evaluate(
+        scenario: _scenario(),
+        observation: PartnerJourneyObservation(
+          revokedContentRetained: true,
+          disconnectIncomplete: true,
+          notificationPreviewMismatch: true,
+        ),
+        coverageLabels: const <String>{'home:now'},
+      );
+
+      expect(result.findings.map((finding) => finding.category), <String>[
+        'revoked_content_retained',
+      ]);
     });
   });
 
@@ -326,11 +510,9 @@ void main() {
           coverageLabels: const <String>{'control:positive'},
         ),
       ]);
-      final expected = mandatoryPartnerJourneyCoverageLabels
-          .where((label) => label != 'control:positive')
+      final expected = report.coverage.missingLabels
           .map((label) => 'coverage_gap:$label')
-          .toList()
-        ..sort();
+          .toList();
       final gaps = report.findings
           .where((finding) => finding.category == 'coverage_gap')
           .toList();
@@ -342,6 +524,23 @@ void main() {
       );
       expect(report.coverage.missingLabels, isNotEmpty);
       expect(report.passed, isFalse);
+    });
+
+    test('coverage labels must match the executed scenario family', () {
+      expect(
+        () => _result(
+          'bad-coverage',
+          coverageLabels: const <String>{'notification:generic'},
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => _result(
+          'bad-fixture',
+          coverageLabels: const <String>{'fixture:RP-005'},
+        ),
+        throwsArgumentError,
+      );
     });
 
     test('has all 40 verbatim mandatory coverage labels', () {
@@ -392,9 +591,11 @@ void main() {
       final report = PartnerJourneyReportBuilder(
         seed: _seed,
         virtualNow: _virtualNow,
-      ).build(<PartnerJourneyResult>[_result('journey-a')]);
+      ).build(_completeCoverageResults());
       expect(report.coverage.missingLabels, isEmpty);
       expect(report.passed, isTrue);
+      expect(report.results.map((result) => result.scenario.family).toSet(),
+          PartnerJourneyFamily.values.toSet());
     });
   });
 }
