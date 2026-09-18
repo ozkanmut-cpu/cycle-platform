@@ -37,8 +37,7 @@ PartnerJourneyResult _result(
         actionCount: 1,
       ),
       findings: const <PartnerJourneyFinding>[],
-      coverageLabels:
-          coverageLabels ?? mandatoryPartnerJourneyCoverageLabels,
+      coverageLabels: coverageLabels ?? mandatoryPartnerJourneyCoverageLabels,
     );
 
 typedef _DetectorCase = ({
@@ -121,7 +120,10 @@ void main() {
 
       expect(restored.toJson(), scenario.toJson());
       expect(scenario.toJson()['virtualNow'], '2026-09-18T09:00:00.000Z');
-      expect(scenario.toJson()['actions'], const <String>['open-us', 'open-now']);
+      expect(
+        scenario.toJson()['actions'],
+        const <String>['open-us', 'open-now'],
+      );
       expect(
         scenario.toJson()['assertions'],
         const <String>['a-assertion', 'z-assertion'],
@@ -205,7 +207,8 @@ void main() {
           reasonCode: 'core_journey_blocked',
         ),
         (
-          observation: PartnerJourneyObservation(recoveryAffordanceMissing: true),
+          observation:
+              PartnerJourneyObservation(recoveryAffordanceMissing: true),
           category: 'recovery_affordance_missing',
           severity: PartnerJourneySeverity.s3,
           reasonCode: 'recovery_affordance_missing',
@@ -307,7 +310,10 @@ void main() {
       ]);
       expect(canonicalPartnerJourneyJson(restored), json);
       expect(report.syntheticEvidenceOnly, isTrue);
-      expect(canonicalPartnerJourneyJson(report), canonicalPartnerJourneyJson(report));
+      expect(
+        canonicalPartnerJourneyJson(report),
+        canonicalPartnerJourneyJson(report),
+      );
     });
 
     test('emits a sorted S3 finding for every missing coverage label', () {
@@ -315,7 +321,10 @@ void main() {
         seed: _seed,
         virtualNow: _virtualNow,
       ).build(<PartnerJourneyResult>[
-        _result('journey-a', coverageLabels: const <String>{'control:positive'}),
+        _result(
+          'journey-a',
+          coverageLabels: const <String>{'control:positive'},
+        ),
       ]);
       final expected = mandatoryPartnerJourneyCoverageLabels
           .where((label) => label != 'control:positive')
