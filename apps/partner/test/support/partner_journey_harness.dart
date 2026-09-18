@@ -74,6 +74,7 @@ class PartnerJourneyHarness {
   int _actionCount = 0;
   int _navigationCount = 0;
   int _recoveryCount = 0;
+  bool _disconnectRecoveryPending = false;
 
   int? get _activeKeyVersion => _registry
       .activeFor(ownerId: fixture.ownerId, recipientId: fixture.recipientId)
@@ -118,9 +119,7 @@ class PartnerJourneyHarness {
     await tester.pumpAndSettle();
     _actionCount++;
     _notificationSink.record(controller.state.preview);
-    if (await _waitUntilVisible(find.text('Scan pairing QR'))) {
-      _recoveryCount++;
-    }
+    _disconnectRecoveryPending = true;
   }
 
   PartnerJourneyObservation observe({
@@ -130,11 +129,18 @@ class PartnerJourneyHarness {
     final latestNotification = _notificationSink.notifications.isEmpty
         ? null
         : _notificationSink.notifications.last;
+    final retryAffordanceObserved =
+        find.text('Scan pairing QR').evaluate().isNotEmpty;
+    if (_disconnectRecoveryPending &&
+        !controller.state.paired &&
+        retryAffordanceObserved) {
+      _recoveryCount++;
+      _disconnectRecoveryPending = false;
+    }
     return PartnerJourneyObservation(
       surfaceReached: _renderedSurface(),
       pairingOutcomeCode: controller.state.errorCode,
-      retryAffordanceObserved:
-          find.text('Scan pairing QR').evaluate().isNotEmpty,
+      retryAffordanceObserved: retryAffordanceObserved,
       visibleAssertionIds: visibleAssertions.entries
           .where((entry) => find.text(entry.value).evaluate().isNotEmpty)
           .map((entry) => entry.key)
@@ -174,14 +180,6 @@ class PartnerJourneyHarness {
     await tester.pumpAndSettle();
     await tester.tap(finder);
     await tester.pumpAndSettle();
-  }
-
-  Future<bool> _waitUntilVisible(Finder finder) async {
-    for (var attempt = 0; attempt < 10; attempt++) {
-      if (finder.evaluate().isNotEmpty) return true;
-      await tester.pump(const Duration(milliseconds: 10));
-    }
-    return finder.evaluate().isNotEmpty;
   }
 
   Finder _navigationDestination(String label) {
