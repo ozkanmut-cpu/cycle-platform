@@ -93,16 +93,18 @@ class PartnerSessionController extends ChangeNotifier {
       return;
     }
 
+    final at = _now().toUtc();
     late final PairingInvitation invitation;
     try {
-      invitation = _pairingCodec.decode(payload, now: _now().toUtc());
+      invitation = _pairingCodec.decode(payload, now: at);
     } on FormatException catch (error) {
       _pairingFailed(_pairingErrorCode(error));
       return;
     }
 
     if (invitation.ownerId != _ownerId ||
-        invitation.recipientId != _recipientId) {
+        invitation.recipientId != _recipientId ||
+        !_configurationMatches(at)) {
       _pairingFailed(pairingScopeMismatch);
       return;
     }
@@ -165,6 +167,8 @@ class PartnerSessionController extends ChangeNotifier {
   }
 
   Future<void> disconnect() async {
+    if (!_state.paired) return;
+
     final grant = _revocationGrant;
     final result = grant == null
         ? null
@@ -180,6 +184,34 @@ class PartnerSessionController extends ChangeNotifier {
     );
     notifyListeners();
   }
+
+  bool _configurationMatches(DateTime at) {
+    final revocationGrant = _revocationGrant;
+    if (revocationGrant != null &&
+        (!_matchesActors(
+              revocationGrant.ownerId,
+              revocationGrant.recipientId,
+            ) ||
+            !revocationGrant.isActiveAt(at))) {
+      return false;
+    }
+
+    final notificationRequest = _notificationRequest;
+    if (notificationRequest != null &&
+        !_matchesActors(
+          notificationRequest.ownerId,
+          notificationRequest.recipientId,
+        )) {
+      return false;
+    }
+
+    return _notificationGrants.every(
+      (grant) => _matchesActors(grant.ownerId, grant.recipientId),
+    );
+  }
+
+  bool _matchesActors(String ownerId, String recipientId) =>
+      ownerId == _ownerId && recipientId == _recipientId;
 
   void _pairingFailed(String errorCode) {
     _state = PartnerSessionState(
