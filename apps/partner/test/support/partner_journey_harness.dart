@@ -115,6 +115,7 @@ class PartnerJourneyHarness {
 
   Future<void> disconnect() async {
     await _tapVisible(find.widgetWithText(TextButton, 'Disconnect'));
+    await tester.pumpAndSettle();
     _actionCount++;
     _notificationSink.record(controller.state.preview);
     if (find.text('Scan pairing QR').evaluate().isNotEmpty) _recoveryCount++;
