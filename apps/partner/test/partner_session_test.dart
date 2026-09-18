@@ -15,40 +15,41 @@ void main() {
     String owner = ownerId,
     String recipient = recipientId,
     DateTime? expiresAt,
-  }) => codec.encode(
-    PairingInvitation(
-      ownerId: owner,
-      recipientId: recipient,
-      keyEnvelopeId: 'envelope-RP-001-v1',
-      nonce: 'nonce-RP-001',
-      expiresAt: expiresAt ?? now.add(const Duration(minutes: 10)),
-    ),
-  );
+  }) =>
+      codec.encode(
+        PairingInvitation(
+          ownerId: owner,
+          recipientId: recipient,
+          keyEnvelopeId: 'envelope-RP-001-v1',
+          nonce: 'nonce-RP-001',
+          expiresAt: expiresAt ?? now.add(const Duration(minutes: 10)),
+        ),
+      );
 
   PermissionGrant revocationGrant() => PermissionGrant(
-    id: 'permission-RP-001',
-    ownerId: ownerId,
-    recipientId: recipientId,
-    recipientKind: RecipientKind.partner,
-    actions: const <PermissionAction>{
-      PermissionAction.view,
-      PermissionAction.notify,
-    },
-    scope: const PermissionScope(categories: <String>{'cycle'}),
-    createdAt: now.subtract(const Duration(days: 1)),
-  );
-
-  RecipientKeyRegistry keyRegistry() => RecipientKeyRegistry(
-    initial: <RecipientKeyState>[
-      RecipientKeyState(
+        id: 'permission-RP-001',
         ownerId: ownerId,
         recipientId: recipientId,
-        keyEnvelopeId: 'envelope-RP-001-v1',
-        version: 1,
+        recipientKind: RecipientKind.partner,
+        actions: const <PermissionAction>{
+          PermissionAction.view,
+          PermissionAction.notify,
+        },
+        scope: const PermissionScope(categories: <String>{'cycle'}),
         createdAt: now.subtract(const Duration(days: 1)),
-      ),
-    ],
-  );
+      );
+
+  RecipientKeyRegistry keyRegistry() => RecipientKeyRegistry(
+        initial: <RecipientKeyState>[
+          RecipientKeyState(
+            ownerId: ownerId,
+            recipientId: recipientId,
+            keyEnvelopeId: 'envelope-RP-001-v1',
+            version: 1,
+            createdAt: now.subtract(const Duration(days: 1)),
+          ),
+        ],
+      );
 
   PartnerSessionController controllerFor({
     required PairingPayloadSource source,
@@ -100,9 +101,8 @@ void main() {
                 'recipientId': recipientId,
                 'keyEnvelopeId': 'envelope-RP-001-v1',
                 'nonce': 'nonce-RP-001',
-                'expiresAt': now
-                    .add(const Duration(minutes: 10))
-                    .toIso8601String(),
+                'expiresAt':
+                    now.add(const Duration(minutes: 10)).toIso8601String(),
               }),
             ),
           )
