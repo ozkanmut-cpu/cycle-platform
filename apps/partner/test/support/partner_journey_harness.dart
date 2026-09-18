@@ -117,12 +117,6 @@ class PartnerJourneyHarness {
   Future<void> disconnect() async {
     await _tapVisible(find.widgetWithText(TextButton, 'Disconnect'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Scan pairing QR'),
-      100,
-      scrollable: find.byType(Scrollable),
-    );
-    await tester.pumpAndSettle();
     _actionCount++;
     _notificationSink.record(controller.state.preview);
     _disconnectRecoveryPending = true;
@@ -136,7 +130,7 @@ class PartnerJourneyHarness {
         ? null
         : _notificationSink.notifications.last;
     final retryAffordanceObserved =
-        find.text('Scan pairing QR').evaluate().isNotEmpty;
+        _retryAffordanceFinder().evaluate().isNotEmpty;
     if (_disconnectRecoveryPending &&
         !controller.state.paired &&
         retryAffordanceObserved) {
@@ -198,6 +192,9 @@ class PartnerJourneyHarness {
     }
     return destination;
   }
+
+  Finder _retryAffordanceFinder() =>
+      find.text('Scan pairing QR', skipOffstage: false);
 
   String? _renderedSurface() {
     final listViews = find.byType(ListView);
