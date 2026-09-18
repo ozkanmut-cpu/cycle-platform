@@ -68,12 +68,12 @@ class PartnerJourneyScenario {
     required List<String> assertions,
     List<String> expectedRecoveryAffordances = const <String>[],
     List<String> riskTags = const <String>[],
-  }) : actions = List<String>.unmodifiable(actions),
-       assertions = List<String>.unmodifiable(assertions),
-       expectedRecoveryAffordances = List<String>.unmodifiable(
-         expectedRecoveryAffordances,
-       ),
-       riskTags = List<String>.unmodifiable(riskTags) {
+  })  : actions = List<String>.unmodifiable(actions),
+        assertions = List<String>.unmodifiable(assertions),
+        expectedRecoveryAffordances = List<String>.unmodifiable(
+          expectedRecoveryAffordances,
+        ),
+        riskTags = List<String>.unmodifiable(riskTags) {
     _requireSchemaVersion(schemaVersion);
     _requireNonblank('id', id);
     _requireNonblank('fixtureId', fixtureId);
@@ -101,18 +101,19 @@ class PartnerJourneyScenario {
   final List<String> riskTags;
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'id': id,
-    'schemaVersion': schemaVersion,
-    'seed': seed,
-    'virtualNow': virtualNow.toUtc().toIso8601String(),
-    'fixtureId': fixtureId,
-    'locale': locale,
-    'family': family.name,
-    'actions': actions,
-    'assertions': _sortedStrings(assertions),
-    'expectedRecoveryAffordances': _sortedStrings(expectedRecoveryAffordances),
-    'riskTags': _sortedStrings(riskTags),
-  };
+        'id': id,
+        'schemaVersion': schemaVersion,
+        'seed': seed,
+        'virtualNow': virtualNow.toUtc().toIso8601String(),
+        'fixtureId': fixtureId,
+        'locale': locale,
+        'family': family.name,
+        'actions': actions,
+        'assertions': _sortedStrings(assertions),
+        'expectedRecoveryAffordances':
+            _sortedStrings(expectedRecoveryAffordances),
+        'riskTags': _sortedStrings(riskTags),
+      };
 
   factory PartnerJourneyScenario.fromJson(Map<String, Object?> json) =>
       PartnerJourneyScenario(
@@ -168,9 +169,9 @@ class PartnerJourneyObservation {
     this.productionUiMismatch = false,
     this.disconnectIncomplete = false,
     this.notificationPreviewMismatch = false,
-  }) : assert(actionCount >= 0),
-       assert(navigationCount >= 0),
-       assert(recoveryCount >= 0);
+  })  : assert(actionCount >= 0),
+        assert(navigationCount >= 0),
+        assert(recoveryCount >= 0);
 
   final String? surfaceReached;
   final String? pairingOutcomeCode;
@@ -208,43 +209,43 @@ class PartnerJourneyObservation {
   final bool notificationPreviewMismatch;
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'surfaceReached': surfaceReached,
-    'pairingOutcomeCode': pairingOutcomeCode,
-    'retryAffordanceObserved': retryAffordanceObserved,
-    'visibleAssertionIds': _sortedStrings(visibleAssertionIds),
-    'forbiddenMarkerAbsenceAssertionIds': _sortedStrings(
-      forbiddenMarkerAbsenceAssertionIds,
-    ),
-    'cardSummaries': _sortedStrings(cardSummaries),
-    'rawValueVisible': rawValueVisible,
-    'notificationPreviewClass': notificationPreviewClass,
-    'notificationRedacted': notificationRedacted,
-    'recipientKeyVersionBefore': recipientKeyVersionBefore,
-    'recipientKeyVersionAfter': recipientKeyVersionAfter,
-    'notificationStopped': notificationStopped,
-    'pairedAfterAction': pairedAfterAction,
-    'actionCount': actionCount,
-    'navigationCount': navigationCount,
-    'recoveryCount': recoveryCount,
-    'driverFailureCode': driverFailureCode,
-    'malformedReasonCode': malformedReasonCode,
-    'determinismMismatch': determinismMismatch,
-    'unpairedSensitiveContentExposed': unpairedSensitiveContentExposed,
-    'lockedNotificationDetailExposed': lockedNotificationDetailExposed,
-    'revokedContentRetained': revokedContentRetained,
-    'notificationSentWithoutPermission': notificationSentWithoutPermission,
-    'permissionScopeWidened': permissionScopeWidened,
-    'pairingInvalidPayloadAccepted': pairingInvalidPayloadAccepted,
-    'pairingScopeMismatchAccepted': pairingScopeMismatchAccepted,
-    'recipientKeyNotRotated': recipientKeyNotRotated,
-    'consentInferredFromSensitiveData': consentInferredFromSensitiveData,
-    'coreJourneyBlocked': coreJourneyBlocked,
-    'recoveryAffordanceMissing': recoveryAffordanceMissing,
-    'partnerTabUnreachable': partnerTabUnreachable,
-    'productionUiMismatch': productionUiMismatch,
-    'disconnectIncomplete': disconnectIncomplete,
-    'notificationPreviewMismatch': notificationPreviewMismatch,
-  };
+        'surfaceReached': surfaceReached,
+        'pairingOutcomeCode': pairingOutcomeCode,
+        'retryAffordanceObserved': retryAffordanceObserved,
+        'visibleAssertionIds': _sortedStrings(visibleAssertionIds),
+        'forbiddenMarkerAbsenceAssertionIds': _sortedStrings(
+          forbiddenMarkerAbsenceAssertionIds,
+        ),
+        'cardSummaries': _sortedStrings(cardSummaries),
+        'rawValueVisible': rawValueVisible,
+        'notificationPreviewClass': notificationPreviewClass,
+        'notificationRedacted': notificationRedacted,
+        'recipientKeyVersionBefore': recipientKeyVersionBefore,
+        'recipientKeyVersionAfter': recipientKeyVersionAfter,
+        'notificationStopped': notificationStopped,
+        'pairedAfterAction': pairedAfterAction,
+        'actionCount': actionCount,
+        'navigationCount': navigationCount,
+        'recoveryCount': recoveryCount,
+        'driverFailureCode': driverFailureCode,
+        'malformedReasonCode': malformedReasonCode,
+        'determinismMismatch': determinismMismatch,
+        'unpairedSensitiveContentExposed': unpairedSensitiveContentExposed,
+        'lockedNotificationDetailExposed': lockedNotificationDetailExposed,
+        'revokedContentRetained': revokedContentRetained,
+        'notificationSentWithoutPermission': notificationSentWithoutPermission,
+        'permissionScopeWidened': permissionScopeWidened,
+        'pairingInvalidPayloadAccepted': pairingInvalidPayloadAccepted,
+        'pairingScopeMismatchAccepted': pairingScopeMismatchAccepted,
+        'recipientKeyNotRotated': recipientKeyNotRotated,
+        'consentInferredFromSensitiveData': consentInferredFromSensitiveData,
+        'coreJourneyBlocked': coreJourneyBlocked,
+        'recoveryAffordanceMissing': recoveryAffordanceMissing,
+        'partnerTabUnreachable': partnerTabUnreachable,
+        'productionUiMismatch': productionUiMismatch,
+        'disconnectIncomplete': disconnectIncomplete,
+        'notificationPreviewMismatch': notificationPreviewMismatch,
+      };
 
   factory PartnerJourneyObservation.fromJson(Map<String, Object?> json) =>
       PartnerJourneyObservation(
@@ -289,7 +290,8 @@ class PartnerJourneyObservation {
         partnerTabUnreachable: json['partnerTabUnreachable']! as bool,
         productionUiMismatch: json['productionUiMismatch']! as bool,
         disconnectIncomplete: json['disconnectIncomplete']! as bool,
-        notificationPreviewMismatch: json['notificationPreviewMismatch']! as bool,
+        notificationPreviewMismatch:
+            json['notificationPreviewMismatch']! as bool,
       );
 }
 
@@ -311,13 +313,13 @@ class PartnerJourneyFinding {
   final Map<String, Object?> diagnostics;
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'category': category,
-    'severity': severity.name,
-    'journeyId': journeyId,
-    'assertionId': assertionId,
-    'reasonCode': reasonCode,
-    'diagnostics': _canonicalMap(diagnostics),
-  };
+        'category': category,
+        'severity': severity.name,
+        'journeyId': journeyId,
+        'assertionId': assertionId,
+        'reasonCode': reasonCode,
+        'diagnostics': _canonicalMap(diagnostics),
+      };
 
   factory PartnerJourneyFinding.fromJson(Map<String, Object?> json) =>
       PartnerJourneyFinding(
@@ -338,8 +340,8 @@ class PartnerJourneyResult {
     required this.observation,
     required List<PartnerJourneyFinding> findings,
     required Set<String> coverageLabels,
-  }) : findings = List<PartnerJourneyFinding>.unmodifiable(findings),
-       coverageLabels = Set<String>.unmodifiable(coverageLabels);
+  })  : findings = List<PartnerJourneyFinding>.unmodifiable(findings),
+        coverageLabels = Set<String>.unmodifiable(coverageLabels);
 
   final PartnerJourneyScenario scenario;
   final PartnerJourneyObservation observation;
@@ -380,7 +382,8 @@ class PartnerJourneyCoverage {
     required this.failed,
     required this.malformed,
     required Map<String, int> labels,
-  }) : labels = Map<String, int>.unmodifiable(SplayTreeMap<String, int>.from(labels)) {
+  }) : labels = Map<String, int>.unmodifiable(
+         SplayTreeMap<String, int>.from(labels)) {
     _requireNonnegative('configured', configured);
     _requireNonnegative('evaluated', evaluated);
     _requireNonnegative('passed', passed);
@@ -395,21 +398,20 @@ class PartnerJourneyCoverage {
   final int malformed;
   final Map<String, int> labels;
 
-  List<String> get missingLabels =>
-      mandatoryPartnerJourneyCoverageLabels
-          .where((label) => !labels.containsKey(label))
-          .toList()
-        ..sort();
+  List<String> get missingLabels => mandatoryPartnerJourneyCoverageLabels
+      .where((label) => !labels.containsKey(label))
+      .toList()
+    ..sort();
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'configured': configured,
-    'evaluated': evaluated,
-    'passed': passed,
-    'failed': failed,
-    'malformed': malformed,
-    'labels': SplayTreeMap<String, int>.from(labels),
-    'missingLabels': missingLabels,
-  };
+        'configured': configured,
+        'evaluated': evaluated,
+        'passed': passed,
+        'failed': failed,
+        'malformed': malformed,
+        'labels': SplayTreeMap<String, int>.from(labels),
+        'missingLabels': missingLabels,
+      };
 
   factory PartnerJourneyCoverage.fromJson(Map<String, Object?> json) =>
       PartnerJourneyCoverage(
@@ -436,8 +438,8 @@ class PartnerJourneyReport {
     required this.actionCount,
     required this.navigationCount,
     required this.recoveryCount,
-  }) : results = List<PartnerJourneyResult>.unmodifiable(results),
-       findings = List<PartnerJourneyFinding>.unmodifiable(findings) {
+  })  : results = List<PartnerJourneyResult>.unmodifiable(results),
+        findings = List<PartnerJourneyFinding>.unmodifiable(findings) {
     _requireSchemaVersion(schemaVersion);
     _requireUtc('virtualNow', virtualNow);
     _requireNonnegative('actionCount', actionCount);
@@ -600,7 +602,8 @@ class PartnerJourneyDetector {
     final hasS4 = findings.isNotEmpty;
     final s3 = <({bool active, String category, String assertion})>[
       (
-        active: observation.coreJourneyBlocked || observation.driverFailureCode != null,
+        active: observation.coreJourneyBlocked ||
+            observation.driverFailureCode != null,
         category: 'core_journey_blocked',
         assertion: 'core-journey-complete',
       ),
