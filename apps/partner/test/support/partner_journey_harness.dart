@@ -132,7 +132,8 @@ class PartnerJourneyHarness {
     return PartnerJourneyObservation(
       surfaceReached: _surfaceReached,
       pairingOutcomeCode: controller.state.errorCode,
-      retryAffordanceObserved: find.text('Scan pairing QR').evaluate().isNotEmpty,
+      retryAffordanceObserved:
+          find.text('Scan pairing QR').evaluate().isNotEmpty,
       visibleAssertionIds: visibleAssertions.entries
           .where((entry) => find.text(entry.value).evaluate().isNotEmpty)
           .map((entry) => entry.key)
