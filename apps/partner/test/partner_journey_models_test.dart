@@ -413,10 +413,11 @@ void main() {
           observation: testCase.observation,
           coverageLabels: const <String>{'control:negative'},
         );
-        expect(result.findings, hasLength(1));
-        expect(result.findings.single.category, testCase.category);
-        expect(result.findings.single.severity, testCase.severity);
-        expect(result.findings.single.reasonCode, testCase.reasonCode);
+        final finding = result.findings.singleWhere(
+          (finding) => finding.category == testCase.category,
+        );
+        expect(finding.severity, testCase.severity);
+        expect(finding.reasonCode, testCase.reasonCode);
         expect(result.passed, isFalse);
       }
     });
@@ -425,6 +426,7 @@ void main() {
       final result = PartnerJourneyDetector().evaluate(
         scenario: _scenario(),
         observation: PartnerJourneyObservation(
+          visibleAssertionIds: const <String>['home-visible'],
           actionCount: 99,
           navigationCount: 99,
           recoveryCount: 99,
@@ -460,6 +462,7 @@ void main() {
       final result = PartnerJourneyDetector().evaluate(
         scenario: _scenario(),
         observation: PartnerJourneyObservation(
+          visibleAssertionIds: const <String>['home-visible'],
           revokedContentRetained: true,
           disconnectIncomplete: true,
           notificationPreviewMismatch: true,

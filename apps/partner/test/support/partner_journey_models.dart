@@ -55,6 +55,57 @@ const Set<String> mandatoryPartnerJourneyCoverageLabels = <String>{
   'control:negative',
 };
 
+const Set<String> _canonicalPartnerJourneyFixtureIds = <String>{
+  'RP-001',
+  'RP-002',
+  'RP-005',
+};
+
+const Map<PartnerJourneyFamily, Set<String>> _familyCoverageLabels =
+    <PartnerJourneyFamily, Set<String>>{
+      PartnerJourneyFamily.pairingLifecycle: <String>{
+        'pairing:valid',
+        'pairing:malformed',
+        'pairing:expired',
+        'pairing:unsupported-version',
+        'pairing:scope-mismatch',
+        'pairing:retry-recovery',
+      },
+      PartnerJourneyFamily.partnerHomeNavigation: <String>{
+        'home:unpaired-negative',
+        'home:now',
+        'home:us',
+        'home:surprise',
+        'home:shared-health',
+      },
+      PartnerJourneyFamily.permissionScopedVisibility: <String>{
+        'visibility:fully-shared',
+        'visibility:abstract-shared',
+        'visibility:engine-only-hidden',
+        'visibility:private-hidden',
+        'visibility:wrong-recipient-hidden',
+      },
+      PartnerJourneyFamily.notificationPrivacy: <String>{
+        'notification:generic',
+        'notification:category-only',
+        'notification:detailed-unlocked',
+        'notification:detailed-locked-redacted',
+        'notification:no-notify-suppressed',
+        'notification:content-capability-suppressed',
+      },
+      PartnerJourneyFamily.revocationDisconnect: <String>{
+        'revocation:key-rotation',
+        'revocation:notifications-stopped',
+        'revocation:content-cleared',
+        'revocation:unpaired',
+      },
+      PartnerJourneyFamily.relationshipSafetySurface: <String>{
+        'safety:no-consent-inference',
+        'safety:no-invented-fallback',
+        'safety:read-only',
+      },
+    };
+
 class PartnerJourneyScenario {
   PartnerJourneyScenario({
     required this.id,
@@ -77,6 +128,13 @@ class PartnerJourneyScenario {
     _requireSchemaVersion(schemaVersion);
     _requireNonblank('id', id);
     _requireNonblank('fixtureId', fixtureId);
+    if (!_canonicalPartnerJourneyFixtureIds.contains(fixtureId)) {
+      throw ArgumentError.value(
+        fixtureId,
+        'fixtureId',
+        'must be a canonical synthetic fixture id',
+      );
+    }
     _requireNonblank('locale', locale);
     _requireUtc('virtualNow', virtualNow);
     _requireUniqueNonblank('actions', actions, allowEmpty: false);
@@ -134,7 +192,7 @@ class PartnerJourneyScenario {
 }
 
 class PartnerJourneyObservation {
-  const PartnerJourneyObservation({
+  PartnerJourneyObservation({
     this.surfaceReached,
     this.pairingOutcomeCode,
     this.retryAffordanceObserved,
@@ -169,7 +227,12 @@ class PartnerJourneyObservation {
     this.productionUiMismatch = false,
     this.disconnectIncomplete = false,
     this.notificationPreviewMismatch = false,
-  })  : assert(actionCount >= 0),
+  })  : visibleAssertionIds = List<String>.unmodifiable(visibleAssertionIds),
+        forbiddenMarkerAbsenceAssertionIds = List<String>.unmodifiable(
+          forbiddenMarkerAbsenceAssertionIds,
+        ),
+        cardSummaries = List<String>.unmodifiable(cardSummaries),
+        assert(actionCount >= 0),
         assert(navigationCount >= 0),
         assert(recoveryCount >= 0);
 
@@ -296,14 +359,14 @@ class PartnerJourneyObservation {
 }
 
 class PartnerJourneyFinding {
-  const PartnerJourneyFinding({
+  PartnerJourneyFinding({
     required this.category,
     required this.severity,
     required this.journeyId,
     required this.assertionId,
     required this.reasonCode,
-    this.diagnostics = const <String, Object?>{},
-  });
+    Map<String, Object?> diagnostics = const <String, Object?>{},
+  }) : diagnostics = _canonicalDiagnostics(diagnostics);
 
   final String category;
   final PartnerJourneySeverity severity;
@@ -318,7 +381,7 @@ class PartnerJourneyFinding {
         'journeyId': journeyId,
         'assertionId': assertionId,
         'reasonCode': reasonCode,
-        'diagnostics': _canonicalMap(diagnostics),
+        'diagnostics': diagnostics,
       };
 
   factory PartnerJourneyFinding.fromJson(Map<String, Object?> json) =>
@@ -341,7 +404,9 @@ class PartnerJourneyResult {
     required List<PartnerJourneyFinding> findings,
     required Set<String> coverageLabels,
   })  : findings = List<PartnerJourneyFinding>.unmodifiable(findings),
-        coverageLabels = Set<String>.unmodifiable(coverageLabels);
+        coverageLabels = Set<String>.unmodifiable(
+          _coverageLabelsForScenario(scenario, coverageLabels),
+        );
 
   final PartnerJourneyScenario scenario;
   final PartnerJourneyObservation observation;
@@ -541,6 +606,18 @@ class PartnerJourneyDetector {
           reasonCode: reasonCode,
         ),
       );
+    }
+
+    final observedAssertions = observation.visibleAssertionIds.toSet();
+    for (final assertionId in scenario.assertions) {
+      if (!observedAssertions.contains(assertionId)) {
+        add(
+          'assertion_missing',
+          PartnerJourneySeverity.s3,
+          assertionId,
+          'assertion_missing:$assertionId',
+        );
+      }
     }
 
     final s4 = <({bool active, String category, String assertion})>[
@@ -815,18 +892,74 @@ List<Map<String, Object?>> _objectList(Object? value) =>
 Map<String, Object?> _objectMap(Object? value) =>
     Map<String, Object?>.from(value! as Map<Object?, Object?>);
 
-Map<String, Object?> _canonicalMap(Map<String, Object?> value) {
-  final sorted = SplayTreeMap<String, Object?>();
-  for (final entry in value.entries) {
-    sorted[entry.key] = _canonicalValue(entry.value);
+Set<String> _coverageLabelsForScenario(
+  PartnerJourneyScenario scenario,
+  Set<String> labels,
+) {
+  final derived = <String>{
+    'family:${scenario.family.name}',
+    'fixture:${scenario.fixtureId}',
+  };
+  final allowed = <String>{
+    ...derived,
+    ..._familyCoverageLabels[scenario.family]!,
+    'control:positive',
+    'control:negative',
+  };
+  for (final label in labels) {
+    if (!mandatoryPartnerJourneyCoverageLabels.contains(label) ||
+        !allowed.contains(label)) {
+      throw ArgumentError.value(
+        label,
+        'coverageLabels',
+        'must be a mandatory label for the executed scenario family',
+      );
+    }
   }
-  return sorted;
+  return <String>{...derived, ...labels};
 }
 
-Object? _canonicalValue(Object? value) {
-  if (value is Map<Object?, Object?>) {
-    return _canonicalMap(Map<String, Object?>.from(value));
+Map<String, Object?> _canonicalDiagnostics(Map<String, Object?> value) {
+  final sorted = SplayTreeMap<String, Object?>();
+  for (final entry in value.entries) {
+    sorted[_stableDiagnosticToken(entry.key)] = _canonicalDiagnosticValue(
+      entry.value,
+    );
   }
-  if (value is List) return value.map(_canonicalValue).toList();
+  return Map<String, Object?>.unmodifiable(sorted);
+}
+
+Object? _canonicalDiagnosticValue(Object? value) {
+  if (value == null || value is bool || value is int) return value;
+  if (value is double) {
+    if (!value.isFinite) {
+      throw ArgumentError.value(value, 'diagnostics', 'must be JSON-safe');
+    }
+    return value;
+  }
+  if (value is String) return _stableDiagnosticToken(value);
+  if (value is Map<Object?, Object?>) {
+    final map = SplayTreeMap<String, Object?>();
+    for (final entry in value.entries) {
+      if (entry.key is! String) {
+        throw ArgumentError.value(entry.key, 'diagnostics', 'keys must be strings');
+      }
+      map[_stableDiagnosticToken(entry.key as String)] =
+          _canonicalDiagnosticValue(entry.value);
+    }
+    return Map<String, Object?>.unmodifiable(map);
+  }
+  if (value is List<Object?>) {
+    final values = value.map(_canonicalDiagnosticValue).toList()
+      ..sort((a, b) => jsonEncode(a).compareTo(jsonEncode(b)));
+    return List<Object?>.unmodifiable(values);
+  }
+  throw ArgumentError.value(value, 'diagnostics', 'must contain stable JSON values');
+}
+
+String _stableDiagnosticToken(String value) {
+  if (!RegExp(r'^[a-z][a-z0-9_:-]*$').hasMatch(value)) {
+    throw ArgumentError.value(value, 'diagnostics', 'must be a stable token');
+  }
   return value;
 }
